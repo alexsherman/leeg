@@ -23,7 +23,7 @@ def getChampById(champ_id):
         return champ_dict[str(champ_id)]
 
 def recordMatch(match):
-    with open('matches.csv', mode='w') as match_csv:
+    with open('matches.csv', mode='a') as match_csv:
         match_writer = csv.writer(match_csv, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
         winner = ""
         team1 = match['teams'][0]
@@ -41,8 +41,9 @@ def recordMatch(match):
             '200': []
         }
         for champ in match['participants']:
-            champsByTeam.append(champ_dict[str(champ['championId'])])
-            match_writer.writerow(['gameId', winner, champsByTeam['100'], champsByTeam['200'], team1bans, team2bans, match.gameVersion])
+            champsByTeam[str(champ['teamId'])].append(champ_dict[str(champ['championId'])])
+        match_writer.writerow([match['gameId'], winner, champsByTeam['100'], champsByTeam['200'], team1bans, team2bans, match['gameVersion']])
+
     
 def makeRequest(url):
     # dev key allows 100 requests per 2 min - sleep before each request to be sure we don't exceed
