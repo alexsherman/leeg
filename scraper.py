@@ -82,6 +82,7 @@ def genChampDict():
 if __name__ == '__main__':
     with open('champions.json') as json_file:
         champ_dict = json.load(json_file)
+    initCSV()
     sleepo_mode = getSummonerByName('sleepo mode')
     sleepo_match_history = getSummonerMatchHistory(sleepo_mode)
     match_ids = getMatchIds(sleepo_match_history);
