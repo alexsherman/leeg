@@ -48,7 +48,6 @@ class PlayerChamp:
         self.team = 'blue' if player['teamId'] == 100 else 'red'
         participant = next((p for p in participants if p['participantId'] == self.participantId), None)
         if participant is not None:
-            print(participant)
             self.id = participant['player']['summonerId']
        # self.rank = player['highestAchievedSeasonTier']
         self.role = player['timeline']['lane']
@@ -57,7 +56,7 @@ class PlayerChamp:
 
     def info(self):
         return {
-            'champion': self.champion,
+            'champion': self.champion.info(),
             'team': self.team,
             'summonerId': self.id
         }
@@ -66,7 +65,7 @@ class PlayerChamp:
 def initCSV():
     with open('matches.csv', mode='w') as match_csv:
         match_writer = csv.writer(match_csv, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        match_writer.writerow(['match_id', 'winning_team', 'team1champs', 'team2champs', 'team1bans', 'team2bans', 'game_version'])
+        match_writer.writerow(['match_id', 'winning_team', 'champsAndPlayers', 'team2champs', 'gameVersion'])
 
 
 class Champ:
@@ -78,6 +77,11 @@ class Champ:
             self.name = champ_dict[str(champ_id)]
     def __str__(self):
         return "% - %" & (self.name, self.id)
+    def info(self):
+        return {
+            'name': self.name,
+            'id': self.id
+        }
 
 def getChampById(champ_id):
     if champ_id == -1:
@@ -87,34 +91,11 @@ def getChampById(champ_id):
 
 
 def recordMatch(match):
-    with open('matches.csv', mode='w') as match_csv:
-        match_writer = csv.writer(match_csv, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        m = Match(match)
-        m.write(match_writer)
-         
-'''
-def recordMatch(match):
     with open('matches.csv', mode='a') as match_csv:
         match_writer = csv.writer(match_csv, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        winner = ""
-        team1 = match['teams'][0]
-        team2 = match['teams'][1]
-        if team1['win'] == 'Win':
-            winner = team1['teamId']
-        else:
-            winner = team2['teamId']
-        print(map(lambda b: b['championId'], team2['bans']))
-        team1bans = map(getChampById, map(lambda b: b['championId'], team1['bans']))
-        team2bans = map(getChampById, map(lambda b: b['championId'], team2['bans']))
-
-        champsByTeam = {
-            '100': [],
-            '200': []
-        }
-        for champ in match['participants']:
-            champsByTeam[str(champ['teamId'])].append(champ_dict[str(champ['championId'])])
-        match_writer.writerow([match['gameId'], winner, champsByTeam['100'], champsByTeam['200'], team1bans, team2bans, match['gameVersion']])
-'''
+        m = Match(match)
+        print('Writing match ' + str(m.id))
+        m.write(match_writer) 
     
 def makeRequest(url):
     # dev key allows 100 requests per 2 min - sleep before each request to be sure we don't exceed
@@ -163,7 +144,7 @@ if __name__ == '__main__':
     for match_id in match_ids:
         match = getMatch(match_id)
         champs = map(lambda p: p['championId'], match['participants'])
-        print(champs)
-        print(map(lambda c: champ_dict[str(c)], champs))
+      #  print(champs)
+      #  print(map(lambda c: champ_dict[str(c)], champs))
         recordMatch(match)
     
