@@ -3,6 +3,7 @@ import os
 import time
 import json
 import csv
+import argparse
 
 url_root = 'https://na1.api.riotgames.com'
 summoner_path = '/lol/summoner/v4/summoners/by-name/'
@@ -11,10 +12,64 @@ match_info_path = '/lol/match/v4/matches/'
 key = os.environ['RIOT_API_KEY']
 champ_dict = {}
 
+def getTeam(match, teamColor):
+    idsToColors = {
+        100: 'blue',
+        200: 'red'
+    }
+    return next((t for t in match['teams'] if idsToColors[t['teamId']] == teamColor), None)
+
+class Match: 
+    def __init__(self, match):
+        self.id = match['gameId']
+        blueTeam = getTeam(match, 'blue')
+        redTeam = getTeam(match, 'red')
+        if blueTeam['win'] == 'Win':
+            self.winner = 'blue'
+        else:
+            self.winner = 'red'
+        self.game_version = match['gameVersion']
+        for participant in match['participants']:
+            p = PlayerChamp(participant, match['participantIdentities'])
+            print(p.info())
+
+class PlayerChamp: 
+    def __init__(self, player, participants):
+        self.participantId = player['participantId']
+        self.champion = Champ(player['championId'])
+        self.team = 'blue' if player['teamId'] == 100 else 'red'
+        participant = next((p for p in participants if p['participantId'] == self.participantId), None)
+        if participant is not None:
+            print(participant)
+            self.id = participant['player']['summonerId']
+       # self.rank = player['highestAchievedSeasonTier']
+        self.role = player['timeline']['lane']
+        if self.role in ('BOT', 'BOTTOM'):
+           self.role = player['timeline']['role']
+
+    def info(self):
+        return {
+            'champion': self.champion,
+            'team': self.team,
+            'summonerId': self.id
+        }
+
+ 
 def initCSV():
     with open('matches.csv', mode='w') as match_csv:
         match_writer = csv.writer(match_csv, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
         match_writer.writerow(['match_id', 'winning_team', 'team1champs', 'team2champs', 'team1bans', 'team2bans', 'game_version'])
+
+
+class Champ:
+    def __init__(self, champ_id):
+        self.id = champ_id
+        if champ_id == -1:
+            self.name = 'None'
+        else:
+            self.name = champ_dict[str(champ_id)]
+    def __str__(self):
+        return "% - %" & (self.name, self.id)
 
 def getChampById(champ_id):
     if champ_id == -1:
@@ -22,6 +77,12 @@ def getChampById(champ_id):
     else:
         return champ_dict[str(champ_id)]
 
+
+def recordMatch(match):
+    with open('matches.csv', mode='a') as match_csv:
+        m = Match(match)
+        
+'''
 def recordMatch(match):
     with open('matches.csv', mode='a') as match_csv:
         match_writer = csv.writer(match_csv, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -43,7 +104,7 @@ def recordMatch(match):
         for champ in match['participants']:
             champsByTeam[str(champ['teamId'])].append(champ_dict[str(champ['championId'])])
         match_writer.writerow([match['gameId'], winner, champsByTeam['100'], champsByTeam['200'], team1bans, team2bans, match['gameVersion']])
-
+'''
     
 def makeRequest(url):
     # dev key allows 100 requests per 2 min - sleep before each request to be sure we don't exceed
@@ -62,7 +123,6 @@ def getSummonerMatchHistory(summonerInfo):
     return makeRequest(match_history_request_url).json()
 
 def getMatchIds(match_history):
-    print(match_history['matches'])
     return map(lambda m: m['gameId'], match_history['matches'])
 
 def getMatch(match_id):
@@ -80,12 +140,16 @@ def genChampDict():
     return champ_dict
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser("Scrape Riot API data")
+    parser.add_argument('--summoner_name', help="name of summoner, seed for spider", default="sleepo mode")
+    parser.add_argument('--n_matches', help="number of matches to crawl through", default=1000, type=int)
+    args = parser.parse_args()
     with open('champions.json') as json_file:
         champ_dict = json.load(json_file)
     initCSV()
-    sleepo_mode = getSummonerByName('sleepo mode')
-    sleepo_match_history = getSummonerMatchHistory(sleepo_mode)
-    match_ids = getMatchIds(sleepo_match_history);
+    seed_summoner = getSummonerByName(args.summoner_name)
+    seed_summoner_match_history = getSummonerMatchHistory(seed_summoner)
+    match_ids = getMatchIds(seed_summoner_match_history);
     for match_id in match_ids:
         match = getMatch(match_id)
         champs = map(lambda p: p['championId'], match['participants'])
