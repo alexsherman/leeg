@@ -29,9 +29,17 @@ class Match:
         else:
             self.winner = 'red'
         self.game_version = match['gameVersion']
+        self.playersAndChamps = []
         for participant in match['participants']:
             p = PlayerChamp(participant, match['participantIdentities'])
-            print(p.info())
+            self.playersAndChamps.append(p.info())
+    def write(self, writer):
+        writer.writerow([
+            self.id,
+            self.winner,
+            self.playersAndChamps,
+            self.game_version
+        ])
 
 class PlayerChamp: 
     def __init__(self, player, participants):
@@ -79,9 +87,11 @@ def getChampById(champ_id):
 
 
 def recordMatch(match):
-    with open('matches.csv', mode='a') as match_csv:
+    with open('matches.csv', mode='w') as match_csv:
+        match_writer = csv.writer(match_csv, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
         m = Match(match)
-        
+        m.write(match_writer)
+         
 '''
 def recordMatch(match):
     with open('matches.csv', mode='a') as match_csv:
@@ -146,7 +156,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     with open('champions.json') as json_file:
         champ_dict = json.load(json_file)
-    initCSV()
+    #initCSV()
     seed_summoner = getSummonerByName(args.summoner_name)
     seed_summoner_match_history = getSummonerMatchHistory(seed_summoner)
     match_ids = getMatchIds(seed_summoner_match_history);
