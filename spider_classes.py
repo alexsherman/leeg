@@ -2,8 +2,12 @@ import json
 
 champ_dict = {}
 
-with open('champions.json', mode='r') as champs:
-	champ_dict = champs
+with open('champions.json') as champs:
+    try:
+        champ_dict = json.load(champs)
+    except:
+        print("No champions.json found!")
+        raise
 
 def getTeam(match, teamColor):
     idsToColors = {
