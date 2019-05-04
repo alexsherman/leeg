@@ -1,6 +1,6 @@
 # leeg
 
-##reading materials
+## reading materials
 https://github.com/vingtfranc/LoLAnalyzer
 This guy has something kind of similar to ideas of ours, with a terrible ui and lots of bloat, and idk how well it even works. but might look at it more
 
