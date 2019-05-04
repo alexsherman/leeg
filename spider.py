@@ -9,6 +9,7 @@ from spider_classes import *
 
 _matches_processed = 0
 _match_ids_processed = []
+_summoner_ids_processed = []
 
 def initCSV():
     with open('matches.csv', mode='w') as match_csv:
@@ -29,23 +30,30 @@ def recordMatch(match):
         _matches_processed += 1
         _match_ids_processed.append(m.id)
 
+def crawl(args):
+    seed_summoner = getSummonerByName(args.summoner_name)
+    seed_summoner_match_history = getSummonerMatchHistory(seed_summoner)
+    match_ids = getMatchIds(seed_summoner_match_history);
+    for match_id in match_ids:
+
+        match = getMatch(match_id)
+        champs = map(lambda p: p['championId'], match['participants'])
+        print(map(lambda c: champ_dict[str(c)], champs))
+        recordMatch(match)
+        summonerIds = map(lamda pc: pc.id, Match(match).playersAndChamps)
+        for id in summonerIds:
+            if id not in _summoner_ids_processed:
+                _summoner_ids_processed.append(id)
+                
+
+
+
 def main():
     parser = argparse.ArgumentParser("Scrape Riot API data")
     parser.add_argument('--summoner_name', help="name of summoner, seed for spider", default="sleepo mode")
     parser.add_argument('--n_matches', help="number of matches to crawl through", default=1000, type=int)
     args = parser.parse_args()
-    with open('champions.json') as json_file:
-        champ_dict = json.load(json_file)
-    #initCSV()
-    seed_summoner = getSummonerByName(args.summoner_name)
-    seed_summoner_match_history = getSummonerMatchHistory(seed_summoner)
-    match_ids = getMatchIds(seed_summoner_match_history);
-    for match_id in match_ids:
-        match = getMatch(match_id)
-        champs = map(lambda p: p['championId'], match['participants'])
-        print(map(lambda c: champ_dict[str(c)], champs))
-        recordMatch(match)
-
+   
 def atExit():
     with open('spider_report.txt', 'a+') as r:
         r.write("Matches processed: {}\r\n".format(_matches_processed))
