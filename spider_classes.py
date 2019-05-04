@@ -45,7 +45,8 @@ class PlayerChamp:
         self.team = 'blue' if player['teamId'] == 100 else 'red'
         participant = next((p for p in participants if p['participantId'] == self.participantId), None)
         if participant is not None:
-            self.id = participant['player']['summonerId']
+            self.id = participant['player']['currentAccountId']
+            self.name = participant['player']['summonerName']
        # self.rank = player['highestAchievedSeasonTier']
         self.role = player['timeline']['lane']
         if self.role in ('BOT', 'BOTTOM'):
@@ -54,8 +55,10 @@ class PlayerChamp:
     def info(self):
         return {
             'champion': self.champion.info(),
+            'role': self.role,
             'team': self.team,
-            'summonerId': self.id
+            'summonerName': self.name,
+            'accountId': self.id
         }
 
 class Champ:
