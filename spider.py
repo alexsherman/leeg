@@ -8,15 +8,24 @@ from spider_utils import *
 from spider_classes import *
 
 _matches_processed = 0
+# TODO change these from list to set
 _match_ids_processed = []
 _summoner_ids_processed = []
 
+# TODO decide on formats and init various csvs accordingly
 def initCSV():
     with open('matches.csv', mode='w') as match_csv:
         match_writer = csv.writer(match_csv, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
         match_writer.writerow(['match_id', 'winning_team', 'champsAndPlayers', 'team2champs', 'gameVersion'])
 
 def recordMatch(match):
+    '''
+    Given MatchDto, converts it to Match instance and appends it to csv.
+    TODO: various csvs, allow command line arg specify file
+
+    Args:
+        match: MatchDto
+    '''
     m = Match(match)
     
     with open('matches.csv', mode='a') as match_csv:
@@ -26,13 +35,15 @@ def recordMatch(match):
         global _matches_processed
         _matches_processed += 1
         _match_ids_processed.append(m.id)
-        return True
 
 def crawl(args, summoner_id):
-    #global _matches_processed
-    #global _match_ids_processed
-    #global _summoner_ids_processed
+    '''
+    Given command line args and summoner id, begins crawling through matches and recording them.
+    Args:
+        args: command line args parsed. determine number of matches until quit. TODO rename
+        summoner_id: actually accountID. TODO rename
 
+    '''
     seed_summoner_match_history = getSummonerMatchHistory(summoner_id)
     match_ids = getMatchIds(seed_summoner_match_history);
 
