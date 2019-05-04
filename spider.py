@@ -18,10 +18,7 @@ def initCSV():
 
 def recordMatch(match):
     m = Match(match)
-    if m.id in _match_ids_processed:
-        print("Match already recorded by this spider")
-        return
-
+    
     with open('matches.csv', mode='a') as match_csv:
         match_writer = csv.writer(match_csv, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
         print('Writing match ' + str(m.id))
@@ -29,23 +26,37 @@ def recordMatch(match):
         global _matches_processed
         _matches_processed += 1
         _match_ids_processed.append(m.id)
+        return True
 
-def crawl(args):
-    seed_summoner = getSummonerByName(args.summoner_name)
-    seed_summoner_match_history = getSummonerMatchHistory(seed_summoner)
+def crawl(args, summoner_id):
+    #global _matches_processed
+    #global _match_ids_processed
+    #global _summoner_ids_processed
+
+    seed_summoner_match_history = getSummonerMatchHistory(summoner_id)
     match_ids = getMatchIds(seed_summoner_match_history);
+
+    # get X matches, process, get the summoners from those processes, repeat until we've go our desired num matches
     for match_id in match_ids:
+        if match_id in _match_ids_processed:
+            print("Match already recorded by this spider")
+            continue
 
         match = getMatch(match_id)
+        recordMatch(match)
         champs = map(lambda p: p['championId'], match['participants'])
         print(map(lambda c: champ_dict[str(c)], champs))
-        recordMatch(match)
-        summonerIds = map(lamda pc: pc.id, Match(match).playersAndChamps)
+            
+        if _matches_processed >= args.n_matches:
+            print("Successfully processed {} matches, exiting".format(_matches_processed))
+            atExit()
+            sys.exit(0)
+        
+        summonerIds = map(lambda p: p['accountId'], Match(match).playersAndChamps)
         for id in summonerIds:
             if id not in _summoner_ids_processed:
                 _summoner_ids_processed.append(id)
-                
-
+                crawl(args, id)
 
 
 def main():
@@ -53,7 +64,9 @@ def main():
     parser.add_argument('--summoner_name', help="name of summoner, seed for spider", default="sleepo mode")
     parser.add_argument('--n_matches', help="number of matches to crawl through", default=1000, type=int)
     args = parser.parse_args()
-   
+    seed_summoner = getSummonerByName(args.summoner_name)
+    crawl(args, seed_summoner['accountId'])
+
 def atExit():
     with open('spider_report.txt', 'a+') as r:
         r.write("Matches processed: {}\r\n".format(_matches_processed))
