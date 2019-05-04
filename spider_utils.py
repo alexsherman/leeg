@@ -69,7 +69,7 @@ def getSummonerMatchHistory(encrypted_account_id, params = {'endIndex': 10}):
     match_history_request_url = _url_root + _match_history_path + encrypted_account_id
     return makeRequest(match_history_request_url, params).json()
 
-def getMatchIds(match_history):i
+def getMatchIds(match_history):
     ''' Given MatchlistDto, return list of match ids.'''
     return map(lambda m: m['gameId'], match_history['matches'])
 

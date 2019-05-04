@@ -38,6 +38,27 @@ class Match:
             self.game_version
         ])
 
+    def writeNamesAndLanes(self, writer):
+        blue = []
+        red = []
+        for pc in self.playersAndChamps:
+            info = {
+                'champion': pc['champion']['name'],
+                'role': pc['role']
+            }
+            if pc['team'] is 'blue':
+                blue.append(info)
+            else:
+                red.append(info)
+        writer.writerow([
+            self.id,
+            self.winner,
+            blue,
+            red,
+            self.game_version
+        ])
+
+
 class PlayerChamp: 
     def __init__(self, player, participants):
         self.participantId = player['participantId']
