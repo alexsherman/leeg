@@ -1,2 +1,5 @@
 .idea/
 *.pyc
+src/rust/reqs/Cargo.lock
+src/rust/reqs/target
+src/rust/reqs/target/*
