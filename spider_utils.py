@@ -33,9 +33,9 @@ def makeRequest(url, optional_params = {}):
     rate_limit = 120/100
     try: 
         optional_params.update({'api_key': key})
-        time.sleep(rate_limit)
         response = requests.get(url, params = optional_params)
         response.raise_for_status()
+        time.sleep(rate_limit)
         return response
     except HTTPError as http_err:
         print(http_err)
