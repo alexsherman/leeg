@@ -1,0 +1,101 @@
+summoner_name,summoner_champ,summoner_win,same_team_champs,opposite_team_champs,account_id,match_id,game_version
+Rawshokwave,Hecarim,True,"['Miss Fortune', 'Lux', 'Annie', 'Dr. Mundo']","['Jhin', 'Master Yi', 'Fizz', 'Sejuani', 'Anivia']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3035308328,9.9.272.4950
+Rawshokwave,Nocturne,True,"['Annie', 'Caitlyn', 'Darius', 'Lux']","['Lee Sin', 'Fiora', 'Ezreal', 'Karthus', 'Thresh']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3034927976,9.9.272.4950
+Rawshokwave,Rammus,False,"['Ezreal', 'Ashe', 'Annie', 'Xayah']","['Riven', 'Ryze', 'Nidalee', 'Jhin', 'Bard']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3034514367,9.9.272.4950
+Rawshokwave,Nocturne,True,"['Ezreal', 'Thresh', 'Annie', 'Vladimir']","['Garen', 'Shaco', 'Lux', 'Neeko', 'Miss Fortune']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3034424993,9.9.272.4950
+Rawshokwave,Rammus,True,"['Soraka', 'Vayne', 'Yorick', 'Akali']","['Riven', 'Udyr', 'Caitlyn', 'Ekko', 'Nautilus']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3032303549,9.8.270.9450
+Rawshokwave,Rammus,True,"['Jayce', 'LeBlanc', 'Ziggs', 'Brand']","['Miss Fortune', 'Pyke', 'Diana', 'Kindred', 'Vladimir']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3030711004,9.8.270.9450
+Rawshokwave,Kindred,False,"['Rakan', 'Xayah', 'Taliyah', 'Akali']","['Yasuo', 'Kayle', 'Hecarim', 'Draven', 'Thresh']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3030701318,9.8.270.9450
+Rawshokwave,Nocturne,True,"['Anivia', 'Miss Fortune', 'Nautilus', 'Vladimir']","['Ezreal', 'Garen', 'Janna', 'Ivern', 'Zed']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3030680281,9.8.270.9450
+Rawshokwave,Hecarim,False,"['Lux', 'Vayne', 'Fiora', 'Annie']","['Miss Fortune', 'Tryndamere', 'Thresh', 'Lissandra', 'Evelynn']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3030656338,9.8.270.9450
+Rawshokwave,Miss Fortune,False,"['Jarvan IV', 'Rumble', 'Yasuo', 'Blitzcrank']","['Leona', 'Camille', 'Irelia', 'Syndra', 'Lee Sin']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3030364137,9.8.270.9450
+Rawshokwave,Ashe,True,"['Nautilus', 'Lux', 'Kled', 'Udyr']","['Illaoi', 'Janna', 'Sylas', 'Jinx', 'Master Yi']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3030326680,9.8.270.9450
+Rawshokwave,Zyra,False,"[""Rek'Sai"", 'Jayce', 'Nautilus', 'Gangplank']","['Sivir', 'LeBlanc', 'Fiora', 'Nami', 'Kindred']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3027481463,9.8.270.9450
+Rawshokwave,Miss Fortune,True,"['Udyr', 'Lux', 'Thresh', 'Riven']","['Jhin', 'Gnar', 'Ahri', 'Lee Sin', 'Blitzcrank']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3025535944,9.8.270.9450
+Rawshokwave,Lucian,False,"['Olaf', 'Jax', 'Blitzcrank', 'Jayce']","['Vladimir', 'Nidalee', 'Morgana', 'Ashe', 'Riven']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3025509202,9.8.270.9450
+Rawshokwave,Zyra,True,"['Annie', 'Pantheon', 'Kayn', 'Yorick']","['Rengar', 'Twisted Fate', 'Morgana', 'Lucian', 'Gangplank']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3025463853,9.8.270.9450
+Rawshokwave,Zyra,False,"['Annie', 'Nocturne', 'Gnar', 'Pantheon']","['Ryze', 'Irelia', 'Ekko', 'Zed', 'Xin Zhao']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3024897290,9.8.270.9450
+Rawshokwave,Zyra,True,"[""Vel'Koz"", 'Amumu', 'Gnar', 'Pantheon']","['Vayne', 'Blitzcrank', 'Zac', 'Akali', 'Gangplank']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3024874745,9.8.270.9450
+Rawshokwave,Zyra,True,"['Annie', 'Rumble', 'Jinx', 'Hecarim']","['Jax', 'Lucian', 'Heimerdinger', 'Braum', 'Akali']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3024716425,9.8.270.9450
+Rawshokwave,Ezreal,False,"['Blitzcrank', 'Dr. Mundo', 'Ahri', 'Amumu']","['Darius', 'Fiddlesticks', 'Xerath', 'Janna', 'Vayne']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3020805355,9.7.269.2391
+Rawshokwave,Blitzcrank,False,"[""Vel'Koz"", 'Fiora', 'Sivir', 'Jarvan IV']","['Vayne', 'Ezreal', 'Udyr', 'Riven', 'Morgana']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3019716076,9.7.269.2391
+Rawshokwave,Morgana,True,"['Jax', 'Annie', 'Gnar', 'Lucian']","['Azir', 'Renekton', 'Rakan', 'Caitlyn', ""Rek'Sai""]",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3019708685,9.7.269.2391
+Rawshokwave,Zyra,False,"['Annie', 'Fiora', 'Draven', 'Nasus']","['Xayah', 'Brand', 'Fizz', ""Rek'Sai"", 'Renekton']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3019681459,9.7.269.2391
+Rawshokwave,Morgana,False,"['Varus', 'Fizz', 'Malphite', 'Kayn']","['Jinx', 'Udyr', 'Orianna', 'Pantheon', 'Zilean']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3019552773,9.7.269.2391
+Rawshokwave,Zyra,True,"['Jinx', 'Akali', 'Warwick', 'Jax']","['Kaisa', 'Ahri', 'Blitzcrank', 'Urgot', 'Evelynn']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3019515183,9.7.269.2391
+Rawshokwave,Miss Fortune,True,"['Blitzcrank', 'Orianna', 'Yorick', 'Master Yi']","['Kaisa', 'Udyr', 'Morgana', 'Yasuo', 'Ziggs']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3017558653,9.7.269.2391
+Rawshokwave,Hecarim,False,"[""Cho'Gath"", 'Ryze', 'Braum', 'Kaisa']","['Thresh', 'Renekton', 'Syndra', 'Ezreal', 'Udyr']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3017539240,9.7.269.2391
+Rawshokwave,Twitch,True,"['Annie', 'Jayce', 'Morgana', 'Kayn']","['Corki', 'Lucian', 'Zac', 'Braum', 'Kaisa']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3016140332,9.7.269.2391
+Rawshokwave,Sona,False,"['Lux', 'Jayce', 'Taric', 'Kayle']","['Veigar', ""Rek'Sai"", 'Sivir', 'Riven', ""Vel'Koz""]",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3016112764,9.7.269.2391
+Rawshokwave,Nocturne,True,"[""Vel'Koz"", 'Jayce', 'Thresh', 'Lucian']","['Varus', 'Kayle', 'Malzahar', 'Akali', 'Sylas']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3015880218,9.7.269.2391
+Rawshokwave,Hecarim,True,"['Annie', 'Dr. Mundo', 'Thresh', 'Sivir']","['Vladimir', 'Kayle', 'Sylas', 'Ornn', 'Jhin']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3015872885,9.7.269.2391
+Rawshokwave,Leona,False,"['Gragas', 'Annie', 'Rumble', 'Lucian']","['Zed', 'Renekton', 'Udyr', 'Morgana', 'Miss Fortune']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3015268257,9.7.269.2391
+Rawshokwave,Nocturne,True,"['Sivir', 'Pyke', 'Dr. Mundo', 'LeBlanc']","['Xerath', 'Caitlyn', 'Teemo', 'Fizz', 'Jax']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3014547822,9.7.269.2391
+Rawshokwave,Lee Sin,False,"['Annie', 'Irelia', 'Morgana', 'Kaisa']","['Kayle', 'Rammus', 'Kassadin', 'Miss Fortune', 'Zilean']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3014498537,9.7.269.2391
+Rawshokwave,Ashe,True,"['Graves', 'Jax', 'Thresh', 'LeBlanc']","['Kaisa', 'Singed', 'Riven', 'Miss Fortune', 'Orianna']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3004717688,9.6.267.4221
+Rawshokwave,Ezreal,False,"['Cassiopeia', 'Thresh', 'Malphite', 'Jax']","['Illaoi', 'Caitlyn', 'Ivern', 'Nocturne', 'Veigar']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3004702838,9.6.267.4221
+Rawshokwave,Lee Sin,False,"['Zilean', 'Lucian', 'Annie', 'Pantheon']","['Nami', 'Akali', 'Miss Fortune', 'Kayle', 'Lissandra']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3004671547,9.6.267.4221
+Rawshokwave,Nocturne,True,"['Nautilus', 'Jhin', 'Lux', 'Sylas']","['Tristana', 'Yorick', 'Malzahar', 'Mordekaiser', 'Annie']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3004652229,9.6.267.4221
+Rawshokwave,Ezreal,True,"['Annie', 'Jayce', 'Leona', 'Jax']","['Braum', 'Vladimir', 'Rengar', 'Talon', 'Tristana']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3004621516,9.6.267.4221
+Rawshokwave,Ezreal,True,"[""Rek'Sai"", 'LeBlanc', 'Thresh', 'Sylas']","[""Kha'Zix"", 'Ahri', 'Tryndamere', 'Jhin', 'Pyke']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3001061946,9.5.265.6479
+Rawshokwave,Jhin,False,"['Neeko', 'Ivern', 'Thresh', 'Sylas']","['Ahri', 'Twitch', 'Yorick', 'Draven', 'Bard']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3001032979,9.5.265.6479
+Rawshokwave,Miss Fortune,True,"['Jayce', 'Pyke', 'Anivia', 'Lee Sin']","['Rengar', 'Xerath', 'Braum', 'Ezreal', 'Kassadin']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3000987246,9.5.265.6479
+Rawshokwave,Sivir,True,"['Annie', 'Rumble', 'Thresh', 'Kayn']","['Soraka', 'Nasus', 'Lucian', 'Nidalee', 'Twisted Fate']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3000526763,9.5.265.6479
+Rawshokwave,Miss Fortune,True,"['Jayce', 'Leona', 'Sylas', ""Cho'Gath""]","['Morgana', 'Ezreal', 'LeBlanc', 'Rengar', 'Ryze']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,3000480257,9.5.265.6479
+Rawshokwave,Tristana,False,"['Diana', 'Wukong', 'Tryndamere', 'Elise']","['Lissandra', 'Kindred', 'Caitlyn', 'Camille', 'Shaco']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2996841698,9.5.265.6479
+Rawshokwave,Ezreal,False,"['Tahm Kench', 'Shyvana', 'Varus', 'Twitch']","['Zilean', 'Heimerdinger', 'Yasuo', 'Lee Sin', 'Rumble']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2996814003,9.5.265.6479
+Rawshokwave,Elise,True,"['Twisted Fate', 'Tahm Kench', 'Lucian', 'Malphite']","['Lee Sin', 'Kalista', 'Hecarim', 'Graves', 'Zed']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2995061391,9.5.265.6479
+Rawshokwave,Shyvana,True,"['Jayce', 'Kayle', 'Ezreal', 'Nami']","['Morgana', 'Viktor', 'Shaco', 'Lux', 'Akali']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2995032126,9.5.265.6479
+Rawshokwave,Lee Sin,False,"['Jayce', 'Jax', 'Sivir', 'Alistar']","['Morgana', 'Jinx', 'Rengar', 'Nasus', 'Akali']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2994984170,9.5.265.6479
+Rawshokwave,Twitch,False,"['Karthus', 'Thresh', 'Yasuo', 'Kayle']","['Olaf', 'Cassiopeia', 'Karma', 'Volibear', 'Vayne']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2994580502,9.5.265.6479
+Rawshokwave,Miss Fortune,True,"['Warwick', 'Orianna', 'Thresh', 'Pantheon']","['Ryze', 'Morgana', 'Lee Sin', 'Jhin', 'Anivia']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2994498334,9.5.265.6479
+Rawshokwave,Ezreal,True,"['Annie', 'Thresh', 'Lee Sin', 'Gangplank']","['Morgana', 'Jinx', 'Lux', 'Illaoi', ""Rek'Sai""]",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2994466903,9.5.265.6479
+Rawshokwave,Lee Sin,False,"['Orianna', 'Kayle', 'Kaisa', 'Galio']","['Teemo', 'Lux', 'Ahri', 'Ashe', 'Elise']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2993714761,9.5.265.6479
+Rawshokwave,Ezreal,True,"['Blitzcrank', 'Ekko', 'Gangplank', 'Kayle']","['Neeko', 'Vayne', 'Leona', 'Vi', 'Xerath']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2993045055,9.5.265.6479
+Rawshokwave,Rammus,True,"['Annie', 'Malphite', 'Jhin', 'Karma']","['Riven', 'Caitlyn', 'Xayah', 'Kindred', 'Fizz']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2992172074,9.4.264.7309
+Rawshokwave,Lee Sin,False,"['Fiddlesticks', 'Annie', 'Jayce', 'Varus']","['Pantheon', 'Sona', ""Kog'Maw"", 'Vi', 'Lux']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2992127877,9.4.264.7309
+Rawshokwave,Master Yi,False,"['Lissandra', 'Jarvan IV', 'Ashe', 'Ezreal']","['Brand', 'Jhin', ""Rek'Sai"", 'Aatrox', 'Ryze']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2990567686,9.4.264.7309
+Rawshokwave,Lee Sin,True,"['Sivir', 'Nautilus', 'Karthus', 'Kennen']","['Annie', 'Ezreal', 'Thresh', 'Evelynn', 'Kled']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2990527531,9.4.264.7309
+Rawshokwave,Lee Sin,True,"['Jax', ""Vel'Koz"", 'Sivir', 'Zoe']","['Kindred', 'Vayne', 'Taric', 'Riven', 'LeBlanc']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2989971607,9.4.264.7309
+Rawshokwave,Lee Sin,True,"['Pantheon', 'Ezreal', ""Vel'Koz"", 'Neeko']","['Nidalee', 'Maokai', 'Kalista', 'Ivern', 'Fiddlesticks']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2989960236,9.4.264.7309
+Rawshokwave,Lee Sin,False,"['Pantheon', 'Thresh', 'Xerath', 'Ezreal']","['Vladimir', 'Zed', 'Ashe', 'Veigar', 'Nunu']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2989681298,9.4.264.7309
+Rawshokwave,Nocturne,True,"['Garen', 'Blitzcrank', 'Annie', 'Ezreal']","['Veigar', 'Kayle', ""Kha'Zix"", 'Jhin', 'Morgana']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2989618405,9.4.264.7309
+Rawshokwave,Vi,False,"['Vayne', 'Thresh', ""Vel'Koz"", 'Pantheon']","['Ezreal', 'Xerath', 'Riven', 'Yorick', 'Sion']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2988993369,9.4.264.7309
+Rawshokwave,Hecarim,False,"['Annie', 'Blitzcrank', 'Gnar', 'Vayne']","['Twisted Fate', 'Sivir', 'Sylas', 'Shen', 'Skarner']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2988950518,9.4.264.7309
+Rawshokwave,Ezreal,False,"['Thresh', 'Annie', 'Gnar', 'Kayn']","['Zed', 'Volibear', 'Kaisa', 'Master Yi', 'Lux']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2988921776,9.4.264.7309
+Rawshokwave,Nocturne,True,"['Vayne', 'Thresh', 'Sejuani', 'Lissandra']","['Rakan', 'Xayah', 'Riven', 'LeBlanc', 'Karthus']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2988778787,9.4.264.7309
+Rawshokwave,Hecarim,False,"['Lissandra', 'Sona', 'Heimerdinger', 'Draven']","['Xerath', 'Soraka', 'Kaisa', 'Zac', 'Teemo']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2988749430,9.4.264.7309
+Rawshokwave,Miss Fortune,False,"['Annie', 'Fiora', 'Pantheon', 'Ivern']","['Zoe', 'Rengar', 'Udyr', 'Kalista', 'Bard']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2987697383,9.4.264.7309
+Rawshokwave,Hecarim,True,"['Ahri', 'Bard', 'Sivir', 'Pantheon']","['Karma', 'Ezreal', 'Nunu', 'Shen', 'Zoe']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2986253512,9.4.264.7309
+Rawshokwave,Nocturne,True,"['Sivir', 'Yorick', 'Blitzcrank', 'Zilean']","['Lucian', 'Quinn', 'Alistar', 'Orianna', 'Ivern']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2985648432,9.4.264.1140
+Rawshokwave,Ezreal,True,"['Annie', 'Dr. Mundo', 'Jarvan IV', 'Pantheon']","['Jax', 'Ashe', 'Vi', 'Leona', 'Ahri']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2985035661,9.4.264.1140
+Rawshokwave,Ezreal,False,"['Annie', 'Sion', 'Pantheon', 'Soraka']","['Sejuani', 'Ashe', 'Miss Fortune', 'Zyra', 'Kennen']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2985022152,9.4.264.1140
+Rawshokwave,Hecarim,True,"['Lucian', 'Morgana', 'Zilean', 'Pantheon']","['Twitch', 'Yorick', 'Nocturne', 'Thresh', 'Neeko']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2984336324,9.4.264.1140
+Rawshokwave,Vi,True,"['Jhin', 'Janna', 'Zilean', 'Pantheon']","['Riven', 'Zoe', 'Gragas', 'Jinx', 'Fiddlesticks']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2984307640,9.4.264.1140
+Rawshokwave,Nocturne,True,"['Xayah', 'Rakan', 'Zilean', 'Pantheon']","['Sion', 'Brand', 'Lux', 'Zed', 'Master Yi']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2984279220,9.4.264.1140
+Rawshokwave,Nocturne,False,"['Malzahar', 'Tristana', 'Rumble', 'Twisted Fate']","['Rengar', 'Diana', 'Vayne', 'Braum', 'Irelia']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2981813773,9.3.261.9578
+Rawshokwave,Nocturne,True,"['Teemo', 'Karthus', 'Zoe', 'Ezreal']","['Karma', 'Hecarim', 'Vayne', 'Zilean', 'Zed']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2981782960,9.3.261.9578
+Rawshokwave,Ezreal,False,"['Twitch', 'Thresh', 'Orianna', 'Aatrox']","['Heimerdinger', 'Yasuo', 'Lux', 'Sivir', 'Sejuani']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2975156761,9.3.261.9578
+Rawshokwave,Miss Fortune,True,"['Rengar', 'Thresh', 'Anivia', 'Neeko']","['Wukong', 'Malzahar', 'Tahm Kench', 'Corki', 'Sona']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2975105736,9.3.261.9578
+Rawshokwave,Miss Fortune,False,"['Thresh', 'LeBlanc', 'Zilean', 'Nidalee']","['Cassiopeia', 'Nunu', 'Teemo', 'Graves', ""Cho'Gath""]",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2975081412,9.3.261.9578
+Rawshokwave,Lulu,False,"['Evelynn', 'Malphite', 'Jhin', 'Yasuo']","['Soraka', 'Caitlyn', 'Neeko', 'Shaco', 'Swain']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2972078308,9.3.261.9578
+Rawshokwave,Blitzcrank,True,"['Dr. Mundo', 'Shaco', 'Ezreal', 'Galio']","['Jarvan IV', 'Caitlyn', 'Neeko', 'Lux', 'Leona']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2972059766,9.3.261.9578
+Rawshokwave,Riven,False,"['Ahri', 'Nunu', 'Leona', 'Caitlyn']","['Annie', 'Ornn', 'Vayne', 'Sion', 'Pyke']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2972016531,9.3.261.9578
+Rawshokwave,Ezreal,False,"['Annie', 'Thresh', 'Jayce', ""Kha'Zix""]","['LeBlanc', 'Graves', 'Vayne', 'Ornn', 'Volibear']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2970226368,9.2.261.2172
+Rawshokwave,Ezreal,False,"['Annie', 'Pyke', 'Fiora', 'Nidalee']","['Neeko', 'Vayne', 'Rumble', 'Soraka', 'Kindred']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2967463482,9.2.261.2172
+Rawshokwave,Miss Fortune,False,"[""Vel'Koz"", 'Master Yi', 'Aatrox', 'Jarvan IV']","['Ezreal', 'Amumu', 'Lux', 'Karma', 'Vi']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2967396405,9.2.261.2172
+Rawshokwave,Draven,True,"['Annie', 'Blitzcrank', 'Gnar', 'Karthus']","['Kaisa', 'Miss Fortune', 'Warwick', 'Azir', 'Brand']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2967358845,9.2.261.2172
+Rawshokwave,Twitch,True,"['Leona', 'Zoe', 'Jayce', 'Rammus']","['Neeko', 'Miss Fortune', 'Ekko', 'Brand', 'Sion']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2966532760,9.2.261.2172
+Rawshokwave,Ezreal,True,"['Maokai', 'Thresh', 'Ahri', 'Karthus']","['Lulu', 'Ekko', 'Jhin', ""Kha'Zix"", 'Nasus']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2966493027,9.2.261.2172
+Rawshokwave,Ezreal,True,"['Annie', 'Fiora', 'Fiddlesticks', 'Rammus']","['Nasus', 'Neeko', 'Ahri', 'Teemo', 'Taric']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2962978960,9.2.261.2172
+Rawshokwave,Nocturne,True,"['Pyke', 'Draven', 'Vladimir', 'Akali']","['Azir', 'Sona', 'Vayne', 'Xin Zhao', 'Quinn']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2961589110,9.2.261.2172
+Rawshokwave,Jax,True,"['Rumble', 'Neeko', 'Pyke', 'Kalista']","['Akali', 'Sivir', 'Udyr', 'Lee Sin', 'Nautilus']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2961604960,9.2.261.2172
+Rawshokwave,Bard,False,"['Riven', 'Ezreal', 'Akali', 'Neeko']","['Volibear', 'Morgana', 'Twitch', 'Zoe', 'Irelia']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2961565611,9.2.261.2172
+Rawshokwave,Zyra,True,"['Master Yi', 'Shen', 'Jhin', 'Neeko']","['Olaf', 'Draven', 'Mordekaiser', 'Tahm Kench', 'Shyvana']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2961524656,9.2.261.2172
+Rawshokwave,Ezreal,False,"['Teemo', 'Sylas', 'Lee Sin', 'Blitzcrank']","['Pyke', 'Diana', 'Sion', 'Jhin', 'Zoe']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2960788642,9.2.261.2172
+Rawshokwave,Ezreal,True,"['Aatrox', 'Diana', 'Blitzcrank', 'Rengar']","['Kayle', 'Kayn', 'Rakan', 'Tristana', 'Janna']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2960758251,9.2.261.2172
+Rawshokwave,Zyra,True,"['Teemo', 'Annie', 'Ezreal', 'Elise']","['Master Yi', 'Lulu', 'Swain', 'Corki', 'Rengar']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2957880301,9.1.257.7563
+Rawshokwave,Jax,True,"['Annie', 'Mordekaiser', 'Brand', 'Lux']","['Swain', 'Talon', 'Pyke', 'Ashe', 'Kindred']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2957862221,9.1.257.7563
+Rawshokwave,Lulu,True,"['Kennen', 'Zilean', 'Kayn', 'Kaisa']","['Rengar', 'Quinn', 'Lux', 'Twitch', 'Leona']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2956897205,9.1.257.7563
+Rawshokwave,Leona,True,"['Ezreal', 'Teemo', 'Katarina', 'Olaf']","['Zed', ""Vel'Koz"", 'Heimerdinger', 'Miss Fortune', 'Warwick']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2956857086,9.1.257.7563
+Rawshokwave,Blitzcrank,False,"['Tryndamere', 'Ezreal', 'Xerath', 'Wukong']","['Rammus', 'Anivia', 'Rumble', 'Jhin', 'Braum']",ib4o9aTcdb4LiPzrkQe2FG4-3LC1zXyS8NL4v8wa4qS59Q,2956827229,9.1.257.7563
