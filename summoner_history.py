@@ -4,6 +4,7 @@ import json
 import csv
 import argparse
 import atexit
+from math import ceil
 from queue import Queue, Empty
 from spider_utils import *
 from spider_classes import *
@@ -64,15 +65,14 @@ def crawl(args, account_id):
             exit()
 
 def addMatchHistoryToQueue(account_id, num_matches):
-    num_requests = min([1, num_matches / 100])
+    num_requests = max([1, ceil(num_matches / 100)])
     print("Getting match history for {}".format(account_id))
     for i in range(0, num_requests):
         params = {
-                    'startIndex': i * 100, 
-                    'endIndex': (i + 1) * 100,
+                    'beginIndex': i * 100, 
                     'queue': _5v5_queue_ids
                 }
-        print("Queuing matches {} through {}".format(params['startIndex'], params['endIndex']))
+        print("Queuing matches {} through {}".format(params['beginIndex'], params['beginIndex'] + 100))
         match_history = getSummonerMatchHistory(account_id, params) 
         for MatchReferenceDto in match_history['matches']:
             _match_queue.put(MatchReferenceDto)
