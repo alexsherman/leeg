@@ -4,8 +4,19 @@
  */
 
  /**
-  * Represents a 2d n*n array of champions and associated winrates
+  * Represents relative win-rates among champions
   */
-struct Winrates {
-	matrix: Vec<Vec<f64>>
+pub struct WinRates {
+	matrix_2d: Vec<Vec<f64>>
+}
+
+impl WinRates {
+
+	// TODO: implement
+
+	pub fn new() -> WinRates {
+		// Placeholder
+		WinRates { matrix_2d: Vec::new() }
+	}
+
 }

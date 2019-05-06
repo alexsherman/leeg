@@ -27,7 +27,7 @@ impl Champion {
 		Champion { name: "".to_string(), id: INVALID_CHAMPION_ID }
 	}
 
-	fn to_string(&self) -> String {
+	fn get_name(&self) -> String {
 		return self.name.to_string();
 	}
 
@@ -42,7 +42,7 @@ impl PartialEq for Champion {
 /**
  * Convenience type for the reference data for all champions
  */
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Champions {
 	list: Vec<Champion>
 }
@@ -53,8 +53,16 @@ impl Champions {
 		Champions { list: Vec::with_capacity(EXPCETED_CHAMPIONS_COUNT) }
 	}
 
-	pub fn index_by_name(&self, name: String) -> Option<usize> {
-		return self.list.iter().position(|champ| champ.name == name);
+	pub fn index_by_name(&self, name: &String) -> Option<usize> {
+		if self.list.iter().position(|champ| &champ.name == name) == None {
+			println!("Champion with name {} not found in Champions::index_by_name!", name);
+			panic!("Champions::index_by_name would have returned None, consult logs for details");
+		}
+		return self.list.iter().position(|champ| &champ.name == name);
+	}
+
+	pub fn champion_by_name(&self, name: String) -> &Champion {
+		return &self.list[self.index_by_name(&name).unwrap()];
 	}
 
 	pub fn by_id(&self, id: i16) -> &Champion {
@@ -99,6 +107,7 @@ pub fn load_champions(filename: String) -> Champions {
 	let champs_map : HashMap<i16, String> = serde_json::from_str(&raw_json).unwrap();
 	let mut champions = Champions::new();
 	for (id, name) in champs_map {
+		println!("Adding new champion with name {} and id {}", name, id);
 		champions.add(id, name);
 	}
 
