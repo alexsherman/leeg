@@ -8,7 +8,7 @@ extern crate serde_derive;
 
 mod champions;
 mod matches;
-mod winrates;
+mod scores;
 mod reqs;
 mod utils;
 

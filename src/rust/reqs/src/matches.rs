@@ -43,6 +43,22 @@ struct RawMatch {
 }
 
 impl Match {
+
+	pub fn get_summoner_champion_idx(&self) -> usize {
+		self.summoner_champion_idx
+	}
+
+	pub fn is_summoner_win(&self) -> bool {
+		self.summoner_win
+	}
+
+	pub fn get_same_team_champion_idxs(&self) -> &Vec<usize> {
+		&(self.same_team_champion_idxs)
+	}
+
+	pub fn get_opposing_team_champion_idxs(&self) -> &Vec<usize> {
+		&(self.opposing_team_champion_idxs)
+	}
  
 	fn from_raw_match(raw_match: &RawMatch, champions: &Champions) -> Match {
 	  let same_team_champs: Vec<String> = vec_from_python_list(&raw_match.same_team_champs);

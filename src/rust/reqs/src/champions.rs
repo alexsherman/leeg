@@ -9,8 +9,11 @@ use std::fs::File;
 use std::io::Read;
 use std::collections::HashMap;
 
-const INVALID_CHAMPION_ID: i16 = -1;
-const EXPCETED_CHAMPIONS_COUNT: usize = 143;
+// Used to indicate an empty slot in the Champions data structure 
+pub const INVALID_CHAMPION_ID: i16 = -1;
+
+// Used to pre-allocate vectors correlated to the set of champions
+pub const EXPECTED_CHAMPIONS_COUNT: usize = 150;
 
 /**
  * A single champion
@@ -50,7 +53,7 @@ pub struct Champions {
 impl Champions {
 
 	pub fn new() -> Champions {
-		Champions { list: Vec::with_capacity(EXPCETED_CHAMPIONS_COUNT) }
+		Champions { list: Vec::with_capacity(EXPECTED_CHAMPIONS_COUNT) }
 	}
 
 	pub fn index_by_name(&self, name: &String) -> Option<usize> {

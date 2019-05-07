@@ -6,7 +6,7 @@
 use champions::Champion;
 use champions::Champions;
 use matches::Match;
-use winrates::WinRates;
+use scores::SimpleIndependentScoreMatrix;
 
 /**
  * A champion recommendation service. Must implement a method that, given the player's team's
@@ -25,14 +25,17 @@ trait ReqService {
   */
 pub struct SingleSummonerReqService {
 	champions: Champions,
-	winrates: WinRates
+	scores: SimpleIndependentScoreMatrix
 }
 
 impl SingleSummonerReqService {
 
 	pub fn from_matches(matches: Vec<Match>, champions: &Champions) -> SingleSummonerReqService {
 		// TODO: implement
-		return SingleSummonerReqService { champions: champions.clone(), winrates: WinRates::new() };
+		return SingleSummonerReqService {
+			champions: champions.clone(),
+			scores: SimpleIndependentScoreMatrix::new()
+		};
 	}
 
 }
