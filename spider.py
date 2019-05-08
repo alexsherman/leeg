@@ -24,7 +24,11 @@ def initCSV():
     with open('matches_short.csv', mode='w+') as match_csv:
         match_writer = csv.writer(match_csv, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
         match_writer.writerow(['match_id', 'winning_team', 'blueTeam', 'redTeam', 'gameVersion'])
-    
+   
+#    with open('match_vectors.csv', mode='w+') as match_csv:
+ #       match_writer = csv.writer(match_csv, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
+  #      match_writer.writerow(['blue', 'red', 'winner'])
+
 
 def recordMatch(match):
     '''
@@ -35,19 +39,14 @@ def recordMatch(match):
         match: MatchDto
     '''
     m = Match(match)
-    
-    with open('matches.csv', mode='a') as match_csv:
-        match_writer =  csv.writer(match_csv, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        print('Writing match ' + str(m.id))
-        m.write(match_writer)
+    with open('match_vectors.csv', mode='a+') as match_vectors:
+        match_writer = csv.writer(match_vectors, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        m.writeVectors(match_writer)
 
-        with open('matches_short.csv', mode='a+') as match_short_csv:
-            match_writer = csv.writer(match_short_csv, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            m.writeNamesAndLanes(match_writer)
 
-        global _matches_processed
-        _matches_processed += 1
-        _match_ids_processed.add(m.id)
+    global _matches_processed
+    _matches_processed += 1
+    _match_ids_processed.add(m.id)
 
 def crawl(args, account_id):
     '''
@@ -66,9 +65,6 @@ def crawl(args, account_id):
                 continue
             print(match_id)
             match = getMatch(match_id)
-            if match['queueId'] not in _5v5_queue_ids:
-                continue
-
             recordMatch(match)
             champs = map(lambda p: p['championId'], match['participants'])
             print(map(lambda c: champ_dict[str(c)], champs))
@@ -91,7 +87,7 @@ def crawl(args, account_id):
 
 def addMatchHistoryToQueue(account_id, match_depth):
     print("Getting match history for {}".format(account_id))
-    match_history = getSummonerMatchHistory(account_id, {'endIndex': match_depth})
+    match_history = getSummonerMatchHistory(account_id, {'endIndex': match_depth, 'queue': _5v5_queue_ids})
     match_ids = getMatchIds(match_history)
     for match_id in match_ids:
         _match_queue.put(match_id)

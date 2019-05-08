@@ -1,10 +1,15 @@
 import json
 
 champ_dict = {}
+champ_indexes = {}
 
 with open('champions.json') as champs:
     try:
         champ_dict = json.load(champs)
+        idx = 0
+        for name in champ_dict.values():
+            champ_indexes[name] = idx
+            idx += 1
     except:
         print("No champions.json found!")
         raise
@@ -57,6 +62,21 @@ class Match:
             red,
             self.game_version
         ])
+    def writeVectors(self, writer):
+        blue = [0] * len(champ_indexes)
+        red = [0] * len (champ_indexes)
+        for pc in self.playersAndChamps:
+            if pc['team'] is 'blue':
+                blue[champ_indexes[pc['champion']['name']]] = 1
+            else:
+                red[champ_indexes[pc['champion']['name']]] = 1        
+        writer.writerow([
+             self.id,
+             self.winner,
+            *blue,
+            *red,
+        ])
+
 
 
 class PlayerChamp: 
