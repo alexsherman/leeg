@@ -2,6 +2,10 @@
  * String utils speciailized for our purposes, not meant to be generalizable
  */
 
+pub fn into_string_vec(strs: &[&str]) -> Vec<String> {
+	return strs.iter().map(|s| s.to_string()).collect()
+}
+
 pub fn strip_square_brackets(string: &String) -> String {
 	string.replace("[", "").replace("]", "")
 }
@@ -17,7 +21,6 @@ pub fn strip_outer_quotes(string: &String) -> String {
 	return string.clone();
 }
 
-
 #[cfg(test)]
 mod tests {
 
@@ -27,19 +30,19 @@ use utils::string::strip_outer_quotes;
 	#[test]
 	fn test_strip_square_brackets() {
 		let input: String = "['Lux', 'Wukong']".to_string();
-		assert_eq!("'Lux', 'Wukong'".to_string(), strip_square_brackets(input));
+		assert_eq!("'Lux', 'Wukong'".to_string(), strip_square_brackets(&input));
 	}
 	
 	#[test]
 	fn test_strip_outer_quotes() {
 		let input: String = "'Lux'".to_string();
-		assert_eq!("Lux".to_string(), strip_outer_quotes(input));
+		assert_eq!("Lux".to_string(), strip_outer_quotes(&input));
 	}
 
 	#[test]
 	fn test_strip_outer_quotes_preserve_apostrophe() {
 		let input: String = "'Rek'Sai'".to_string();
-		assert_eq!("Rek'Sai".to_string(), strip_outer_quotes(input));
+		assert_eq!("Rek'Sai".to_string(), strip_outer_quotes(&input));
 	}
 
 }

@@ -64,16 +64,16 @@ impl Match {
 	  let same_team_champs: Vec<String> = vec_from_python_list(&raw_match.same_team_champs);
 	  let mut same_team_champion_idxs: Vec<usize> = Vec::with_capacity(ALLIED_CHAMPS_SIZE);
 	  for champion_name in same_team_champs {
-	  	same_team_champion_idxs.push(champions.index_by_name(&champion_name).unwrap());
+	  	same_team_champion_idxs.push(*champions.index_by_name(&champion_name));
 	  }
 	  let opposite_team_champs: Vec<String> = vec_from_python_list(&raw_match.opposite_team_champs);
 	  let mut opposing_team_champion_idxs: Vec<usize> = Vec::with_capacity(ENEMY_CHAMPS_SIZE);
 	  for champion_name in opposite_team_champs {
-	  	opposing_team_champion_idxs.push(champions.index_by_name(&champion_name).unwrap());
+	  	opposing_team_champion_idxs.push(*champions.index_by_name(&champion_name));
 	  }
 
 	  Match {
-	  	summoner_champion_idx: champions.index_by_name(&raw_match.summoner_champ).unwrap(),
+	  	summoner_champion_idx: champions.index_by_name(&raw_match.summoner_champ).clone(),
 	  	summoner_win: bool_from_string(&raw_match.summoner_win),
 	  	same_team_champion_idxs: same_team_champion_idxs,
 	  	opposing_team_champion_idxs: opposing_team_champion_idxs
@@ -123,7 +123,6 @@ pub fn load_matches(filename: String, champions: &Champions) -> Vec<Match> {
 	for result in csv_reader.deserialize() {
 		let raw_match: RawMatch = result.unwrap();
 		let game = Match::from_raw_match(&raw_match, &champions);
-		println!("Adding a new match with match_id {}", raw_match.match_id);
 		matches.push(game);
 	}
 

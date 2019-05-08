@@ -9,31 +9,16 @@ use std::fs::File;
 use std::io::Read;
 use std::collections::HashMap;
 
-// Used to indicate an empty slot in the Champions data structure 
-pub const INVALID_CHAMPION_ID: i16 = -1;
-
-// Used to pre-allocate vectors correlated to the set of champions
-pub const EXPECTED_CHAMPIONS_COUNT: usize = 150;
+// Used as a hint to pre-allocate data structures correlated to the set of champions
+pub const EXPECTED_CHAMPIONS_COUNT: usize = 143;
 
 /**
  * A single champion
  */
- #[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Champion {
 	name: String,
 	id: i16
-}
-
-impl Champion {
-
-	fn new() -> Champion {
-		Champion { name: "".to_string(), id: INVALID_CHAMPION_ID }
-	}
-
-	fn get_name(&self) -> String {
-		return self.name.to_string();
-	}
-
 }
 
 impl PartialEq for Champion {
@@ -47,54 +32,47 @@ impl PartialEq for Champion {
  */
 #[derive(Debug, Clone)]
 pub struct Champions {
-	list: Vec<Champion>
+	list: Vec<Champion>,
+	id_hashes: HashMap<i16, usize>,
+	name_hashes: HashMap<String, usize>
 }
 
 impl Champions {
 
 	pub fn new() -> Champions {
-		Champions { list: Vec::with_capacity(EXPECTED_CHAMPIONS_COUNT) }
-	}
-
-	pub fn index_by_name(&self, name: &String) -> Option<usize> {
-		if self.list.iter().position(|champ| &champ.name == name) == None {
-			println!("Champion with name {} not found in Champions::index_by_name!", name);
-			panic!("Champions::index_by_name would have returned None, consult logs for details");
+		Champions {
+			list: Vec::with_capacity(EXPECTED_CHAMPIONS_COUNT),
+			id_hashes: HashMap::with_capacity(EXPECTED_CHAMPIONS_COUNT),
+			name_hashes: HashMap::with_capacity(EXPECTED_CHAMPIONS_COUNT)
 		}
-		return self.list.iter().position(|champ| &champ.name == name);
 	}
 
-	pub fn champion_by_name(&self, name: String) -> &Champion {
-		return &self.list[self.index_by_name(&name).unwrap()];
-	}
-
-	pub fn by_id(&self, id: i16) -> &Champion {
-		if id == INVALID_CHAMPION_ID || self.list[id as usize].id == INVALID_CHAMPION_ID {
-			panic!("Invalid champion id specified in call to Champions::by_id");
-		}
-		return &self.list[id as usize];
-	}
-
-	pub fn count(&self) -> usize {
-		let mut count: usize = 0;
-		for champion in self.list.iter() {
-			if champion.id != INVALID_CHAMPION_ID {
-				count += 1;
-			}
-		}
-		return count;
+	pub fn index_by_name(&self, name: &String) -> &usize {
+		return &self.name_hashes.get(name).unwrap();
 	}
 
 	pub fn len(&self) -> usize {
 		return self.list.len();
 	}
 
-	fn add(&mut self, id: i16, name: String) {
+	pub fn idxs_from_names(&self, champion_names: &Vec<String>) -> Vec<usize> {
+		return champion_names.iter()
+				.map(|name| self.name_hashes.get(name).unwrap().clone())
+				.collect();
+	}
+
+	pub fn names_from_idxs(&self, champion_idxs: &Vec<usize>) -> Vec<String> {
+		return champion_idxs.iter()
+				.map(|idx| self.list[*idx].name.clone())
+				.collect();
+	}
+
+	fn push(&mut self, id: i16, name: String) {
 		let champion = Champion {name: name, id: id};
-		if (id as usize) >= self.list.len() {
-			self.list.resize(id as usize, Champion::new());
-		}
-		self.list.insert(id as usize, champion);
+		let idx = self.list.len();
+		self.id_hashes.insert(id, idx);
+		self.name_hashes.insert(champion.name.clone(), idx);
+		self.list.push(champion);
 	}
 
 }
@@ -110,8 +88,7 @@ pub fn load_champions(filename: String) -> Champions {
 	let champs_map : HashMap<i16, String> = serde_json::from_str(&raw_json).unwrap();
 	let mut champions = Champions::new();
 	for (id, name) in champs_map {
-		println!("Adding new champion with name {} and id {}", name, id);
-		champions.add(id, name);
+		champions.push(id, name);
 	}
 
 	return champions;

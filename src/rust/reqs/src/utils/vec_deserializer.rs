@@ -33,7 +33,7 @@ use utils::vec_deserializer::vec_from_python_list;
 				"Ezreal".to_string(),
 				"Malphite".to_string()
 		];
-		assert_eq!(expected, vec_from_python_list(input));
+		assert_eq!(expected, vec_from_python_list(&input));
 	}
 
 }
