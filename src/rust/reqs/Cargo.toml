@@ -3,6 +3,14 @@ name = "reqs"
 version = "0.1.0"
 authors = ["dmcfalls <dan.mcfalls4@gmail.com>"]
 
+[lib]
+name = "reqslib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "reqsbin"
+path = "src/main.rs"
+
 [dependencies]
 serde = "1.0.55"
 serde_derive = "1.0.55"
