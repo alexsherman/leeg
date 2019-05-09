@@ -11,8 +11,8 @@ use matches::load_matches;
 use reqs::SingleSummonerReqService;
 use reqs::ReqService;
 
-const CHAMPIONS_FILE_PATH: &str = "/home/leeg/champions.json";
-const MATCHES_FILE_PATH: &str = "/home/leeg/dans_last_100.csv";
+const CHAMPIONS_FILE_PATH: &str = "/home/alex/leeg/champions.json";
+const MATCHES_FILE_PATH: &str = "/home/alex/leeg/alex_last_500.csv";
 
 pub fn handle_req_req(num_reqs: usize, team_picks: &Vec<String>, opp_picks: &Vec<String>) -> Vec<String> {
     let champions = load_champions(CHAMPIONS_FILE_PATH.to_string());
