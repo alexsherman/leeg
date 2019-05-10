@@ -12,8 +12,8 @@ use utils::argmax::argmax_idx;
 
 // Used for comparisons. The "empty product" is 1 instead of 0, but 1 is greater than any
 // score we'd encounter, so we filter out any value of 1.
-const ONE_F64: f64 = 0.999999999;
-const ZERO_F64: f64 = 0.0;
+const ONE_F64: f64 = 1f64;
+const ZERO_F64: f64 = 0f64;
 
 /**
  * A champion recommendation service. Must implement a method that, given the player's team's
@@ -69,11 +69,12 @@ impl SingleSummonerReqService {
 
 		let mut scores: Vec<f64> = Vec::with_capacity(self.champions.len());
 		for i in 0..self.champions.len() {
-			let mut score_i: f64 = self.score_matrix.ally_score_product(&i, &team_idxs)
+			let mut score_i: f64 = self.score_matrix.champ_winrate(&i)
+					* self.score_matrix.ally_score_product(&i, &team_idxs)
 					* self.score_matrix.opp_score_product(&i, &opp_idxs);
-			if score_i > ONE_F64 {
+			if score_i == ONE_F64 {
 				score_i = ZERO_F64;
-			}		
+			}
 			scores.push(score_i);
 		}
 		return scores;
@@ -82,13 +83,13 @@ impl SingleSummonerReqService {
 	/**
 	 * Set scores for banned champions to zero since they are not able to be picked
 	 */
-	fn filter_bans(&self, scores: &mut Vec<f64>, team_bans: &Vec<String>, opp_bans: &Vec<String>) {
+	fn filter_champs(&self, scores: &mut Vec<f64>, champs1: &Vec<String>, champs2: &Vec<String>) {
 		
-		let team_ban_idxs = self.champions.idxs_from_names(team_bans);
-		let opp_ban_idxs = self.champions.idxs_from_names(opp_bans);
+		let champs1_idxs = self.champions.idxs_from_names(champs1);
+		let champs2_idxs = self.champions.idxs_from_names(champs2);
 
 		for (idx, score) in scores.iter_mut().enumerate() {
-			if team_ban_idxs.contains(&idx) || opp_ban_idxs.contains(&idx) {
+			if champs1_idxs.contains(&idx) || champs2_idxs.contains(&idx) {
 				*score = ZERO_F64;
 			}
 		}
@@ -119,7 +120,8 @@ impl ReqService for SingleSummonerReqService {
 			-> Vec<String> {
 
 		let mut scores = self.calculate_scores(team_picks, opp_picks);
-		self.filter_bans(&mut scores, team_bans, opp_bans);
+		self.filter_champs(&mut scores, team_bans, opp_bans);
+		self.filter_champs(&mut scores, team_picks, opp_picks);
 		return self.get_reqs(&mut scores, num_reqs);
 
 	}
@@ -128,6 +130,7 @@ impl ReqService for SingleSummonerReqService {
 			-> Vec<String> {
 		
 		let mut scores = self.calculate_scores(team_picks, opp_picks);
+		self.filter_champs(&mut scores, team_picks, opp_picks);
 		return self.get_reqs(&mut scores, num_reqs);
 		
 	}
