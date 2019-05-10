@@ -1,0 +1,6 @@
+[postgresql]
+host={{ip of db here}
+database=match_na
+user=postgres
+password={{passwordhere}}
+
