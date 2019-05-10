@@ -8,14 +8,12 @@ from math import ceil
 from queue import Queue, Empty
 from spider_utils import *
 from spider_classes import *
+from db_utils import *
 
 _match_queue = Queue()
 _5v5_queue_ids = [400, 420]
 
-def initCSV():
-    with open('summoner_matches.csv', mode='w+') as match_csv:
-        match_writer = csv.writer(match_csv, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        match_writer.writerow(['summoner_name', 'summoner_champ', 'summoner_win', 'same_team_champs', 'opposite_team_champs', 'account_id', 'match_id', 'game_version'])    
+_db = {}
 
 def recordMatch(account_id, MatchReferenceDto, match):
     '''
@@ -26,7 +24,10 @@ def recordMatch(account_id, MatchReferenceDto, match):
         match: MatchDto
     '''
     m = Match(match)
-    
+    m.insert_into_all_matches(_db['cursor'])
+    _db['connection'].commit()
+
+    '''
     with open('summoner_matches.csv', mode='a') as match_csv:
         match_writer =  csv.writer(match_csv, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
         print('Writing match ' + str(m.id))
@@ -52,7 +53,7 @@ def recordMatch(account_id, MatchReferenceDto, match):
             m.id,
             m.game_version
         ])
-
+        '''
 def crawl(args, account_id):
     addMatchHistoryToQueue(account_id, args.num_matches)
     while True:
@@ -83,12 +84,16 @@ def main():
     parser.add_argument('--num_matches', help="number of matches to crawl through", default=100, type=int)
     args = parser.parse_args()
     print('Getting {} matches for {}'.format(args.num_matches, args.summoner_name))
-    initCSV()
+    global _db
+    _db = connect()
+    print(_db)
+
     seed_summoner = getSummonerByName(args.summoner_name)
     crawl(args, seed_summoner['accountId'])
 
 def exit():
-    # ?
+    _db['connection'].close()
+    _db['cursor'].close()
     sys.exit(0)
 
 

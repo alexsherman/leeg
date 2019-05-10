@@ -5,8 +5,8 @@ CREATE TABLE all_matches (
 	red_team text[] NOT NULL,
 	blue_bans text[],
 	red_bans text[],
-	red_summoners int[] NOT NULL, --account ids - order same as x_team order
-	blue_summoners int[] NOT NULL,
+	red_summoners text[] NOT NULL, --account ids - order same as x_team order
+	blue_summoners text[] NOT NULL,
 	play_date timestamp,
 	duration interval,
 	game_version text,

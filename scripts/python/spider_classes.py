@@ -1,6 +1,6 @@
 import json
 import datetime
-
+import psycopg2
 champ_dict = {}
 champ_indexes = {}
 
@@ -55,10 +55,10 @@ class Match:
             else:
                 self.red_team.append(champ)
                 self.blue_team.append(summoner)
-        for ban in blueTeam['bans']
-            self.blue_bans.append(champ_dict[str(ban['championId'])])
-        for ban in redTeam['bans']
-            self.read_bans.append(champ_dict[str(ban['championId'])])
+        for ban in blueTeam['bans']:
+            self.blue_bans.append(getChampById(ban['championId']))
+        for ban in redTeam['bans']:
+            self.red_bans.append(getChampById(ban['championId']))
 
     def insert_into_all_matches(self, cursor):
         sql = '''
@@ -67,12 +67,21 @@ class Match:
                 blue_summoners, red_summoners, play_date, duration, game_version, game_mode)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             '''
-        play_date = datetime.datetime.fromtimestamp(self.play_date)
+        play_date = datetime.datetime.fromtimestamp(self.play_date / 1000)
         duration = datetime.timedelta(seconds=self.duration)
         sql_tuple = (self.id, self.blue_wins, self.blue_team, self.red_team, self.blue_bans, self.red_bans, self.blue_summoners, self.red_summoners, play_date, duration, self.game_version, self.game_mode)
-        cursor.execute(sql, sql_tuple)
-
-
+        try:
+            cursor.execute(sql, sql_tuple)
+            print('Writing {} to all_matches'.format(self.id))
+        except psycopg2.DatabaseError as e:
+            print(e)
+    
+    def insert_into_summoner_matches(self, cursor):
+        '''
+        TODO implement
+        '''
+        return
+        
     def writeVectors(self, writer):
         blue = [0] * len(champ_indexes)
         red = [0] * len (champ_indexes)

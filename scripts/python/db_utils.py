@@ -20,10 +20,11 @@ def connect():
     
     Client calling connect() is responsible for calling .close() on both cursor and connection.
     '''
-    conn = None
+    connection = None
     try:
         params = config()
-        print('Connecting to {} as {}...'.format(params['host'], params['username']))    
+        print(params)
+        print('Connecting to {} as {}...'.format(params['host'], params['user']))    
         connection = psycopg2.connect(**params)
         cursor = connection.cursor()
         return {
@@ -33,8 +34,7 @@ def connect():
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-        if conn is not None:
-            conn.close()
-
+        if connection is not None:
+            connection.close()
 
 
