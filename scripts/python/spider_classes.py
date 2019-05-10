@@ -1,9 +1,10 @@
 import json
-
+import datetime
+import psycopg2
 champ_dict = {}
 champ_indexes = {}
 
-with open('champions.json') as champs:
+with open('../../champions.json') as champs:
     try:
         champ_dict = json.load(champs)
         idx = 0
@@ -24,6 +25,9 @@ def getTeam(match, teamColor):
 class Match: 
     def __init__(self, match):
         self.id = match['gameId']
+        self.play_date = match['gameCreation']
+        self.duration = match['gameDuration']
+        self.game_mode = match['queueId']
         blueTeam = getTeam(match, 'blue')
         redTeam = getTeam(match, 'red')
         if blueTeam['win'] == 'Win':
@@ -35,33 +39,49 @@ class Match:
         for participant in match['participants']:
             p = PlayerChamp(participant, match['participantIdentities'])
             self.playersAndChamps.append(p.info())
-    def write(self, writer):
-        writer.writerow([
-            self.id,
-            self.winner,
-            self.playersAndChamps,
-            self.game_version
-        ])
-
-    def writeNamesAndLanes(self, writer):
-        blue = []
-        red = []
+        self.blue_wins = self.winner == 'blue'
+        self.blue_team = []
+        self.red_team = []
+        self.blue_bans = []
+        self.red_bans = []
+        self.red_summoners = []
+        self.blue_summoners = []
         for pc in self.playersAndChamps:
-            info = {
-                'champion': pc['champion']['name'],
-                'role': pc['role']
-            }
+            champ = pc['champion']['name']
+            summoner = pc['accountId'] 
             if pc['team'] is 'blue':
-                blue.append(info)
+                self.blue_team.append(champ)
+                self.blue_summoners.append(summoner)
             else:
-                red.append(info)
-        writer.writerow([
-            self.id,
-            self.winner,
-            blue,
-            red,
-            self.game_version
-        ])
+                self.red_team.append(champ)
+                self.red_summoners.append(summoner)
+        for ban in blueTeam['bans']:
+            self.blue_bans.append(getChampById(ban['championId']))
+        for ban in redTeam['bans']:
+            self.red_bans.append(getChampById(ban['championId']))
+
+    def insert_into_all_matches(self, cursor):
+        sql = '''
+                INSERT INTO all_matches
+                (id, blue_wins, blue_team, red_team, blue_bans, red_bans, 
+                blue_summoners, red_summoners, play_date, duration, game_version, game_mode)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            '''
+        play_date = datetime.datetime.fromtimestamp(self.play_date / 1000)
+        duration = datetime.timedelta(seconds=self.duration)
+        sql_tuple = (self.id, self.blue_wins, self.blue_team, self.red_team, self.blue_bans, self.red_bans, self.blue_summoners, self.red_summoners, play_date, duration, self.game_version, self.game_mode)
+        try:
+            cursor.execute(sql, sql_tuple)
+            print('Writing {} to all_matches'.format(self.id))
+        except psycopg2.DatabaseError as e:
+            print(e)
+    
+    def insert_into_summoner_matches(self, cursor):
+        '''
+        TODO implement
+        '''
+        return
+        
     def writeVectors(self, writer):
         blue = [0] * len(champ_indexes)
         red = [0] * len (champ_indexes)
