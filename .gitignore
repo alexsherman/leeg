@@ -3,3 +3,5 @@
 src/rust/reqs/Cargo.lock
 src/rust/reqs/target
 src/rust/reqs/target/*
+scripts/python/database.ini
+
