@@ -14,6 +14,7 @@ from db_utils import *
 _match_queue = Queue()
 _5v5_queue_ids = [400, 420]
 _num_processed = 0
+_summoner_ids_processed = set()
 _db = {}
 
 def recordMatch(account_id, MatchReferenceDto, match):    
@@ -32,9 +33,18 @@ def crawl(args, account_id):
     addMatchHistoryToQueue(account_id, args.num_matches)
     while True:
         try:
-            MatchReferenceDto = _match_queue.get(block = False)
+            q_entry = _match_queue.get(block = False)
+            MatchReferenceDto = q_entry['mrdto']
+            summoner_id = q_entry['id']
             match = getMatch(MatchReferenceDto['gameId'])            
-            recordMatch(account_id, MatchReferenceDto, match)
+            recordMatch(summoner_id, MatchReferenceDto, match)
+            if args.spider and _match_queue.qsize() < args.num_matches * 10:
+                summonerIds = map(lambda p: p['accountId'], Match(match).playersAndChamps)
+                for id in summonerIds:
+                    if id not in _summoner_ids_processed:
+                        _summoner_ids_processed.add(id)
+                        addMatchHistoryToQueue(id, args.num_matches)
+
         except Empty:
             print("Empty match queue")
             exit()
@@ -54,19 +64,23 @@ def addMatchHistoryToQueue(account_id, num_matches):
     for i in range(0, num_requests):
         params = {
                     'beginIndex': i * 100, 
-                    'queue': _5v5_queue_ids
+                    'queue': _5v5_queue_ids,
+                    'endIndex': i * 100 + 100
                 }
-        print("Fetching matches {} through {}".format(params['beginIndex'], params['beginIndex'] + 100))
+        if num_matches < 100:
+            params['endIndex'] = num_matches
+        print("Fetching matches {} through {}".format(params['beginIndex'], params['endIndex']))
         match_history = getSummonerMatchHistory(account_id, params) 
         new_matches = [match for match in match_history['matches'] if match['gameId'] not in idset]
         print("{} of these matches are not in DB, requesting".format(len(new_matches)))
         for MatchReferenceDto in new_matches:
-            _match_queue.put(MatchReferenceDto)
+            _match_queue.put({'mrdto': MatchReferenceDto, 'id': account_id})
 
 def main():
     parser = argparse.ArgumentParser("Scrape Riot API data")
     parser.add_argument('--summoner_name', help="name of summoner for which to get match history", required=True)
     parser.add_argument('--num_matches', help="number of matches to crawl through", default=100, type=int)
+    parser.add_argument('--spider', action="store_true", help="If true, fetch matches for other summoners in the seed summoner's games")
     args = parser.parse_args()
     print('Getting {} matches for {}'.format(args.num_matches, args.summoner_name))
     global _db

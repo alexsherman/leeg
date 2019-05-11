@@ -23,7 +23,6 @@ def connect():
     connection = None
     try:
         params = config()
-        print(params)
         print('Connecting to {} as {}...'.format(params['host'], params['user']))    
         connection = psycopg2.connect(**params)
         cursor = connection.cursor()
