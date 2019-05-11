@@ -12,14 +12,20 @@ from db_utils import *
 
 _match_queue = Queue()
 _5v5_queue_ids = [400, 420]
-
+_num_processed = 0
 _db = {}
 
 def recordMatch(account_id, MatchReferenceDto, match):    
     m = Match(match)
     m.insert_into_all_matches(_db['cursor'])
     _db['connection'].commit()
-    #TODO implement the other table insert here
+    s = Summoner().from_match(m, account_id)
+    m.insert_into_summoner_matches(_db['cursor'], s)
+    _db['connection'].commit()
+    global _num_processed
+    _num_processed += 1
+    if _num_processed % 10 == 0:
+        print("Processed {} matches.".format(_num_processed))
 
 def crawl(args, account_id):
     addMatchHistoryToQueue(account_id, args.num_matches)
