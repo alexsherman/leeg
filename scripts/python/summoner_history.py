@@ -4,6 +4,7 @@ import json
 import csv
 import argparse
 import atexit
+from rquests.exceptions import HTTPError
 from math import ceil
 from queue import Queue, Empty
 from spider_utils import *
@@ -37,11 +38,20 @@ def crawl(args, account_id):
         except Empty:
             print("Empty match queue")
             exit()
+        except HTTPError as e:
+            continue
 
 def addMatchHistoryToQueue(account_id, num_matches):
     num_requests = max([1, ceil(num_matches / 100)])
     print("Getting match history for {}".format(account_id))
     #TODO - query db to check which matches we already have, remove those from queue
+    sql = '''
+            SELECT id from summoner_matches where id = %s
+        '''
+    sql_tuple = (account_id,)
+    print(sql, sql_tuple)
+    ids = _db['cursor'].execute(sql, sql_tuple)
+    print(ids)
     for i in range(0, num_requests):
         params = {
                     'beginIndex': i * 100, 
@@ -49,6 +59,7 @@ def addMatchHistoryToQueue(account_id, num_matches):
                 }
         print("Queuing matches {} through {}".format(params['beginIndex'], params['beginIndex'] + 100))
         match_history = getSummonerMatchHistory(account_id, params) 
+
         for MatchReferenceDto in match_history['matches']:
             _match_queue.put(MatchReferenceDto)
 
