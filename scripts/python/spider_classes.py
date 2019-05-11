@@ -36,9 +36,11 @@ class Match:
             self.winner = 'red'
         self.game_version = match['gameVersion']
         self.playersAndChamps = []
+        
         for participant in match['participants']:
             p = PlayerChamp(participant, match['participantIdentities'])
             self.playersAndChamps.append(p.info())
+        
         self.blue_wins = self.winner == 'blue'
         self.blue_team = []
         self.red_team = []
@@ -46,6 +48,7 @@ class Match:
         self.red_bans = []
         self.red_summoners = []
         self.blue_summoners = []
+        
         for pc in self.playersAndChamps:
             champ = pc['champion']['name']
             summoner = pc['accountId'] 
@@ -55,8 +58,10 @@ class Match:
             else:
                 self.red_team.append(champ)
                 self.red_summoners.append(summoner)
+        
         for ban in blueTeam['bans']:
             self.blue_bans.append(getChampById(ban['championId']))
+        
         for ban in redTeam['bans']:
             self.red_bans.append(getChampById(ban['championId']))
 
@@ -76,12 +81,34 @@ class Match:
         except psycopg2.DatabaseError as e:
             print(e)
     
-    def insert_into_summoner_matches(self, cursor):
-        '''
-        TODO implement
-        '''
-        return
+    def insert_into_summoner_matches(self, cursor, summoner):
+        same_team_champions = self.blue_team
+        opp_team_champions = self.red_team
+        same_team_bans = self.blue_bans
+        opp_team_bans = self.red_bans
         
+        if summoner.team == 'red':
+            opp_team_champions = self.blue_team
+            same_team_champions = self.red_team
+            same_team_bans = self.red_bans
+            opp_team_bans = self.blue_bans
+        
+        same_team_champions.remove(summoner.champion)
+        play_date = datetime.datetime.fromtimestamp(self.play_date / 1000)
+        duration = datetime.timedelta(seconds=self.duration)
+        sql = '''
+                INSERT INTO summoner_matches
+                (id, name, wins, champion, same_team_champions, opp_team_champions, same_team_bans,
+                opp_team_bans, match_id, play_date, game_version)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            '''
+        sql_tuple = (summoner.id, summoner.name, summoner.wins, summoner.champion, same_team_champions, opp_team_champions, same_team_bans, opp_team_bans, self.id, play_date, self.game_version)
+        try:
+            cursor.execute(sql, sql_tuple)
+            print('Writing {} to summoner_matches for {}'.format(self.id, summoner.name))
+        except psycopg2.DatabaseError as e:
+            print(e)
+
     def writeVectors(self, writer):
         blue = [0] * len(champ_indexes)
         red = [0] * len (champ_indexes)
@@ -97,7 +124,16 @@ class Match:
             *red,
         ])
 
-
+    
+class Summoner:
+    def from_match(self, m, id): 
+        pc = next((p for p in m.playersAndChamps if p['accountId'] == id), None) 
+        self.id = id
+        self.team = pc['team']
+        self.name = pc['summonerName']
+        self.champion = pc['champion']['name']
+        self.wins = m.winner == pc['team']
+        return self
 
 class PlayerChamp: 
     def __init__(self, player, participants):
