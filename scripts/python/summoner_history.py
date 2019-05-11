@@ -4,7 +4,7 @@ import json
 import csv
 import argparse
 import atexit
-from rquests.exceptions import HTTPError
+from requests.exceptions import HTTPError
 from math import ceil
 from queue import Queue, Empty
 from spider_utils import *
@@ -44,23 +44,23 @@ def crawl(args, account_id):
 def addMatchHistoryToQueue(account_id, num_matches):
     num_requests = max([1, ceil(num_matches / 100)])
     print("Getting match history for {}".format(account_id))
-    #TODO - query db to check which matches we already have, remove those from queue
     sql = '''
-            SELECT id from summoner_matches where id = %s
+            SELECT match_id from summoner_matches where id = %s
         '''
     sql_tuple = (account_id,)
-    print(sql, sql_tuple)
-    ids = _db['cursor'].execute(sql, sql_tuple)
-    print(ids)
+    _db['cursor'].execute(sql, sql_tuple)
+    ids = _db['cursor'].fetchall()
+    idset = set([match_id for tup in ids for match_id in tup])
     for i in range(0, num_requests):
         params = {
                     'beginIndex': i * 100, 
                     'queue': _5v5_queue_ids
                 }
-        print("Queuing matches {} through {}".format(params['beginIndex'], params['beginIndex'] + 100))
+        print("Fetching matches {} through {}".format(params['beginIndex'], params['beginIndex'] + 100))
         match_history = getSummonerMatchHistory(account_id, params) 
-
-        for MatchReferenceDto in match_history['matches']:
+        new_matches = [match for match in match_history['matches'] if match['gameId'] not in idset]
+        print("{} of these matches are not in DB, requesting".format(len(new_matches)))
+        for MatchReferenceDto in new_matches:
             _match_queue.put(MatchReferenceDto)
 
 def main():
