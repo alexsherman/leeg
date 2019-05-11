@@ -1,7 +1,8 @@
 # leeg
 
-## reading materials
-https://github.com/vingtfranc/LoLAnalyzer
-This guy has something kind of similar to ideas of ours, with a terrible ui and lots of bloat, and idk how well it even works. but might look at it more
+## connecting to DB
+db is postgres 11, instance is named matches-na, db is named matches
+get password from alex and be added as editor to project on GC
+log on to google cloud console, get the databse IP from overview page, and whitelist your ip on the connections page
+connect without ssl (for now)
 
-https://towardsdatascience.com/building-a-league-of-legends-champions-recommender-system-in-go-and-how-to-deploy-it-in-the-cloud-1ee7a4fb55ee
