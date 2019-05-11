@@ -54,7 +54,7 @@ class Match:
                 self.blue_summoners.append(summoner)
             else:
                 self.red_team.append(champ)
-                self.blue_team.append(summoner)
+                self.red_summoners.append(summoner)
         for ban in blueTeam['bans']:
             self.blue_bans.append(getChampById(ban['championId']))
         for ban in redTeam['bans']:
