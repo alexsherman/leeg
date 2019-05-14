@@ -17,3 +17,8 @@ neither are very popular. why? well neither takes into account your own personal
 
 https://u.gg/lol/tier-list/?role=middle&patch=9_8
 good filtering options, and the duo tier list is interesting
+
+## potential ways of utilizing desktop to get champ info in real time
+
+https://github.com/stirante/lol-client-java-api
+http://developers.overwolf.com/documentation/sdk/overwolf/games/launchers/
