@@ -13,13 +13,20 @@ fn index() -> &'static str {
     "Welcome to Banana (a Rocket server, courtesy of Prentice Pirate)"
 }
 
-fn champStringToVec(championString: &String) -> Vec<String> {
-    championString.split(',').map(|s| s.to_string()).collect()
+fn champStringToVec(championString: &Option<String>) -> Vec<String> {
+    match championString {
+        Some(s) => {
+           s.split(',').map(|s| s.to_string()).collect() 
+        },
+        None => {
+            Vec::new()
+        }
+    }
 }
 
-#[get("/req?<req_num>&<team>&<opp>&<tbans>&<obans>")]
-fn recommendation(req_num: usize, team: String, opp: String, tbans: String, obans: String) -> JsonValue {
-    json!(handle_req_req(req_num, &champStringToVec(&team), &champStringToVec(&opp), 
+#[get("/req?<summoner_name>&<team>&<opp>&<tbans>&<obans>")]
+fn recommendation(summoner_name: String, team: Option<String>, opp: Option<String>, tbans: Option<String>, obans: Option<String>) -> JsonValue {
+    json!(handle_req_req(&summoner_name, &champStringToVec(&team), &champStringToVec(&opp), 
                          &champStringToVec(&tbans), &champStringToVec(&obans)))
 }
 
