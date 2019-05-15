@@ -15,6 +15,9 @@ use champions::Champions;
 use utils::bool_deserializer::bool_from_string;
 use utils::vec_deserializer::vec_from_python_list;
 
+use self::chrono::NaiveDateTime;
+use self::postgres::{Connection, Error, TlsMode};
+
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
@@ -77,7 +80,7 @@ struct AllSummonersMatch {
     same_team_bans: Vec<String>,
     opp_team_bans: Vec<String>,
     match_id: i64,
-  //  play_date: chrono::NaiveDateTime,
+    play_date: NaiveDateTime,
     game_version: String
 }
 
@@ -188,14 +191,18 @@ pub fn load_matches(filename: String, champions: &Champions) -> Vec<Match> {
 	return matches;
 }
 
-pub fn load_summoner_matches_from_db(summoner_name: String, champions: &Champions) -> Result<Vec<Match>, postgres::Error> {
-    let mut config_file = File::open(&Path::new("Db_config.toml")).expect("No db config toml found!");
+fn get_connection_to_matches_db() -> Result<Connection, Error> {
+     let mut config_file = File::open(&Path::new("Db_config.toml")).expect("No db config toml found!");
     let mut config_string = String::new();
     config_file.read_to_string(&mut config_string)?;
     let config: Config = toml::from_str(&config_string).unwrap();
     let connection_string = format!("postgres://{}:{}@{}:{}/{}", config.user, config.password, config.host, config.port, config.database);
     println!("{}", connection_string);
-    let conn = postgres::Connection::connect(connection_string, postgres::TlsMode::None)?;
+    Connection::connect(connection_string, TlsMode::None)
+}
+
+pub fn load_summoner_matches_from_db(summoner_name: String, champions: &Champions) -> Result<Vec<Match>, Error> {
+    let conn = get_connection_to_matches_db()?;
     let id_query_string = "SELECT id from summoner_matches where name = $1 LIMIT 1";
     let games_query_string = "SELECT * from summoner_matches where id = $1";
     let mut id = String::from("");
@@ -216,7 +223,7 @@ pub fn load_summoner_matches_from_db(summoner_name: String, champions: &Champion
             same_team_bans: row.get(6),
             opp_team_bans: row.get(7),
             match_id: row.get(8),
-          //  play_date: row.get(9),
+            play_date: row.get(9),
             game_version: row.get(10)
         };
         let game = Match::from_summoner_matches_table(db_match, &champions);

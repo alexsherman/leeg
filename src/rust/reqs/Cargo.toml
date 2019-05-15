@@ -21,4 +21,4 @@ toml = "0.4.2"
 
 [dependencies.postgres]
 version = "0.15"
-features = ["with-time"]
+features = ["with-chrono"]
