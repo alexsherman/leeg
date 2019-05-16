@@ -9,7 +9,7 @@ use self::postgres::{Connection, Error, TlsMode};
 
 const DB_CONFIG_PATH: &str = "Db_config.toml";
 
-pub const Q_MOST_RECENT_ID_BY_NAME: &str = "SELECT id from summoner_matches where name = $1 ORDER BY play_date desc LIMIT 1";
+pub const Q_MOST_RECENT_ID_BY_NAME: &str = "SELECT id from summoner_matches where name = $1 LIMIT 1";
 pub const Q_SUMM_MATCHES_FOR_ID: &str = "SELECT * from summoner_matches where id = $1";
 
 /**
