@@ -1,26 +1,23 @@
 /**
  * Common structs and traits for representing match data
  * @author dmcfalls
+ * @author alexsherman
  */
 
 extern crate csv;
 extern crate serde_json;
 extern crate chrono;
 extern crate postgres;
-extern crate toml;
 
 use champions::Champion;
 use champions::Champions;
+use utils::postgres_utils::*;
 
 use utils::bool_deserializer::bool_from_string;
 use utils::vec_deserializer::vec_from_python_list;
 
 use self::chrono::NaiveDateTime;
-use self::postgres::{Connection, Error, TlsMode};
-
-use std::fs::File;
-use std::io::prelude::*;
-use std::path::Path;
+use self::postgres::Error;
 
 const ALLIED_CHAMPS_SIZE: usize = 4;
 const ENEMY_CHAMPS_SIZE: usize = 5;
@@ -191,28 +188,19 @@ pub fn load_matches(filename: String, champions: &Champions) -> Vec<Match> {
 	return matches;
 }
 
-fn get_connection_to_matches_db() -> Result<Connection, Error> {
-     let mut config_file = File::open(&Path::new("Db_config.toml")).expect("No db config toml found!");
-    let mut config_string = String::new();
-    config_file.read_to_string(&mut config_string)?;
-    let config: Config = toml::from_str(&config_string).unwrap();
-    let connection_string = format!("postgres://{}:{}@{}:{}/{}", config.user, config.password, config.host, config.port, config.database);
-    println!("{}", connection_string);
-    Connection::connect(connection_string, TlsMode::None)
-}
-
 pub fn load_summoner_matches_from_db(summoner_name: String, champions: &Champions) -> Result<Vec<Match>, Error> {
     let conn = get_connection_to_matches_db()?;
-    let id_query_string = "SELECT id from summoner_matches where name = $1 LIMIT 1";
+    
+    let id_query_string = "SELECT id from summoner_matches where name = $1 ORDER BY play_date desc LIMIT 1";
     let games_query_string = "SELECT * from summoner_matches where id = $1";
     let mut id = String::from("");
-    for row in &conn.query(id_query_string, &[&summoner_name]).unwrap() {
+    for row in &conn.query(Q_MOST_RECENT_ID_BY_NAME, &[&summoner_name]).unwrap() {
         id = row.get(0);
     }
 
     let mut matches: Vec<Match> = Vec::new();
 
-    for row in &conn.query(games_query_string, &[&id])? {
+    for row in &conn.query(Q_SUMM_MATCHES_FOR_ID, &[&id])? {
         let db_match = AllSummonersMatch {
             summoner_id: row.get(0),
             summoner_name: row.get(1),

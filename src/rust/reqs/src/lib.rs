@@ -7,7 +7,7 @@ mod utils;
 mod champions;
 mod reqs;
 use champions::load_champions;
-use matches::{load_matches, load_summoner_matches_from_db};
+use matches::load_summoner_matches_from_db;
 use reqs::SingleSummonerReqService;
 use reqs::ReqService;
 
