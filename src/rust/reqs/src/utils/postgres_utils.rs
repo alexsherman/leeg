@@ -30,7 +30,7 @@ pub fn get_connection_to_matches_db() -> Result<Connection, Error> {
     let mut config_string = String::new();
     config_file.read_to_string(&mut config_string)?;
     let config: Config = toml::from_str(&config_string).unwrap();
-    let connection_string = format!( "postgres://{}:{}@{}:{}/{}", config.user, config.password, config.host, config.port,
-                                    config.database);
+    let connection_string = format!( "postgres://{}:{}@{}:{}/{}", config.user, 
+                                     config.password, config.host, config.port, config.database);
     Connection::connect(connection_string, TlsMode::None)
 }
