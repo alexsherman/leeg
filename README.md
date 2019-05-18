@@ -6,19 +6,10 @@ get password from alex and be added as editor to project on GC
 log on to google cloud console, get the databse IP from overview page, and whitelist your ip on the connections page
 connect without ssl (for now)
 
-## similar sites 
-
-http://loldrafts.altervista.org/
-http://lolpickforme.com/ChampSelect.aspx
-
-neither are very popular. why? well neither takes into account your own personal history, for one. second, they ugly as fuck. but maybe their failure can help us learn something
-
-## less similar but more successful
-
-https://u.gg/lol/tier-list/?role=middle&patch=9_8
-good filtering options, and the duo tier list is interesting
 
 ## potential ways of utilizing desktop to get champ info in real time
 
 https://github.com/stirante/lol-client-java-api
-http://developers.overwolf.com/documentation/sdk/overwolf/games/launchers/
+
+## future data source for professional league matches 
+http://oracleselixir.com/
