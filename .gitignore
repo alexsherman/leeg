@@ -4,4 +4,6 @@ src/rust/reqs/Cargo.lock
 src/rust/reqs/target
 src/rust/reqs/target/*
 scripts/python/database.ini
-
+src/java/client-listener/client-listener.iml
+src/java/client-listener/target
+src/java/client-listener/target/*
