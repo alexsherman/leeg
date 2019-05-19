@@ -224,6 +224,16 @@ pub struct GlobalMatch {
     pub opp_team: Vec<usize>
 }
 
+impl GlobalMatch {
+	pub fn get_same_team_champion_idxs(&self) -> &Vec<usize> {
+		&(self.same_team)
+	}
+
+	pub fn get_opp_team_champion_idxs(&self) -> &Vec<usize> {
+		&(self.opp_team)
+	}
+}
+
 /*
  * Proof of concept method that, at least with our current DB size, we can efficiently get every
  * match of a given matchup. I've turned this into a vector of matches where the teams are 'same'

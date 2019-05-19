@@ -176,18 +176,18 @@ impl GlobalMatchCounts {
         }
     }
 
-    fn populate_global_match_data(&mut self, m: GlobalMatch) {
+    fn populate_global_match_data(&mut self, m: &GlobalMatch) {
         let win_increment = match m.same_wins {
             true => 1,
             false => 0
         };
-        for champ_idx in m.same_team {
-            self.same_games[champ_idx] += 1;
-            self.same_wins[champ_idx] += win_increment;
+        for champ_idx in m.get_same_team_champion_idxs() {
+            self.same_games[*champ_idx] += 1;
+            self.same_wins[*champ_idx] += win_increment;
         }
-        for champ_idx in m.opp_team {
-            self.opp_games[champ_idx] += 1;
-            self.opp_wins[champ_idx] += 1 - win_increment;
+        for champ_idx in m.get_opp_team_champion_idxs() {
+            self.opp_games[*champ_idx] += 1;
+            self.opp_wins[*champ_idx] += 1 - win_increment;
         }
     }
 }
@@ -195,17 +195,17 @@ impl GlobalMatchCounts {
 pub struct GlobalScoreVectors {
     same_team: Vec<usize>,
     opp_team: Vec<usize>,
-    same_winrates: Vec<Score>,
-    opp_winrates: Vec<Score>,
+    pub same_winrates: Vec<Score>,
+    pub opp_winrates: Vec<Score>,
     n: usize
 }
 
 pub trait ScoreVector {
-    fn from_global_matches(same_team: &Vec<String>, opp_team: &Vec<String>, matches: Vec<GlobalMatch>, n: usize) -> Self;
+    fn from_global_matches(matches: &Vec<GlobalMatch>, n: usize) -> Self;
 }
 
 impl ScoreVector for GlobalScoreVectors {
-    fn from_global_matches(same_team: &Vec<String>, opp_team: &Vec<String>, matches: Vec<GlobalMatch>, n: usize) -> GlobalScoreVectors { 
+    fn from_global_matches(matches: &Vec<GlobalMatch>, n: usize) -> GlobalScoreVectors { 
 		let mut score_vectors = GlobalScoreVectors::with_dimensions(n);
 		let mut match_counts = GlobalMatchCounts::with_dimensions(n);
 		for m in matches {
