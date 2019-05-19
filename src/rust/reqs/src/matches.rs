@@ -236,19 +236,24 @@ pub fn load_matches_with_champ_vecs(same_team: &Vec<String>, opp_team: &Vec<Stri
     let conn = get_connection_to_matches_db()?;
     let mut matches: Vec<GlobalMatch> = Vec::new();
     for row in &conn.query(Q_GLOBAL_MATCHES_BOTH_TEAM_BLUE, &[&same_team, &opp_team])? {
+        let same_champ_names = row.get(1);
+        let opp_champ_names = row.get(2);
         let m = GlobalMatch {
             same_wins: row.get(0),
-            same_team: *champions.index_by_name(&row.get(1)),
-            opp_team: *champions.index_by_name(&row.get(2))
+            same_team: champions.idxs_from_names(&same_champ_names),
+            opp_team: champions.idxs_from_names(&opp_champ_names)
+
         };
         matches.push(m);
     }
     for row in &conn.query(Q_GLOBAL_MATCHES_BOTH_TEAM_RED, &[&same_team, &opp_team])? {
         let opp_wins: bool = row.get(0);
+        let same_champ_names = row.get(2);
+        let opp_champ_names = row.get(1);
         let m = GlobalMatch {
             same_wins: !opp_wins,
-            same_team: *champions.index_by_name(&row.get(2)),
-            opp_team: *champions.index_by_name(&row.get(1))
+            same_team: champions.idxs_from_names(&same_champ_names),
+            opp_team: champions.idxs_from_names(&opp_champ_names)
         };
         matches.push(m);
     }
