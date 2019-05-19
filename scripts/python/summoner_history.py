@@ -38,7 +38,7 @@ def crawl(args, account_id):
             summoner_id = q_entry['id']
             match = getMatch(MatchReferenceDto['gameId'])            
             recordMatch(summoner_id, MatchReferenceDto, match)
-            if args.spider and _match_queue.qsize() < args.num_matches * 10:
+            if args.spider and _match_queue.qsize() < args.num_matches * 100:
                 summonerIds = map(lambda p: p['accountId'], Match(match).playersAndChamps)
                 for id in summonerIds:
                     if id not in _summoner_ids_processed:

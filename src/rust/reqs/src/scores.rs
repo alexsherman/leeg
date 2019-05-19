@@ -3,7 +3,7 @@
  * @author dmcfalls
  */
 
-use matches::Match;
+use matches::{Match, GlobalMatch};
 
 /**
  * Represents a score indicating how well one champion fares against another.
@@ -162,14 +162,14 @@ impl MatchCounts {
         let win_increment = match m.same_wins {
             true => 1,
             false => 0
-        }
+        };
         for champ_idx in m.same_team {
-            self.ally_games[*champ_idx] += 1;
-            self.ally_wins[*champ_idx] += win_increment;
+            self.ally_games[champ_idx] += 1;
+            self.ally_wins[champ_idx] += win_increment;
         }
         for champ_idx in m.opp_team {
-            self.vs_games[*champ_idx] += 1;
-            self.vs_wins[*champ_idx] += (1 - win_increment);
+            self.vs_games[champ_idx] += 1;
+            self.vs_wins[champ_idx] += 1 - win_increment;
         }
     }
 }
@@ -177,5 +177,50 @@ impl MatchCounts {
 pub struct GlobalScoreVectors {
     same_team: Vec<usize>,
     opp_team: Vec<usize>,
+    same_winrates: Vec<Score>,
+    opp_winrates: Vec<Score>,
+    n: usize
 }
 
+pub trait ScoreVector {
+    fn from_global_matches(same_team: &Vec<String>, opp_team: &Vec<String>, matches: Vec<GlobalMatch>, n: usize) -> Self;
+}
+
+impl ScoreVector for GlobalScoreVectors {
+    fn from_global_matches(same_team: &Vec<String>, opp_team: &Vec<String>, matches: Vec<GlobalMatch>, n: usize) -> GlobalScoreVectors { 
+		let mut score_vectors = GlobalScoreVectors::with_dimensions(n);
+		let mut match_counts = MatchCounts::with_dimensions(n);
+		for m in matches {
+			match_counts.populate_global_match_data(m);
+		}
+		score_vectors.get_scores_from_match_counts(&match_counts);
+	    score_vectors
+    }
+}
+
+impl GlobalScoreVectors {
+	fn with_dimensions(n: usize) -> GlobalScoreVectors {
+		let mut score_vectors = GlobalScoreVectors {
+            same_team: Vec::with_capacity(5),
+            opp_team: Vec::with_capacity(5),
+            same_winrates: vec!([0f64; n]),
+            opp_winrates: vec!([0f64; n]),
+			n: n
+		}
+        score_vectors
+	}
+
+    fn get_scores_from_match_counts(&self, match_counts: &MatchCounts) {
+        for i in 0..self.n {
+			self.same_winrates[i] = self.winrate_score(match_counts.ally_wins[i], match_counts.ally_games[i]);
+            self.opp_winrates[i] = self.winrate_score(match_counts.vs_wins[i], match_counts.vs_games[i]);
+        }
+    }
+    
+	fn winrate_score(&self, wins: u32, games: u32) -> f64 {
+		if games == 0u32 {
+			return 1f64;
+		}
+		return wins as f64 / games as f64;
+	}
+}

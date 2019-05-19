@@ -219,9 +219,9 @@ pub fn load_summoner_matches_from_db(summoner_name: String, champions: &Champion
 
 #[derive(Debug)]
 pub struct GlobalMatch {
-    same_wins: bool,
-    same_team: Vec<usize>,
-    opp_team: Vec<usize>
+    pub same_wins: bool,
+    pub same_team: Vec<usize>,
+    pub opp_team: Vec<usize>
 }
 
 /*
@@ -237,7 +237,7 @@ pub fn load_matches_with_champ_vecs(same_team: &Vec<String>, opp_team: &Vec<Stri
     let mut matches: Vec<GlobalMatch> = Vec::new();
     for row in &conn.query(Q_GLOBAL_MATCHES_BOTH_TEAM_BLUE, &[&same_team, &opp_team])? {
         let m = GlobalMatch {
-            same_wins: row.get(0)),
+            same_wins: row.get(0),
             same_team: *champions.index_by_name(&row.get(1)),
             opp_team: *champions.index_by_name(&row.get(2))
         };
@@ -249,7 +249,7 @@ pub fn load_matches_with_champ_vecs(same_team: &Vec<String>, opp_team: &Vec<Stri
             same_wins: !opp_wins,
             same_team: *champions.index_by_name(&row.get(2)),
             opp_team: *champions.index_by_name(&row.get(1))
-       };
+        };
         matches.push(m);
     }
     Ok(matches)
