@@ -157,4 +157,25 @@ impl MatchCounts {
 		}
 	}
 
+
+    fn populate_global_match_data(&mut self, m: &GlobalMatch) {
+        let win_increment = match m.same_wins {
+            true => 1,
+            false => 0
+        }
+        for champ_idx in m.same_team {
+            self.ally_games[*champ_idx] += 1;
+            self.ally_wins[*champ_idx] += win_increment;
+        }
+        for champ_idx in m.opp_team {
+            self.vs_games[*champ_idx] += 1;
+            self.vs_wins[*champ_idx] += (1 - win_increment);
+        }
+    }
 }
+
+pub struct GlobalScoreVectors {
+    same_team: Vec<usize>,
+    opp_team: Vec<usize>,
+}
+

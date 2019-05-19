@@ -220,8 +220,8 @@ pub fn load_summoner_matches_from_db(summoner_name: String, champions: &Champion
 #[derive(Debug)]
 pub struct GlobalMatch {
     same_wins: bool,
-    same_team: Vec<String>,
-    opp_team: Vec<String>
+    same_team: Vec<usize>,
+    opp_team: Vec<usize>
 }
 
 /*
@@ -232,27 +232,25 @@ pub struct GlobalMatch {
  * It should be pretty trivial to take this vector and calculate every champion present in those
  * games' scores and return.
  */
-pub fn load_matches_with_champ_vecs(same_team: &Vec<String>, opp_team: &Vec<String>) -> Result<Vec<GlobalMatch>, Error> {
+pub fn load_matches_with_champ_vecs(same_team: &Vec<String>, opp_team: &Vec<String>, champions: &Champions) -> Result<Vec<GlobalMatch>, Error> {
     let conn = get_connection_to_matches_db()?;
     let mut matches: Vec<GlobalMatch> = Vec::new();
-    println!("attempting to get matches");
-    for row in &conn.query("select blue_wins, blue_team, red_team from all_matches where blue_team @> $1 and red_team @> $2", &[&same_team, &opp_team])? {
+    for row in &conn.query(Q_GLOBAL_MATCHES_BOTH_TEAM_BLUE, &[&same_team, &opp_team])? {
         let m = GlobalMatch {
-            same_wins: row.get(0),
-            same_team: row.get(1),
-            opp_team: row.get(2)
+            same_wins: row.get(0)),
+            same_team: *champions.index_by_name(&row.get(1)),
+            opp_team: *champions.index_by_name(&row.get(2))
         };
         matches.push(m);
     }
-    for row in &conn.query("select blue_wins, blue_team, red_team from all_matches where red_team @> $1 and blue_team @> $2", &[&same_team, &opp_team])? {
+    for row in &conn.query(Q_GLOBAL_MATCHES_BOTH_TEAM_RED, &[&same_team, &opp_team])? {
         let opp_wins: bool = row.get(0);
         let m = GlobalMatch {
             same_wins: !opp_wins,
-            same_team: row.get(2),
-            opp_team: row.get(1)
-        };
+            same_team: *champions.index_by_name(&row.get(2)),
+            opp_team: *champions.index_by_name(&row.get(1))
+       };
         matches.push(m);
     }
-    println!("{:?}", matches);
     Ok(matches)
 }

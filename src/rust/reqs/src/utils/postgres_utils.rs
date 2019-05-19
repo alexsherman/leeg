@@ -11,6 +11,12 @@ const DB_CONFIG_PATH: &str = "Db_config.toml";
 
 pub const Q_MOST_RECENT_ID_BY_NAME: &str = "SELECT id from summoner_matches where name = $1 LIMIT 1";
 pub const Q_SUMM_MATCHES_FOR_ID: &str = "SELECT * from summoner_matches where id = $1";
+// TODO: it would be pretty cool to have a macro that takes care of this stuff depending on arrays
+// you pass in or something
+pub const Q_GLOBAL_MATCHES_BOTH_TEAM_BLUE: &str = "select blue_wins, blue_team, red_team from all_matches where blue_team @> $1 and red_team @> $2";
+pub const Q_GLOBAL_MATCHES_BOTH_TEAM_RED: &str = "select blue_wins, blue_team, red_team from all_matches where red_team @> $1 and blue_team @> $2";
+pub const Q_GLOBAL_MATCHES_SINGLE_TEAM_BLUE: &str = "select blue_wins, blue_team, red_team from all_matches where blue_team @> $1";
+pub const Q_GLOBAL_MATCHES_SINGLE_TEAM_RED: &str = "select blue_wins, blue_team, red_team from all_matches where red_team @> $1";
 
 /**
  ** Config toml file to connect to database.
