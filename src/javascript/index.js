@@ -23,23 +23,39 @@ class ChampionSelect extends React.Component {
 		this.state = {
 			sameTeam: {
 					champs: [
-						"Ahri", "Ezreal", undefined, undefined, undefined
+						"Ahri", "Ezreal",
 					]
 				},
 			oppTeam: {
 					champs: [
-						"Riven", "Malphite", undefined, undefined, undefined
+						"Riven"
 					]
-			}
+			},
+			req: null
 		}
 	}
 
 	componentDidMount() {
+			this.getReqs();
 			// open websocket, ping it if possible
 	}
 
 	componentWillUnmount() {
 		// close websocket
+	}
+
+	getReqs() {
+		const baseUrl = 'http://localhost:8000/globalreq';
+		const params = '?' + 'team=' + this.state.sameTeam.champs.join(',') + '&opp=' + this.state.oppTeam.champs.join(',');
+		fetch(baseUrl + params, {mode: 'no-cors'}).then(resp => {
+
+			resp.body.then(text => {
+				console.log(text)
+				this.setState({
+					req: text
+				});
+			});	
+		});
 	}
 
 	addChampToTeam() {
@@ -54,6 +70,7 @@ class ChampionSelect extends React.Component {
 		return (
 				<div id="app-container">
 					<Team teamdata={this.state.sameTeam} />
+					<h1>We recommend {this.state.req}</h1>
 					<Team teamdata={this.state.oppTeam} />
 				</div>
 			)
