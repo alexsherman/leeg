@@ -6,7 +6,7 @@
 use rocket::request::Form;
 use rocket_contrib::json::JsonValue;
 use std::vec::Vec;
-use reqs::handle_req_req;
+use reqs::{handle_req_req, handle_global_req_req};
 
 #[get("/")]
 fn index() -> &'static str {
@@ -30,6 +30,11 @@ fn recommendation(summoner_name: String, team: Option<String>, opp: Option<Strin
                          &champStringToVec(&tbans), &champStringToVec(&obans)))
 }
 
+#[get("/globalreq?<team>&<opp>")]
+fn global_recommendation(team: Option<String>, opp: Option<String>) -> JsonValue {
+    json!(handle_global_req_req(&champStringToVec(&team), &champStringToVec(&opp)))
+}
+
 fn main() {
-    rocket::ignite().mount("/", routes![index, recommendation]).launch();
+    rocket::ignite().mount("/", routes![index, recommendation, global_recommendation]).launch();
 }

@@ -190,9 +190,6 @@ pub fn load_matches(filename: String, champions: &Champions) -> Vec<Match> {
 
 pub fn load_summoner_matches_from_db(summoner_name: String, champions: &Champions) -> Result<Vec<Match>, Error> {
     let conn = get_connection_to_matches_db()?;
-    
-    let id_query_string = "SELECT id from summoner_matches where name = $1 ORDER BY play_date desc LIMIT 1";
-    let games_query_string = "SELECT * from summoner_matches where id = $1";
     let mut id = String::from("");
     for row in &conn.query(Q_MOST_RECENT_ID_BY_NAME, &[&summoner_name]).unwrap() {
         id = row.get(0);
@@ -218,4 +215,57 @@ pub fn load_summoner_matches_from_db(summoner_name: String, champions: &Champion
         matches.push(game);
     }
     Ok(matches) 
+}
+
+#[derive(Debug)]
+pub struct GlobalMatch {
+    pub same_wins: bool,
+    pub same_team: Vec<usize>,
+    pub opp_team: Vec<usize>
+}
+
+impl GlobalMatch {
+	pub fn get_same_team_champion_idxs(&self) -> &Vec<usize> {
+		&(self.same_team)
+	}
+
+	pub fn get_opp_team_champion_idxs(&self) -> &Vec<usize> {
+		&(self.opp_team)
+	}
+}
+
+/*
+ * Proof of concept method that, at least with our current DB size, we can efficiently get every
+ * match of a given matchup. I've turned this into a vector of matches where the teams are 'same'
+ * and 'opp' rather than blue and red.
+ *
+ * It should be pretty trivial to take this vector and calculate every champion present in those
+ * games' scores and return.
+ */
+pub fn load_global_matches_from_db(same_team: &Vec<String>, opp_team: &Vec<String>, champions: &Champions) -> Result<Vec<GlobalMatch>, Error> {
+    let conn = get_connection_to_matches_db()?;
+    let mut matches: Vec<GlobalMatch> = Vec::new();
+    for row in &conn.query(Q_GLOBAL_MATCHES_BOTH_TEAM_BLUE, &[&same_team, &opp_team])? {
+        let same_champ_names = row.get(1);
+        let opp_champ_names = row.get(2);
+        let m = GlobalMatch {
+            same_wins: row.get(0),
+            same_team: champions.idxs_from_names(&same_champ_names),
+            opp_team: champions.idxs_from_names(&opp_champ_names)
+
+        };
+        matches.push(m);
+    }
+    for row in &conn.query(Q_GLOBAL_MATCHES_BOTH_TEAM_RED, &[&same_team, &opp_team])? {
+        let opp_wins: bool = row.get(0);
+        let same_champ_names = row.get(2);
+        let opp_champ_names = row.get(1);
+        let m = GlobalMatch {
+            same_wins: !opp_wins,
+            same_team: champions.idxs_from_names(&same_champ_names),
+            opp_team: champions.idxs_from_names(&opp_champ_names)
+        };
+        matches.push(m);
+    }
+    Ok(matches)
 }
