@@ -7,7 +7,7 @@ mod utils;
 mod champions;
 mod reqs;
 use champions::load_champions;
-use matches::{load_summoner_matches_from_db, load_matches_with_champ_vecs};
+use matches::{load_summoner_matches_from_db, load_global_matches_from_db};
 use reqs::{ReqService, SingleSummonerReqService, GlobalReqService};
 
 const CHAMPIONS_FILE_PATH: &str = "/home/alex/leeg/champions.json";
@@ -23,7 +23,7 @@ pub fn handle_req_req(summoner_name: &str, team_picks: &Vec<String>, opp_picks: 
 
 pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>) -> Vec<String> {
     let champions = load_champions(CHAMPIONS_FILE_PATH.to_string());
-    let matches = load_matches_with_champ_vecs(&team_picks, &opp_picks, &champions).unwrap();
+    let matches = load_global_matches_from_db(&team_picks, &opp_picks, &champions).unwrap();
     let req_service = GlobalReqService::from_matches(&matches, &champions);
     req_service.req_banless(&team_picks, &opp_picks, 10)
 }

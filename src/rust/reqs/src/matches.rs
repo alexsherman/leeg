@@ -242,7 +242,7 @@ impl GlobalMatch {
  * It should be pretty trivial to take this vector and calculate every champion present in those
  * games' scores and return.
  */
-pub fn load_matches_with_champ_vecs(same_team: &Vec<String>, opp_team: &Vec<String>, champions: &Champions) -> Result<Vec<GlobalMatch>, Error> {
+pub fn load_global_matches_from_db(same_team: &Vec<String>, opp_team: &Vec<String>, champions: &Champions) -> Result<Vec<GlobalMatch>, Error> {
     let conn = get_connection_to_matches_db()?;
     let mut matches: Vec<GlobalMatch> = Vec::new();
     for row in &conn.query(Q_GLOBAL_MATCHES_BOTH_TEAM_BLUE, &[&same_team, &opp_team])? {
