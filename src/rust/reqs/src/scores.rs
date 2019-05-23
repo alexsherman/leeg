@@ -206,12 +206,12 @@ pub trait ScoreVector {
 
 impl ScoreVector for GlobalScoreVectors {
     fn from_global_matches(matches: &Vec<GlobalMatch>, n: usize) -> GlobalScoreVectors { 
-		let mut score_vectors = GlobalScoreVectors::with_dimensions(n);
-		let mut match_counts = GlobalMatchCounts::with_dimensions(n);
-		for m in matches {
-			match_counts.populate_global_match_data(m);
-		}
-		score_vectors.get_scores_from_match_counts(&match_counts);
+	    let mut score_vectors = GlobalScoreVectors::with_dimensions(n);
+	    let mut match_counts = GlobalMatchCounts::with_dimensions(n);
+	    for m in matches {
+	    	match_counts.populate_global_match_data(m);
+	    }
+	    score_vectors.get_scores_from_match_counts(&match_counts);
 	    score_vectors
     }
 }
@@ -229,7 +229,7 @@ impl GlobalScoreVectors {
 
     fn get_scores_from_match_counts(&mut self, match_counts: &GlobalMatchCounts) {
         for i in 0..self.n {
-			self.same_winrates[i] = self.winrate_score(match_counts.same_wins[i], match_counts.same_games[i]);
+            self.same_winrates[i] = self.winrate_score(match_counts.same_wins[i], match_counts.same_games[i]);
             self.opp_winrates[i] = self.winrate_score(match_counts.opp_wins[i], match_counts.opp_games[i]);
         }
     }
