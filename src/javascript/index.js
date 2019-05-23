@@ -8,7 +8,7 @@ function SummonerSquare(props) {
 function Team(props) {
 	const champs = props.teamdata.champs;
 	const summonerSquares = champs.map((champ) => 
-		<SummonerSquare key={champ.toString()} champion={champ} />
+		<SummonerSquare key={champ} champion={champ} />
 	);
 	return (
 		<div className="team-container">
@@ -21,11 +21,16 @@ class ChampionSelect extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			team: {
+			sameTeam: {
 					champs: [
-						"Ahri", "Ezreal", "Riven", "Sona", "Karthus"
+						"Ahri", "Ezreal", undefined, undefined, undefined
 					]
-				}
+				},
+			oppTeam: {
+					champs: [
+						"Riven", "Malphite", undefined, undefined, undefined
+					]
+			}
 		}
 	}
 
@@ -47,8 +52,9 @@ class ChampionSelect extends React.Component {
 
 	render() {
 		return (
-				<div>
-					<Team teamdata={this.state.team} />
+				<div id="app-container">
+					<Team teamdata={this.state.sameTeam} />
+					<Team teamdata={this.state.oppTeam} />
 				</div>
 			)
 		}
@@ -56,6 +62,6 @@ class ChampionSelect extends React.Component {
 
 ReactDOM.render(
   <ChampionSelect />,
-  document.getElementById('app-container')
+  document.getElementById('app')
 );
 
