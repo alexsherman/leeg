@@ -8,4 +8,4 @@ src/rust/banana/target/*
 src/rust/banana/Cargo.lock
 src/rust/banana/Db_config.toml
 scripts/python/database.ini
-
+node_modules/
