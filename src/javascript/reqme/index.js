@@ -36,8 +36,16 @@ class ChampionSelect extends React.Component {
     }
 
     componentDidMount() {
-            this.getReqs();
+            //this.getReqs();
             // open websocket, ping it if possible
+        let webSocket = new WebSocket('ws://localhost:5000');
+        webSocket.onmessage = event => {
+            const teams = JSON.parse(event.data);
+            this.setState({
+                sameTeam: teams.sameTeam,
+                oppTeam: teams.oppTeam
+            })
+        }
     }
 
     componentWillUnmount() {
