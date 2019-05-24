@@ -17,6 +17,24 @@ function Team(props) {
     );
 }
 
+function Reqs(props) {
+    if (props.resp === null) {
+        return;
+    }
+    const reqs = props.resp;
+    const indivReqs = reqs.map((champ) => 
+        <li key={champ}>{champ}</li>
+    );
+    return (
+        <div className="req-container">
+            We recommend:
+            <ul>
+                {indivReqs}
+            </ul>
+        </div>
+    )
+}
+
 class ChampionSelect extends React.Component {
     constructor() {
         super();
@@ -31,20 +49,25 @@ class ChampionSelect extends React.Component {
                         "Riven"
                     ]
             },
-            req: null
+            req: []
         }
     }
 
     componentDidMount() {
             //this.getReqs();
             // open websocket, ping it if possible
+        let tm = undefined;
         let webSocket = new WebSocket('ws://localhost:5000');
         webSocket.onmessage = event => {
             const teams = JSON.parse(event.data);
             this.setState({
                 sameTeam: teams.sameTeam,
                 oppTeam: teams.oppTeam
-            })
+            });
+            if (tm) {
+                tm.clearTimeout
+            }
+            tm = setTimeout(this.getReqs.bind(this), 500);
         }
     }
 
@@ -54,16 +77,38 @@ class ChampionSelect extends React.Component {
 
     getReqs() {
         const baseUrl = 'http://localhost:8000/globalreq';
-        const params = '?' + 'team=' + this.state.sameTeam.champs.join(',') + '&opp=' + this.state.oppTeam.champs.join(',');
-        fetch(baseUrl + params, {mode: 'no-cors'}).then(resp => {
+        let params = '?';
+        if (this.state.sameTeam.champs.length > 0) {
+            params += 'team=' + this.state.sameTeam.champs.join(',');
+        }
+        if (this.state.oppTeam.champs.length > 0) {
+            params += '&opp=' + this.state.oppTeam.champs.join(',');
+        }
+        if (this.state.oppTeam.champs.length === 0 && this.state.sameTeam.champs.length === 0) {
+            this.setState({
+                    req: []
+                });
+            return;
+        }
 
-            resp.body.then(text => {
+        fetch(baseUrl + params, {
+            method: "GET",
+            mode: "cors",
+
+            headers: {
+                "Accept": "application/json"
+            }
+        }).then(resp => {
+
+            resp.json().then(text => {
                 console.log(text)
                 this.setState({
-                    req: text
+                    req: text.reqs
                 });
             }); 
-        });
+        }).catch(err => {
+            console.log(err);
+        })
     }
 
     addChampToTeam() {
@@ -78,7 +123,7 @@ class ChampionSelect extends React.Component {
         return (
                 <div id="app-container">
                     <Team teamdata={this.state.sameTeam} />
-                    <h1>We recommend {this.state.req}</h1>
+                    <Reqs resp={this.state.req} />
                     <Team teamdata={this.state.oppTeam} />
                 </div>
             )
