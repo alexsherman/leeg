@@ -1,7 +1,18 @@
 function SummonerSquare(props) {
     const champ = props.champion;
     return (
-        <h1>{champ}</h1>
+        <React.Fragment>
+            <h1>{champ}</h1>
+            <ChampSquare champion={champ} />
+        </React.Fragment>
+    )
+}
+
+function ChampSquare(props) {
+    const name = props.champion;
+    const src = "http://ddragon.leagueoflegends.com/cdn/6.24.1/img/champion/" + name + ".png";
+    return (
+        <img src={src} />
     )
 }
 
@@ -23,7 +34,10 @@ function Reqs(props) {
     }
     const reqs = props.resp;
     const indivReqs = reqs.map((champ) => 
-        <li key={champ}>{champ}</li>
+        <React.Fragment>
+            <li key={champ}>{champ}</li>
+            <ChampSquare champion={champ} />
+        </React.Fragment>
     );
     return (
         <div className="req-container">
