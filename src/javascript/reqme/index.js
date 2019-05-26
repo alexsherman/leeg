@@ -111,6 +111,7 @@ class ChampionSelect extends React.Component {
                 });
             return;
         }
+        params += "&roles=Mid"
 
         fetch(baseUrl + params, {
             method: "GET",

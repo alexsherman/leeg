@@ -29,9 +29,15 @@ fn recommendation(summoner_name: String, team: Option<String>, opp: Option<Strin
                          &champStringToVec(&tbans), &champStringToVec(&obans))})
 }
 
-#[get("/globalreq?<team>&<opp>")]
-fn global_recommendation(team: Option<String>, opp: Option<String>) -> JsonValue {
-    json!({"reqs": handle_global_req_req(&champStringToVec(&team), &champStringToVec(&opp))})
+#[get("/globalreq?<team>&<opp>&<roles>")]
+fn global_recommendation(team: Option<String>, opp: Option<String>, roles: Option<String>) -> JsonValue {
+    let roles_option = match roles {
+        Some(s) => {
+           Some(s.split(',').map(|s| s.to_string()).collect()) 
+        },
+        None => None
+    };
+    json!({"reqs": handle_global_req_req(&champStringToVec(&team), &champStringToVec(&opp), roles_option)})
 }
 
 fn main() {

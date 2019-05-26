@@ -217,7 +217,7 @@ impl ScoreVector for GlobalScoreVectors {
 }
 
 impl GlobalScoreVectors {
-	fn with_dimensions(n: usize) -> GlobalScoreVectors {
+	pub fn with_dimensions(n: usize) -> GlobalScoreVectors {
         GlobalScoreVectors {
             same_team: Vec::with_capacity(5),
             opp_team: Vec::with_capacity(5),
