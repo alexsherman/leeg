@@ -22,7 +22,8 @@ fn keyname_from_picks(team_picks: &Vec<String>, opp_picks: &Vec<String>) -> Stri
     format!("{}-{}", team_picks.join(","), opp_picks.join(","))
 }
 
-pub fn get_cached_global_reqs(conn: &Connection, team_picks: &Vec<String>, opp_picks: &Vec<String>) -> Result<GlobalServiceWithWeight, RedisError> {
+pub fn get_cached_global_reqs(conn: &Connection, team_picks: &Vec<String>, opp_picks: &Vec<String>) 
+                                -> Result<GlobalServiceWithWeight, RedisError> {
     let key = keyname_from_picks(team_picks, opp_picks);
     println!("getting reqs for {}", key);
     let res: Result<String, RedisError> = conn.get(key);
@@ -32,7 +33,8 @@ pub fn get_cached_global_reqs(conn: &Connection, team_picks: &Vec<String>, opp_p
     }
 }
 
-pub fn insert_cached_global_reqs(conn: &Connection, team_picks: &Vec<String>, opp_picks: &Vec<String>, service: GlobalServiceWithWeight) -> Result<Vec<String>, RedisError> {
+pub fn insert_cached_global_reqs(conn: &Connection, team_picks: &Vec<String>, opp_picks: &Vec<String>, service: GlobalServiceWithWeight) 
+                                -> Result<Vec<String>, RedisError> {
     let key = keyname_from_picks(team_picks, opp_picks);
     println!("inserting reqs for {}", key);
     let expire_time: usize = 600;

@@ -260,7 +260,6 @@ pub fn combine_req_services(services: &Vec<GlobalServiceWithWeight>, roles: Opti
 			None => true
 		};
 		if !champ_matches_roles {
-			println!("eliminating champ based on role");
 			combined_service.score_vectors.same_winrates[i] = ZERO_F64;
 		}
 	}
