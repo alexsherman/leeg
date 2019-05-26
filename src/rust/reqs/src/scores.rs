@@ -192,6 +192,7 @@ impl GlobalMatchCounts {
     }
 }
 
+#[derive(Clone, Deserialize, Serialize)]
 pub struct GlobalScoreVectors {
     same_team: Vec<usize>,
     opp_team: Vec<usize>,

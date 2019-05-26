@@ -33,6 +33,8 @@ pub fn simple_handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<St
 }
 
 pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, roles: Option<Vec<String>>) -> Vec<String> {
+    let redis_connection = utils::redis_utils::get_connection();
+
     // this will hold all the structs that we combine at the end
     let mut service_vec: Vec<GlobalServiceWithWeight> = Vec::new();
     let mut num_matches_analyzed: usize = 0;
@@ -45,6 +47,8 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, 
         req_service: req_service,
         weight: matches.len()
     };
+    //TEST INSERT
+    let insert = utils::redis_utils::insert_cached_global_reqs(&redis_connection, &team_picks, &opp_picks, w_service.clone());
     service_vec.push(w_service);
     // if we haven't analyzed enough matches, this is because the current query was too specific
     // to get enough data. so broaden the query by doing partial combinations of team_picks and opp_picks
@@ -69,7 +73,7 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, 
                 // very imperfect. But the idea is that if there are 2 matches for one combination and some
                 // champion won in both of those, there needs to be some weight which prevents that 100% from
                 // dominating the score
-                let mut service = GlobalServiceWithWeight {
+                let service = GlobalServiceWithWeight {
                     req_service: req_service2,
                     weight: m.len()
                 };
@@ -81,6 +85,7 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, 
     }
    
     let combined_service = combine_req_services(&service_vec, roles);
-    combined_service.req_banless(&team_picks, &opp_picks, 20)
-}
+    let res = combined_service.req_banless(&team_picks, &opp_picks, 20);    
+    res
+}    
 

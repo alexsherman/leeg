@@ -140,6 +140,7 @@ impl ReqService for SingleSummonerReqService {
 /**
  * Champion recommendation service constructed for a particular partial team comp/matchup.
  */
+ #[derive(Clone, Deserialize, Serialize)]
 pub struct GlobalReqService {
     champions: Champions,
     score_vectors: GlobalScoreVectors,
@@ -215,6 +216,7 @@ impl GlobalReqService {
 
 }
 
+#[derive(Clone, Deserialize, Serialize)]
 pub struct GlobalServiceWithWeight {
 	pub req_service: GlobalReqService,
 	pub weight: usize
