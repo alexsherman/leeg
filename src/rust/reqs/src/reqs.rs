@@ -143,7 +143,6 @@ impl ReqService for SingleSummonerReqService {
 pub struct GlobalReqService {
     champions: Champions,
     score_vectors: GlobalScoreVectors,
-    roles: Option<Vec<String>>
 }
 
 impl ReqService for GlobalReqService {
@@ -170,11 +169,10 @@ impl GlobalReqService {
 	/**
 	 * Construct a new GlobalReqService given match and champion data
 	 */
-	pub fn from_matches(matches: &Vec<GlobalMatch>, champions: &Champions, roles: &Option<Vec<String>>) -> GlobalReqService {
+	pub fn from_matches(matches: &Vec<GlobalMatch>, champions: &Champions) -> GlobalReqService {
 		return GlobalReqService {
 			champions: champions.clone(),
 			score_vectors: GlobalScoreVectors::from_global_matches(matches, champions.len()),
-			roles: roles.clone()
 		};
 	}
 
@@ -188,20 +186,8 @@ impl GlobalReqService {
 
 		let mut scores: Vec<f64> = Vec::with_capacity(self.champions.len());
 		for i in 0..self.champions.len() { 
-			let champ_matches_roles: bool = match &self.roles {
-				Some(x) => {
-					let mut found = false;
-					for role in x {
-						if self.champions.get_list()[i].get_roles().contains(&role) {
-							found = true;
-						}
-					}
-					found
-				},
-				None => true
-			};
 			let mut score_i: f64 = self.score_vectors.same_winrates[i]; 
-			if score_i == ONE_F64 || team_idxs.contains(&i) || opp_idxs.contains(&i) || !champ_matches_roles {
+			if score_i == ONE_F64 || team_idxs.contains(&i) || opp_idxs.contains(&i) {
 				score_i = ZERO_F64;
 			}
 			scores.push(score_i);
@@ -240,11 +226,9 @@ pub struct GlobalServiceWithWeight {
 * Note that champion vectors should be in the same order for all GSWW.
 */ 
 pub fn combine_req_services(services: &Vec<GlobalServiceWithWeight>, roles: Option<Vec<String>>) -> GlobalReqService {
-	// for each req service
 	let mut combined_service = GlobalReqService {
 		champions: services[0].req_service.champions.clone(),
 		score_vectors: GlobalScoreVectors::with_dimensions(services[0].req_service.champions.len()),
-		roles: roles
 	};
 
 	let mut total_weight: usize = 0;
@@ -257,6 +241,25 @@ pub fn combine_req_services(services: &Vec<GlobalServiceWithWeight>, roles: Opti
 		println!("Weight: {}", adjusted_weight);
 		for i in 0..s.req_service.score_vectors.same_winrates.len() {
 			combined_service.score_vectors.same_winrates[i] += adjusted_weight * s.req_service.score_vectors.same_winrates[i];
+		}
+	}
+	// filter out champs which don't match the roles specified
+	for i in 0..combined_service.champions.len() { 
+		let champ_matches_roles: bool = match &roles {
+			Some(x) => {
+				let mut found = false;
+				for role in x {
+					if combined_service.champions.get_list()[i].get_roles().contains(&role) {
+						found = true;
+					}
+				}
+				found
+			},
+			None => true
+		};
+		if !champ_matches_roles {
+			println!("eliminating champ based on role");
+			combined_service.score_vectors.same_winrates[i] = ZERO_F64;
 		}
 	}
 	combined_service

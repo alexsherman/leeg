@@ -28,7 +28,7 @@ pub fn handle_req_req(summoner_name: &str, team_picks: &Vec<String>, opp_picks: 
 pub fn simple_handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>) -> Vec<String> {
     let champions = load_champions(CHAMPIONS_FILE_PATH.to_string());
     let matches = load_global_matches_from_db(&team_picks, &opp_picks, &champions).unwrap();
-    let req_service = GlobalReqService::from_matches(&matches, &champions, &None);
+    let req_service = GlobalReqService::from_matches(&matches, &champions);
     req_service.req_banless(&team_picks, &opp_picks, 10)
 }
 
@@ -40,7 +40,7 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, 
     let champions = load_champions_with_role(CHAMPIONS_FILE_PATH.to_string(), ROLES_FILE_PATH.to_string());
     let matches = load_global_matches_from_db(&team_picks, &opp_picks, &champions).unwrap();
     num_matches_analyzed += matches.len();
-    let req_service = GlobalReqService::from_matches(&matches, &champions, &roles);
+    let req_service = GlobalReqService::from_matches(&matches, &champions);
     let w_service = GlobalServiceWithWeight {
         req_service: req_service,
         weight: matches.len()
@@ -64,7 +64,7 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, 
             for opp_combination in opp_picks.iter().cloned().combinations(opp_n) {
                 let m = load_global_matches_from_db(&team_combination, &opp_combination, &champions).unwrap();
                 num_matches_analyzed += m.len();
-                let req_service2 = GlobalReqService::from_matches(&m, &champions, &roles);
+                let req_service2 = GlobalReqService::from_matches(&m, &champions);
                 // Currently trying to weight each service by the number of matches they have, but this is
                 // very imperfect. But the idea is that if there are 2 matches for one combination and some
                 // champion won in both of those, there needs to be some weight which prevents that 100% from
