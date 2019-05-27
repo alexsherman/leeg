@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import Select from 'react-select';
+import Sidebar from './sidebar.js';
 function RoleToggles(props) {
     const options = [
         {"value": "Top", "label": "Top"},
@@ -12,6 +13,7 @@ function RoleToggles(props) {
     const placeholder = "Select one or more roles to filter recommendations."
     return (
         <Select
+        className="role-select"
         isMulti
         placeholder={placeholder}
         onChange={props.updateRoles}
@@ -22,10 +24,11 @@ function RoleToggles(props) {
 
 function SummonerSquare(props) {
     const champ = props.champion;
+    const rank = (props.idx !== undefined) ? "#" + (props.idx + 1) + " - " : "";
     return (
         <div className="summoner-square">
             <ChampSquare champion={champ} />
-            <div className="champion-name">{champ}</div>
+            <div className="champion-name">{rank}{champ}</div>
         </div>
     )
 }
@@ -53,7 +56,7 @@ function Team(props) {
         <SummonerSquare key={champ} champion={champ} />
     );
     return (
-        <div className="team-container">
+        <div className={"team-container " + props.team}>
             <TeamLabel label={label} />
             {summonerSquares}
         </div>
@@ -65,16 +68,15 @@ function Reqs(props) {
         return;
     }
     const reqs = props.resp;
-    const indivReqs = reqs.map((champ) => 
+    const indivReqs = reqs.map((champ, idx) => 
         <React.Fragment>
-            <SummonerSquare key={champ} champion={champ} />
+            <SummonerSquare idx={idx} key={champ} champion={champ} />
         </React.Fragment>
     );
     return (
         <div className="center-container">
             <RoleToggles roles={props.roles} updateRoles={props.updateRoles} />
             <div className="req-container">
-                The best champs for {props.roles.join(' + ')} are:
                 {indivReqs}            
             </div>
         </div>
@@ -174,10 +176,10 @@ class ChampionSelect extends React.Component {
 
     render() {
         return (
-                <div id="app-container">
-                    <Team teamdata={this.state.sameTeam} label="Your Team" />
+                <div className="app-container">
+                    <Team team={"blue-team"} teamdata={this.state.sameTeam} label="Your Team" />
                     <Reqs resp={this.state.req} roles={this.state.roles} updateRoles={this.updateRoles} />
-                    <Team teamdata={this.state.oppTeam} label="Enemy Team"/>
+                    <Team team={"red-team"} teamdata={this.state.oppTeam} label="Enemy Team"/>
                 </div>
             )
         }
@@ -185,8 +187,17 @@ class ChampionSelect extends React.Component {
 
 export default ChampionSelect;
 
+function MainView() {
+    return (
+        <div className="main-view-container">
+            <Sidebar />
+            <ChampionSelect />
+        </div>
+    );
+}
+
 ReactDOM.render(
-  <ChampionSelect />,
+  <MainView />,
   document.getElementById('app')
 );
 
