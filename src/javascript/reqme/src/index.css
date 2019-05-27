@@ -49,7 +49,8 @@ body {
 }
 
 .champion-square {
-    width: 100%;  
+    width: 110px;
+    height: 110px;
 }
 
 .summoner-square {
@@ -62,6 +63,10 @@ body {
     border: 3px solid black;
     border-radius: 10px;
     align-items: center;
+}
+
+.champion-square {
+
 }
 
 .team-label {

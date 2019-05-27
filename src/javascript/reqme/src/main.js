@@ -34,10 +34,28 @@ function SummonerSquare(props) {
 }
 
 function ChampSquare(props) {
-    const name = props.champion;
-    const src = "http://ddragon.leagueoflegends.com/cdn/6.24.1/img/champion/" + name + ".png";
+    let name = props.champion;
+    name = name.split(' ').join("").split("'").join("");
+    if (name === "Wukong") {
+        name = "MonkeyKing";
+    }
+    if (name === "LeBlanc") {
+        name = "Leblanc";
+    }
+    if (name === "KaiSa") {
+        name = "Kaisa";
+    }
+    if (name === "KhaZix") {
+        name = "Khazix";
+    }
+    if (name === "VelKoz") {
+        name = "Velkoz"
+    }
+    const src = "url(http://ddragon.leagueoflegends.com/cdn/9.10.1/img/champion/" + name + ".png)";
+    const style = {"backgroundImage": src, "backgroundSize": "cover", "backgroundPosition": "center"};
+    console.log(style);
     return (
-        <img className="champion-square" src={src} />
+        <div className="champion-square" style={style}></div>
     )
 }
 
