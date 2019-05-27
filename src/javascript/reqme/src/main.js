@@ -1,3 +1,25 @@
+import React, { Component } from "react";
+import ReactDOM from "react-dom";
+import Select from 'react-select';
+function RoleToggles(props) {
+    const options = [
+        {"value": "Top", "label": "Top"},
+        {"value": "Jungle", "label": "Jungle"},
+        {"value": "Mid", "label": "Mid"},
+        {"value": "Bottom", "label": "Bottom"},
+        {"value": "Support", "label": "Support"},
+    ];
+    const placeholder = "Select one or more roles to filter recommendations."
+    return (
+        <Select
+        isMulti
+        placeholder={placeholder}
+        onChange={props.updateRoles}
+        options={options}
+      />
+    )
+}
+
 function SummonerSquare(props) {
     const champ = props.champion;
     return (
@@ -49,11 +71,14 @@ function Reqs(props) {
         </React.Fragment>
     );
     return (
-        <div className="req-container">
-            The best champs for your team are:
-            {indivReqs}            
+        <div className="center-container">
+            <RoleToggles roles={props.roles} updateRoles={props.updateRoles} />
+            <div className="req-container">
+                The best champs for {props.roles.join(' + ')} are:
+                {indivReqs}            
+            </div>
         </div>
-    )
+    );
 }
 
 class ChampionSelect extends React.Component {
@@ -70,8 +95,10 @@ class ChampionSelect extends React.Component {
                         "Riven"
                     ]
             },
-            req: []
+            req: [],
+            roles: ["Top", "Bottom", "Jungle", "Mid", "Support"]
         }
+        this.updateRoles = this.updateRoles.bind(this);
     }
 
     componentDidMount() {
@@ -95,7 +122,14 @@ class ChampionSelect extends React.Component {
         // close websocket
     }
 
+    componentDidUpdate(prevProps, prevState) {
+      if (this.state.roles.length !== prevState.roles.length) {
+        this.getReqs();
+      }
+    }
+
     getReqs() {
+
         // todo - move to separate file to handle all recommendation API call logic
         const baseUrl = 'http://localhost:8000/globalreq';
         let params = '?';
@@ -106,12 +140,12 @@ class ChampionSelect extends React.Component {
             params += '&opp=' + this.state.oppTeam.champs.join(',');
         }
         if (this.state.oppTeam.champs.length === 0 && this.state.sameTeam.champs.length === 0) {
-            this.setState({
-                    req: []
-                });
             return;
         }
-        params += "&roles=Mid"
+
+        if (this.state.roles.length) {
+            params += "&roles=" + this.state.roles.join(",");
+        }
 
         fetch(baseUrl + params, {
             method: "GET",
@@ -123,7 +157,6 @@ class ChampionSelect extends React.Component {
         }).then(resp => {
 
             resp.json().then(text => {
-                console.log(text)
                 this.setState({
                     req: text.reqs
                 });
@@ -133,16 +166,24 @@ class ChampionSelect extends React.Component {
         })
     }
 
+    updateRoles(roles) {
+        this.setState({
+            roles: roles.map((r) => r.value)
+        });
+    }
+
     render() {
         return (
                 <div id="app-container">
                     <Team teamdata={this.state.sameTeam} label="Your Team" />
-                    <Reqs resp={this.state.req} />
+                    <Reqs resp={this.state.req} roles={this.state.roles} updateRoles={this.updateRoles} />
                     <Team teamdata={this.state.oppTeam} label="Enemy Team"/>
                 </div>
             )
         }
 }
+
+export default ChampionSelect;
 
 ReactDOM.render(
   <ChampionSelect />,

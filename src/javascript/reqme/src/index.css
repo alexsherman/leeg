@@ -54,3 +54,8 @@ body {
 .summoner-square .champion-name {
     font-size: 18px;
 }
+
+.center-container {
+    display: flex;
+    flex-direction: column;
+}
