@@ -18,7 +18,14 @@ pub const EXPECTED_CHAMPIONS_COUNT: usize = 143;
 #[derive(Debug, Clone, Deserialize)]
 pub struct Champion {
 	name: String,
-	id: i16
+	id: i16,
+	roles: Vec<String>
+}
+
+impl Champion {
+	pub fn get_roles(&self) -> &Vec<String> {
+		&self.roles
+	}
 }
 
 impl PartialEq for Champion {
@@ -67,8 +74,12 @@ impl Champions {
 				.collect();
 	}
 
-	fn push(&mut self, id: i16, name: String) {
-		let champion = Champion {name: name, id: id};
+	pub fn get_list(&self) -> &Vec<Champion> {
+		&self.list
+	}
+
+	fn push(&mut self, id: i16, name: String, roles: Vec<String>) {
+		let champion = Champion {name: name, id: id, roles: roles};
 		let idx = self.list.len();
 		self.id_hashes.insert(id, idx);
 		self.name_hashes.insert(champion.name.clone(), idx);
@@ -88,7 +99,28 @@ pub fn load_champions(filename: String) -> Champions {
 	let champs_map : HashMap<i16, String> = serde_json::from_str(&raw_json).unwrap();
 	let mut champions = Champions::new();
 	for (id, name) in champs_map {
-		champions.push(id, name);
+		let role: Vec<String> = Vec::new();
+		champions.push(id, name, role);
+	}
+
+	return champions;
+}
+
+pub fn load_champions_with_role(champ_filename: String, role_filename: String) -> Champions {
+	let mut champ_json_file = File::open(champ_filename).expect("Unable to open file");
+	let mut champ_raw_json = String::new();
+	champ_json_file.read_to_string(&mut champ_raw_json).expect("Unable to read file");
+
+	let mut roles_json_file = File::open(role_filename).expect("Unable to open file");
+	let mut roles_raw_json = String::new();
+	roles_json_file.read_to_string(&mut roles_raw_json).expect("Unable to read file");
+
+
+	let champs_map : HashMap<i16, String> = serde_json::from_str(&champ_raw_json).unwrap();
+	let roles_map : HashMap<i16, Vec<String>> = serde_json::from_str(&roles_raw_json).unwrap();
+	let mut champions = Champions::new();
+	for (id, name) in champs_map {
+		champions.push(id, name, roles_map.get(&id).unwrap().clone());
 	}
 
 	return champions;
