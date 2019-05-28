@@ -216,7 +216,7 @@ impl ScoreVector for GlobalScoreVectors {
 	    score_vectors
     }
 }
-
+    
 impl GlobalScoreVectors {
 	pub fn with_dimensions(n: usize) -> GlobalScoreVectors {
         GlobalScoreVectors {
@@ -239,6 +239,12 @@ impl GlobalScoreVectors {
 		if games == 0u32 {
 			return 1f64;
 		}
-		return wins as f64 / games as f64;
+        let mut raw_winrate = wins as f64 / games as f64;
+        let mut small_sample_penalty = 0f64;
+        if games < 100 && raw_winrate > 0.55f64 {
+            small_sample_penalty = 0.5 as f64 / games as f64;
+        }
+        println!("{} - {} = {}", raw_winrate, small_sample_penalty, raw_winrate - small_sample_penalty);
+		return raw_winrate - small_sample_penalty;
 	}
 }

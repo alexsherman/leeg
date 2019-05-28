@@ -1,18 +1,61 @@
+import React, { Component } from "react";
+import ReactDOM from "react-dom";
+import Select from 'react-select';
+import Sidebar from './sidebar.js';
+function RoleToggles(props) {
+    const options = [
+        {"value": "Top", "label": "Top"},
+        {"value": "Jungle", "label": "Jungle"},
+        {"value": "Mid", "label": "Mid"},
+        {"value": "Bottom", "label": "Bottom"},
+        {"value": "Support", "label": "Support"},
+    ];
+    const placeholder = "Select one or more roles to filter recommendations."
+    return (
+        <Select
+        className="role-select"
+        isMulti
+        placeholder={placeholder}
+        onChange={props.updateRoles}
+        options={options}
+      />
+    )
+}
+
 function SummonerSquare(props) {
     const champ = props.champion;
+    const rank = (props.idx !== undefined) ? "#" + (props.idx + 1) + " - " : "";
     return (
         <div className="summoner-square">
             <ChampSquare champion={champ} />
-            <div className="champion-name">{champ}</div>
+            <div className="champion-name">{rank}{champ}</div>
         </div>
     )
 }
 
 function ChampSquare(props) {
-    const name = props.champion;
-    const src = "http://ddragon.leagueoflegends.com/cdn/6.24.1/img/champion/" + name + ".png";
+    let name = props.champion;
+    name = name.split(' ').join("").split("'").join("");
+    if (name === "Wukong") {
+        name = "MonkeyKing";
+    }
+    if (name === "LeBlanc") {
+        name = "Leblanc";
+    }
+    if (name === "KaiSa") {
+        name = "Kaisa";
+    }
+    if (name === "KhaZix") {
+        name = "Khazix";
+    }
+    if (name === "VelKoz") {
+        name = "Velkoz"
+    }
+    const src = "url(http://ddragon.leagueoflegends.com/cdn/9.10.1/img/champion/" + name + ".png)";
+    const style = {"backgroundImage": src, "backgroundSize": "cover", "backgroundPosition": "center"};
+    console.log(style);
     return (
-        <img className="champion-square" src={src} />
+        <div className="champion-square" style={style}></div>
     )
 }
 
@@ -31,7 +74,7 @@ function Team(props) {
         <SummonerSquare key={champ} champion={champ} />
     );
     return (
-        <div className="team-container">
+        <div className={"team-container " + props.team}>
             <TeamLabel label={label} />
             {summonerSquares}
         </div>
@@ -43,17 +86,19 @@ function Reqs(props) {
         return;
     }
     const reqs = props.resp;
-    const indivReqs = reqs.map((champ) => 
+    const indivReqs = reqs.map((champ, idx) => 
         <React.Fragment>
-            <SummonerSquare key={champ} champion={champ} />
+            <SummonerSquare idx={idx} key={champ} champion={champ} />
         </React.Fragment>
     );
     return (
-        <div className="req-container">
-            The best champs for your team are:
-            {indivReqs}            
+        <div className="center-container">
+            <RoleToggles roles={props.roles} updateRoles={props.updateRoles} />
+            <div className="req-container">
+                {indivReqs}            
+            </div>
         </div>
-    )
+    );
 }
 
 class ChampionSelect extends React.Component {
@@ -70,8 +115,10 @@ class ChampionSelect extends React.Component {
                         "Riven"
                     ]
             },
-            req: []
+            req: [],
+            roles: ["Top", "Bottom", "Jungle", "Mid", "Support"]
         }
+        this.updateRoles = this.updateRoles.bind(this);
     }
 
     componentDidMount() {
@@ -95,7 +142,14 @@ class ChampionSelect extends React.Component {
         // close websocket
     }
 
+    componentDidUpdate(prevProps, prevState) {
+      if (this.state.roles.length !== prevState.roles.length) {
+        this.getReqs();
+      }
+    }
+
     getReqs() {
+
         // todo - move to separate file to handle all recommendation API call logic
         const baseUrl = 'http://localhost:8000/globalreq';
         let params = '?';
@@ -106,12 +160,12 @@ class ChampionSelect extends React.Component {
             params += '&opp=' + this.state.oppTeam.champs.join(',');
         }
         if (this.state.oppTeam.champs.length === 0 && this.state.sameTeam.champs.length === 0) {
-            this.setState({
-                    req: []
-                });
             return;
         }
-        params += "&roles=Mid"
+
+        if (this.state.roles.length) {
+            params += "&roles=" + this.state.roles.join(",");
+        }
 
         fetch(baseUrl + params, {
             method: "GET",
@@ -123,7 +177,6 @@ class ChampionSelect extends React.Component {
         }).then(resp => {
 
             resp.json().then(text => {
-                console.log(text)
                 this.setState({
                     req: text.reqs
                 });
@@ -133,19 +186,36 @@ class ChampionSelect extends React.Component {
         })
     }
 
+    updateRoles(roles) {
+        this.setState({
+            roles: roles.map((r) => r.value)
+        });
+    }
+
     render() {
         return (
-                <div id="app-container">
-                    <Team teamdata={this.state.sameTeam} label="Your Team" />
-                    <Reqs resp={this.state.req} />
-                    <Team teamdata={this.state.oppTeam} label="Enemy Team"/>
+                <div className="app-container">
+                    <Team team={"blue-team"} teamdata={this.state.sameTeam} label="Your Team" />
+                    <Reqs resp={this.state.req} roles={this.state.roles} updateRoles={this.updateRoles} />
+                    <Team team={"red-team"} teamdata={this.state.oppTeam} label="Enemy Team"/>
                 </div>
             )
         }
 }
 
+export default ChampionSelect;
+
+function MainView() {
+    return (
+        <div className="main-view-container">
+            <Sidebar />
+            <ChampionSelect />
+        </div>
+    );
+}
+
 ReactDOM.render(
-  <ChampionSelect />,
+  <MainView />,
   document.getElementById('app')
 );
 
