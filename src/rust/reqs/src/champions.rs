@@ -15,7 +15,7 @@ pub const EXPECTED_CHAMPIONS_COUNT: usize = 143;
 /**
  * A single champion
  */
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Champion {
 	name: String,
 	id: i16,
@@ -37,7 +37,7 @@ impl PartialEq for Champion {
 /**
  * Convenience type for the reference data for all champions
  */
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Champions {
 	list: Vec<Champion>,
 	id_hashes: HashMap<i16, usize>,
@@ -122,6 +122,6 @@ pub fn load_champions_with_role(champ_filename: String, role_filename: String) -
 	for (id, name) in champs_map {
 		champions.push(id, name, roles_map.get(&id).unwrap().clone());
 	}
-
+	// todo - sort this shit
 	return champions;
 }
