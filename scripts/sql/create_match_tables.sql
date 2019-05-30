@@ -14,6 +14,7 @@ CREATE TABLE all_matches (
 );
  
 CREATE UNIQUE INDEX idx_match_id ON all_matches(id);
+CREATE INDEX idx_champions ON all_matches USING GIN(blue_team, red_team, blue_bans, red_bans);
 
 CREATE TABLE summoner_matches (
 	id text,

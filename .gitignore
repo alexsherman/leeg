@@ -3,7 +3,14 @@
 src/rust/reqs/Cargo.lock
 src/rust/reqs/target
 src/rust/reqs/target/*
+src/rust/banana/target
+src/rust/banana/target/*
+src/rust/banana/Cargo.lock
+src/rust/banana/Db_config.toml
 scripts/python/database.ini
+node_modules/
+*.rdb
 src/java/client-listener/client-listener.iml
 src/java/client-listener/target
 src/java/client-listener/target/*
+
