@@ -163,7 +163,8 @@ pub struct GlobalMatchCounts {
     same_wins: Vec<u32>,
     same_games: Vec<u32>,
     opp_wins: Vec<u32>,
-    opp_games: Vec<u32>
+    opp_games: Vec<u32>,
+    total_games: u32
 }
 
 impl GlobalMatchCounts {
@@ -172,7 +173,8 @@ impl GlobalMatchCounts {
             same_wins: vec![0u32; n],
             same_games: vec![0u32; n],
             opp_wins: vec![0u32; n],
-            opp_games: vec![0u32; n]
+            opp_games: vec![0u32; n],
+            total_games: 0
         }
     }
 
@@ -189,6 +191,7 @@ impl GlobalMatchCounts {
             self.opp_games[*champ_idx] += 1;
             self.opp_wins[*champ_idx] += 1 - win_increment;
         }
+        self.total_games += 1;
     }
 }
 
@@ -198,6 +201,8 @@ pub struct GlobalScoreVectors {
     opp_team: Vec<usize>,
     pub same_winrates: Vec<Score>,
     pub opp_winrates: Vec<Score>,
+    pub same_pickrates: Vec<Score>,
+    pub opp_pickrates: Vec<Score>,
     n: usize
 }
 
@@ -224,6 +229,8 @@ impl GlobalScoreVectors {
             opp_team: Vec::with_capacity(5),
             same_winrates: vec![0f64; n],
             opp_winrates: vec![0f64; n],
+            same_pickrates: vec![0f64; n],
+            opp_pickrates: vec![0f64; n],
 			n: n
 		}
 	}
@@ -232,6 +239,8 @@ impl GlobalScoreVectors {
         for i in 0..self.n {
             self.same_winrates[i] = self.winrate_score(match_counts.same_wins[i], match_counts.same_games[i]);
             self.opp_winrates[i] = self.winrate_score(match_counts.opp_wins[i], match_counts.opp_games[i]);
+            self.same_pickrates[i] = self.calc_pickrate(match_counts.same_games[i], match_counts.total_games);
+            self.opp_pickrates[i] = self.calc_pickrate(match_counts.opp_games[i], match_counts.total_games);
         }
     }
     
@@ -245,6 +254,10 @@ impl GlobalScoreVectors {
             small_sample_penalty = 0.5 as f64 / games as f64;
         }
         println!("{} - {} = {}", raw_winrate, small_sample_penalty, raw_winrate - small_sample_penalty);
-		return raw_winrate - small_sample_penalty;
+		raw_winrate - small_sample_penalty;
 	}
+
+    fn calc_pickrate(&self, games: u32, total_games: u32) -> f64 {
+        games as f64 / total_games as f64
+    }
 }

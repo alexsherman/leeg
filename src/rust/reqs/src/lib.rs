@@ -70,7 +70,7 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, 
     }
    
     let combined_service = combine_req_services(&service_vec, roles);
-    let res = combined_service.req_banless(&team_picks, &opp_picks, 20);    
+    let res = combined_service.req_banless(&team_picks, &opp_picks, 144);    
     res
 }    
 
@@ -91,6 +91,7 @@ fn get_or_create_global_req_service(conn: &Connection, team_picks: &Vec<String>,
     // very imperfect. But the idea is that if there are 2 matches for one combination and some
     // champion won in both of those, there needs to be some weight which prevents that 100% from
     // dominating the score
+    //
     let weighted_service = GlobalServiceWithWeight {
         req_service: service,
         weight: matches.len()
