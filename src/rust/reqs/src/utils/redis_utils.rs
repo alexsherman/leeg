@@ -4,7 +4,7 @@ use reqs::GlobalServiceWithWeight;
 extern crate serde_json;
 use self::serde_json::json;
 
-const default_expire_time: usize: 3600;
+const default_expire_time: usize = 3600;
 
 pub fn get_connection() -> Connection {
     let client = redis::Client::open("redis://127.0.0.1:6379").unwrap();    
