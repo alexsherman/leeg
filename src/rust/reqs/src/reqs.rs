@@ -199,16 +199,18 @@ impl GlobalReqService {
     fn get_reqs(&self, scores: &mut Vec<f64>, num_reqs: usize) -> Vec<String> {
 		let mut req_idxs: Vec<usize> = Vec::new();
         let mut top_scores: Vec<f64> = Vec::new();
+        let mut pick_rates: Vec<f64> = Vec::new();
         for _ in 0..num_reqs {
 			let req_idx = argmax_idx(&scores);
 			req_idxs.push(req_idx);
             top_scores.push(scores[req_idx]);
+            pick_rates.push(self.score_vectors.same_pickrates[req_idx] + self.score_vectors.opp_pickrates[req_idx]);
 			// Zero-out the score in question so that reqs are not duplicated
 			scores[req_idx] = ZERO_F64;
 		}
         let names = self.champions.names_from_idxs(&req_idxs);
         for i in 0..num_reqs {
-            println!("{} -> {}", names[i], top_scores[i]);
+            println!("{} -> {} ({})", names[i], top_scores[i], pick_rates[i]);
         }
         names
 	}
@@ -243,6 +245,10 @@ pub fn combine_req_services(services: &Vec<GlobalServiceWithWeight>, roles: Opti
 		println!("Weight: {}", adjusted_weight);
 		for i in 0..s.req_service.score_vectors.same_winrates.len() {
 			combined_service.score_vectors.same_winrates[i] += adjusted_weight * s.req_service.score_vectors.same_winrates[i];
+			combined_service.score_vectors.opp_winrates[i] += adjusted_weight * s.req_service.score_vectors.opp_winrates[i];
+			combined_service.score_vectors.same_pickrates[i] += adjusted_weight * s.req_service.score_vectors.same_pickrates[i];
+			combined_service.score_vectors.opp_pickrates[i] += adjusted_weight * s.req_service.score_vectors.opp_pickrates[i];
+
 		}
 	}
 	// filter out champs which don't match the roles specified
