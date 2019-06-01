@@ -22,20 +22,6 @@ use self::postgres::Error;
 const ALLIED_CHAMPS_SIZE: usize = 4;
 const ENEMY_CHAMPS_SIZE: usize = 5;
 
-/**
- * Config toml file to connect to database.
- */
-
-#[derive(Deserialize)]
-struct Config {
-    database: String,
-    host: String,
-    user: String,
-    password: String,
-    port: String
-}
-
-
  /**
   * Details for a single game of league of legends, formatted to contain minimized details from
   * a single player's perspective, and with the assumption that the player is known
@@ -269,4 +255,33 @@ pub fn load_global_matches_from_db(same_team: &Vec<String>, opp_team: &Vec<Strin
         matches.push(m);
     }
     Ok(matches)
+}
+
+pub struct GlobalMatchMatrices {
+    pub same_derived_matrix: Vec<Vec<GlobalMatch>>,
+    pub opp_derived_matrix: Vec<Vec<GlobalMatch>>
+}
+
+impl GlobalMatchMatrices {
+    pub fn from_matches(matches: &Vec<GlobalMatch>, champions: &Champions) -> GlobalMatchMatrices {
+        let mut same_derived_matrix: Vec<Vec<GlobalMatch>> = Vec::new();
+        let mut opp_derived_matrix: Vec<Vec<GlobalMatch>> = Vec::new();
+        for _ in 0..champions.get_list().len() {
+            same_derived_matrix.push(Vec::new());
+            opp_derived_matrix.push(Vec::new());
+        }
+
+        for m in matches {
+            for c in &m.same_team {
+                same_derived_matrix[*c].push((*m).clone());
+            }
+            for c in &m.opp_team {
+                opp_derived_matrix[*c].push((*m).clone());
+            }
+        }
+        GlobalMatchMatrices {
+            same_derived_matrix: same_derived_matrix,
+            opp_derived_matrix: opp_derived_matrix
+        }
+    }
 }

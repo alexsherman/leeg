@@ -9,7 +9,7 @@ mod reqs;
 
 use itertools::Itertools;
 use champions::{load_champions,load_champions_with_role,Champions};
-use matches::{load_summoner_matches_from_db, load_global_matches_from_db, GlobalMatch};
+use matches::{load_summoner_matches_from_db, load_global_matches_from_db, GlobalMatch, GlobalMatchMatrices};
 use reqs::{ReqService, SingleSummonerReqService, GlobalReqService, GlobalServiceWithWeight, combine_req_services};
 use utils::redis_utils::{get_connection, Connection, get_cached_global_reqs, insert_cached_global_reqs};
 
@@ -41,7 +41,7 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, 
     let mut service_vec: Vec<GlobalServiceWithWeight> = Vec::new();
     let mut num_matches_analyzed: usize = 0;
     let champions = load_champions_with_role(CHAMPIONS_FILE_PATH.to_string(), ROLES_FILE_PATH.to_string());
-    let weighted_service = get_or_create_global_req_service(&redis_connection, &team_picks, &opp_picks, &champions);
+    let weighted_service = get_or_create_global_req_service(&redis_connection, &team_picks, &opp_picks, &champions, true);
     num_matches_analyzed += weighted_service.weight;
     service_vec.push(weighted_service);
     // if we haven't analyzed enough matches, this is because the current query was too specific
@@ -49,20 +49,18 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, 
     println!("{} matches analyzed so far", num_matches_analyzed);
     let mut team_n = team_picks.len();
     let mut opp_n = opp_picks.len();
-    while num_matches_analyzed < SUFFICIENT_MATCH_THRESHOLD && (team_n > 1 || opp_n > 1) {
+    while num_matches_analyzed < SUFFICIENT_MATCH_THRESHOLD && (team_n > 0 || opp_n > 0) {
         team_n = match team_n {
-            1 => 1,
             0 => 0,
             x => x - 1
         };
         opp_n = match opp_n {
-            1 => 1,
             0 => 0,
             x => x - 1
         };
         for team_combination in team_picks.iter().cloned().combinations(team_n) {
             for opp_combination in opp_picks.iter().cloned().combinations(opp_n) {
-                let w_service = get_or_create_global_req_service(&redis_connection, &team_combination, &opp_combination, &champions);
+                let w_service = get_or_create_global_req_service(&redis_connection, &team_combination, &opp_combination, &champions, false);
                 num_matches_analyzed += w_service.weight;
                 service_vec.push(w_service);
                 println!("{} matches analyzed so far", num_matches_analyzed);
@@ -81,7 +79,7 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, 
 *   and put it in the cache.
 */
 fn get_or_create_global_req_service(conn: &Connection, team_picks: &Vec<String>, opp_picks: &Vec<String>, 
-                                    champions: &Champions) 
+                                    champions: &Champions, derive: bool) 
                                     -> GlobalServiceWithWeight {
     let cached_entry = get_cached_global_reqs(&conn, &team_picks, &opp_picks);
     if cached_entry.is_ok() {
@@ -93,44 +91,33 @@ fn get_or_create_global_req_service(conn: &Connection, team_picks: &Vec<String>,
     // very imperfect. But the idea is that if there are 2 matches for one combination and some
     // champion won in both of those, there needs to be some weight which prevents that 100% from
     // dominating the score
-    //
+    //todo - increase weight by specificity
+    // 10 games of exact comp worth more than 10 games of less specific comp
     let weighted_service = GlobalServiceWithWeight {
         req_service: service,
         weight: matches.len()
     };
     insert_cached_global_reqs(&conn, &team_picks, &opp_picks, weighted_service.clone());
-    derive_and_cache_granular_services(&conn, &matches, &team_picks, &opp_picks, &champions);
+    if derive {
+        derive_and_cache_granular_services(&conn, &matches, &team_picks, &opp_picks, &champions);
+    }
+    
     weighted_service
 }
 
 /*
     Given a list of matches and the team/opp picks which were used to query those matches, create a matrix of matches from those matches
     where each inner Vec represents the subset of matches in which champions[i] was present (on team and opp respectively).
-    Then, create GlobalReqService 
+    Then, create a service for that set of matches and cache it. 
+
 */
-fn derive_and_cache_granular_services(conn: &Connection, matches: &Vec<GlobalMatch>, team_picks: &Vec<String>, opp_picks: &Vec<String>, 
-                                    champions: &Champions) {
-
-    let mut same_derived_matrix: Vec<Vec<GlobalMatch>> = Vec::new();
-    let mut opp_derived_matrix: Vec<Vec<GlobalMatch>> = Vec::new();
-    for _ in 0..champions.get_list().len() {
-        same_derived_matrix.push(Vec::new());
-        opp_derived_matrix.push(Vec::new());
-    }
-
-    /*
-        every match passed already is guaraneed to have team_picks on same and opp_picks on op
-        for every match, clone it and put it in the vector 
-    */
-    for m in matches {
-        for c in &m.same_team {
-            same_derived_matrix[*c].push((*m).clone());
-        }
-        for c in &m.opp_team {
-            opp_derived_matrix[*c].push((*m).clone());
-        }
-    }
-    for (index, champ_match_vec) in same_derived_matrix.iter().enumerate() {
+fn derive_and_cache_granular_services(conn: &Connection, matches: &Vec<GlobalMatch>, team_picks: &Vec<String>, 
+                                      opp_picks: &Vec<String>, champions: &Champions) 
+                                      {
+    let derived_matrices = GlobalMatchMatrices::from_matches(&matches, &champions);
+    create_then_cache_services(&conn, &derived_matrices, &team_picks, &opp_picks, &champions, true);
+    create_then_cache_services(&conn, &derived_matrices, &team_picks, &opp_picks, &champions, true);
+   /* for (index, champ_match_vec) in derived_matrices.same_derived_matrix.iter().enumerate() {
         let champ_name = &champions.get_list()[index].name;
         if team_picks.contains(champ_name) {
             continue;
@@ -144,7 +131,7 @@ fn derive_and_cache_granular_services(conn: &Connection, matches: &Vec<GlobalMat
         };
         insert_cached_global_reqs(&conn, &potential_team_picks, &opp_picks, weighted_service.clone());    
     }
-     for (index, champ_match_vec) in opp_derived_matrix.iter().enumerate() {
+    for (index, champ_match_vec) in derived_matrices.opp_derived_matrix.iter().enumerate() {
         let champ_name = &champions.get_list()[index].name;
         if team_picks.contains(champ_name) {
             continue;
@@ -157,5 +144,39 @@ fn derive_and_cache_granular_services(conn: &Connection, matches: &Vec<GlobalMat
             weight: champ_match_vec.len()
         };
         insert_cached_global_reqs(&conn, &team_picks, &potential_opp_picks, weighted_service.clone());    
+    }*/
+}
+
+fn create_then_cache_services(conn: &Connection, derived_matrices: &GlobalMatchMatrices, team_picks: &Vec<String>, 
+                              opp_picks: &Vec<String>, champions: &Champions, potential_is_team: bool) {
+    let matrix = match potential_is_team {
+        true => &derived_matrices.same_derived_matrix,
+        false => &derived_matrices.opp_derived_matrix
+    };
+    for (index, champ_match_vec) in matrix.iter().enumerate() {
+        let champ_name = &champions.get_list()[index].name;
+        if team_picks.contains(champ_name) {
+            continue;
+        }
+
+        let service = GlobalReqService::from_matches(&champ_match_vec, &champions);
+        let weighted_service = GlobalServiceWithWeight {
+            req_service: service,
+            weight: champ_match_vec.len()
+        };
+
+        match potential_is_team {
+            true => {
+                let mut potential_team_picks = team_picks.clone();
+                potential_team_picks.push(champ_name.clone());
+                insert_cached_global_reqs(&conn, &potential_team_picks, &opp_picks, weighted_service);    
+            },
+            false => {
+                let mut potential_opp_picks = opp_picks.clone();
+                potential_opp_picks.push(champ_name.clone());
+                insert_cached_global_reqs(&conn, &team_picks, &potential_opp_picks, weighted_service);    
+            }
+        }
+        
     }
 }
