@@ -254,10 +254,13 @@ impl GlobalScoreVectors {
             small_sample_penalty = 0.5 as f64 / games as f64;
         }
         println!("{} - {} = {}", raw_winrate, small_sample_penalty, raw_winrate - small_sample_penalty);
-		raw_winrate - small_sample_penalty;
+		raw_winrate - small_sample_penalty
 	}
 
     fn calc_pickrate(&self, games: u32, total_games: u32) -> f64 {
-        games as f64 / total_games as f64
+        match total_games {
+            0u32 => 0f64,
+            _ => games as f64 / total_games as f64
+        }
     }
 }
