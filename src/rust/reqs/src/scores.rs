@@ -253,7 +253,7 @@ impl GlobalScoreVectors {
         if games < 100 && raw_winrate > 0.55f64 {
             small_sample_penalty = 0.5 as f64 / games as f64;
         }
-        println!("{} - {} = {}", raw_winrate, small_sample_penalty, raw_winrate - small_sample_penalty);
+      //  println!("{} - {} = {}", raw_winrate, small_sample_penalty, raw_winrate - small_sample_penalty);
 		raw_winrate - small_sample_penalty
 	}
 

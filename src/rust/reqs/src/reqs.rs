@@ -210,7 +210,7 @@ impl GlobalReqService {
 		}
         let names = self.champions.names_from_idxs(&req_idxs);
         for i in 0..num_reqs {
-            println!("{} -> {} ({})", names[i], top_scores[i], pick_rates[i]);
+            println!("{} -> {:.2}% (picked {:.2}%)", names[i], top_scores[i] * 100f64, pick_rates[i] * 100f64);
         }
         names
 	}

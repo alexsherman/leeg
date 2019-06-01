@@ -17,7 +17,7 @@ pub const EXPECTED_CHAMPIONS_COUNT: usize = 143;
  */
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Champion {
-	name: String,
+	pub name: String,
 	id: i16,
 	roles: Vec<String>
 }

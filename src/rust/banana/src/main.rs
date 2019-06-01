@@ -41,6 +41,8 @@ fn global_recommendation(team: Option<String>, opp: Option<String>, roles: Optio
 }
 
 fn main() {
+    // this will put all global winrates and 1 to 1 winrate services in cache if not cached already
+    handle_global_req_req(&Vec::new(), &Vec::new(), None);
     rocket::ignite().attach(CORS()).mount("/", routes![recommendation, global_recommendation]).launch();
 }
 

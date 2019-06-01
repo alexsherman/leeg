@@ -217,7 +217,7 @@ pub fn load_summoner_matches_from_db(summoner_name: String, champions: &Champion
     Ok(matches) 
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GlobalMatch {
     pub same_wins: bool,
     pub same_team: Vec<usize>,
