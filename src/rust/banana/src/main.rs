@@ -5,7 +5,7 @@
 
 use rocket_contrib::json::JsonValue;
 use std::vec::Vec;
-use reqs::{handle_req_req, handle_global_req_req};
+use reqs::{handle_req_req, handle_global_req_req, get_global_matrix};
 use rocket::{Request, Response};
 use rocket::fairing::{Fairing, Info, Kind};
 use rocket::http::{Header, ContentType, Method};
@@ -39,10 +39,15 @@ fn global_recommendation(team: Option<String>, opp: Option<String>, roles: Optio
     json!({"reqs": handle_global_req_req(&champ_string_to_vec(&team), &champ_string_to_vec(&opp), roles_option)})
 }
 
+#[get("/championmatrix")]
+fn champion_matrix() -> JsonValue {
+    json!(get_global_matrix())
+}
+
 fn main() {
     // this will put all global winrates and 1 to 1 winrate services in cache if not cached already
     handle_global_req_req(&Vec::new(), &Vec::new(), None);
-    rocket::ignite().attach(CORS()).mount("/", routes![recommendation, global_recommendation]).launch();
+    rocket::ignite().attach(CORS()).mount("/", routes![recommendation, global_recommendation, champion_matrix]).launch();
 }
 
 pub struct CORS();

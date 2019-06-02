@@ -33,7 +33,7 @@ function SummonerSquare(props) {
     )
 }
 
-function ChampSquare(props) {
+export function ChampSquare(props) {
     let name = props.champion;
     name = name.split(' ').join("").split("'").join("");
     if (name === "Wukong") {

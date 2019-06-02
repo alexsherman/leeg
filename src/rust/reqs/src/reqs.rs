@@ -225,6 +225,12 @@ pub struct GlobalServiceWithWeight {
 	pub weight: usize
 }
 
+#[derive(Clone, Deserialize, Serialize)]
+pub struct NamedGlobalService {
+	pub req_service: GlobalReqService,
+	pub champ_name: String
+}
+
 /**
 *  Given a vector of GlobalServiceWithWeights which each have a GlobalReqService and a weight,
 * combines the scores of the vectors given their respective weights.

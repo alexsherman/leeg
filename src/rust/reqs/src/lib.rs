@@ -10,7 +10,7 @@ mod reqs;
 use itertools::Itertools;
 use champions::{load_champions,load_champions_with_role,Champions};
 use matches::{load_summoner_matches_from_db, load_global_matches_from_db, GlobalMatch, GlobalMatchMatrices};
-use reqs::{ReqService, SingleSummonerReqService, GlobalReqService, GlobalServiceWithWeight, combine_req_services};
+use reqs::{ReqService, SingleSummonerReqService, GlobalReqService, NamedGlobalService, GlobalServiceWithWeight, combine_req_services};
 use utils::redis_utils::{get_connection, Connection, get_cached_global_reqs, insert_cached_global_reqs};
 
 const CHAMPIONS_FILE_PATH: &str = "/mnt/c/Users/Alex/Documents/dev/leeg/champions.json";
@@ -116,7 +116,7 @@ fn derive_and_cache_granular_services(conn: &Connection, matches: &Vec<GlobalMat
                                       {
     let derived_matrices = GlobalMatchMatrices::from_matches(&matches, &champions);
     create_then_cache_services(&conn, &derived_matrices, &team_picks, &opp_picks, &champions, true);
-    create_then_cache_services(&conn, &derived_matrices, &team_picks, &opp_picks, &champions, true);
+    create_then_cache_services(&conn, &derived_matrices, &team_picks, &opp_picks, &champions, false);
 }
 
 /** 
@@ -156,4 +156,22 @@ fn create_then_cache_services(conn: &Connection, derived_matrices: &GlobalMatchM
         }
         
     }
+}
+
+pub fn get_global_matrix() -> Vec<NamedGlobalService> {
+    let champions = load_champions_with_role(CHAMPIONS_FILE_PATH.to_string(), ROLES_FILE_PATH.to_string());
+    let redis_connection = get_connection();
+    let mut service_vector: Vec<NamedGlobalService> = Vec::with_capacity(champions.get_list().len());
+    for index in 0..champions.get_list().len() {
+        let champ_name = &champions.get_list()[index].name;
+        let empty_vec: Vec<String> = Vec::new();
+        let mut single_champ_vec: Vec<String> = Vec::new();
+        single_champ_vec.push(champ_name.clone());
+        let r = get_or_create_global_req_service(&redis_connection, &empty_vec, &single_champ_vec, &champions, false);
+        service_vector.push(NamedGlobalService {
+            req_service: r.req_service,
+            champ_name:  champ_name.clone()
+        });
+    }
+    service_vector
 }
