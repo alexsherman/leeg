@@ -151,9 +151,7 @@ impl ReqService for GlobalReqService {
     fn req(&self, team_picks: &Vec<String>, opp_picks: &Vec<String>,
             team_bans: &Vec<String>, opp_bans: &Vec<String>, num_reqs: usize)
             -> Vec<String> {
-        println!("unimplemented rn!");
-        let empty: Vec<String> = Vec::new();
-        empty
+        unimplemented!();
     }
 
     fn req_banless(&self, team_picks: &Vec<String>, opp_picks: &Vec<String>, num_reqs: usize)
@@ -202,6 +200,9 @@ impl GlobalReqService {
         let mut pick_rates: Vec<f64> = Vec::new();
         for _ in 0..num_reqs {
 			let req_idx = argmax_idx(&scores);
+			if scores[req_idx] == ZERO_F64 {
+				break;
+			}
 			req_idxs.push(req_idx);
             top_scores.push(scores[req_idx]);
             pick_rates.push(self.score_vectors.same_pickrates[req_idx] + self.score_vectors.opp_pickrates[req_idx]);
@@ -209,8 +210,8 @@ impl GlobalReqService {
 			scores[req_idx] = ZERO_F64;
 		}
         let names = self.champions.names_from_idxs(&req_idxs);
-        for i in 0..num_reqs {
-            println!("{} -> {} ({})", names[i], top_scores[i], pick_rates[i]);
+        for i in 0..top_scores.len() {
+            println!("{} -> {:.2}% (picked {:.2}%)", names[i], top_scores[i] * 100f64, pick_rates[i] * 100f64);
         }
         names
 	}

@@ -248,12 +248,12 @@ impl GlobalScoreVectors {
 		if games == 0u32 {
 			return 1f64;
 		}
-        let mut raw_winrate = wins as f64 / games as f64;
+        let raw_winrate = wins as f64 / games as f64;
         let mut small_sample_penalty = 0f64;
         if games < 100 && raw_winrate > 0.55f64 {
             small_sample_penalty = 0.5 as f64 / games as f64;
         }
-        println!("{} - {} = {}", raw_winrate, small_sample_penalty, raw_winrate - small_sample_penalty);
+      //  println!("{} - {} = {}", raw_winrate, small_sample_penalty, raw_winrate - small_sample_penalty);
 		raw_winrate - small_sample_penalty
 	}
 

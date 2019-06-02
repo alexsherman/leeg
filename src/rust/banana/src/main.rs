@@ -3,7 +3,6 @@
 #[macro_use] extern crate rocket;
 #[macro_use] extern crate rocket_contrib;
 
-use rocket::request::Form;
 use rocket_contrib::json::JsonValue;
 use std::vec::Vec;
 use reqs::{handle_req_req, handle_global_req_req};
@@ -12,8 +11,8 @@ use rocket::fairing::{Fairing, Info, Kind};
 use rocket::http::{Header, ContentType, Method};
 use std::io::Cursor;
 
-fn champStringToVec(championString: &Option<String>) -> Vec<String> {
-    match championString {
+fn champ_string_to_vec(champ_string: &Option<String>) -> Vec<String> {
+    match champ_string {
         Some(s) => {
            s.split(',').map(|s| s.to_string()).collect() 
         },
@@ -25,8 +24,8 @@ fn champStringToVec(championString: &Option<String>) -> Vec<String> {
 
 #[get("/req?<summoner_name>&<team>&<opp>&<tbans>&<obans>")]
 fn recommendation(summoner_name: String, team: Option<String>, opp: Option<String>, tbans: Option<String>, obans: Option<String>) -> JsonValue {
-    json!({"reqs": handle_req_req(&summoner_name, &champStringToVec(&team), &champStringToVec(&opp), 
-                         &champStringToVec(&tbans), &champStringToVec(&obans))})
+    json!({"reqs": handle_req_req(&summoner_name, &champ_string_to_vec(&team), &champ_string_to_vec(&opp), 
+                         &champ_string_to_vec(&tbans), &champ_string_to_vec(&obans))})
 }
 
 #[get("/globalreq?<team>&<opp>&<roles>")]
@@ -37,10 +36,12 @@ fn global_recommendation(team: Option<String>, opp: Option<String>, roles: Optio
         },
         None => None
     };
-    json!({"reqs": handle_global_req_req(&champStringToVec(&team), &champStringToVec(&opp), roles_option)})
+    json!({"reqs": handle_global_req_req(&champ_string_to_vec(&team), &champ_string_to_vec(&opp), roles_option)})
 }
 
 fn main() {
+    // this will put all global winrates and 1 to 1 winrate services in cache if not cached already
+    handle_global_req_req(&Vec::new(), &Vec::new(), None);
     rocket::ignite().attach(CORS()).mount("/", routes![recommendation, global_recommendation]).launch();
 }
 
