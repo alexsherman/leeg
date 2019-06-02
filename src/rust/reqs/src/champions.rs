@@ -17,7 +17,7 @@ pub const EXPECTED_CHAMPIONS_COUNT: usize = 143;
  */
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Champion {
-	name: String,
+	pub name: String,
 	id: i16,
 	roles: Vec<String>
 }
@@ -102,8 +102,7 @@ pub fn load_champions(filename: String) -> Champions {
 		let role: Vec<String> = Vec::new();
 		champions.push(id, name, role);
 	}
-
-	return champions;
+	champions
 }
 
 pub fn load_champions_with_role(champ_filename: String, role_filename: String) -> Champions {
@@ -122,6 +121,11 @@ pub fn load_champions_with_role(champ_filename: String, role_filename: String) -
 	for (id, name) in champs_map {
 		champions.push(id, name, roles_map.get(&id).unwrap().clone());
 	}
-	// todo - sort this shit
-	return champions;
+	// This is my horrible fix to make the cache work until we do the thing we said we'd do
+	let mut sorted_champions = Champions::new();
+	champions.list.sort_by_key(|key| key.id);
+	for c in champions.list {
+		sorted_champions.push(c.id, c.name, roles_map.get(&c.id).unwrap().clone());
+	}
+	sorted_champions
 }

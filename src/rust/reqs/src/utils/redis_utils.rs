@@ -8,20 +8,19 @@ const default_expire_time: usize = 3600;
 
 pub fn get_connection() -> Connection {
     let client = redis::Client::open("redis://127.0.0.1:6379").unwrap();    
-    let conn = client.get_connection().unwrap();
-
-    //testing 
-    let _: () = conn.set("answer", 42).unwrap();
-    let answer: usize = conn.get("answer").unwrap();
-    println!("Answer: {}", answer);
-    conn
+    client.get_connection().unwrap()
 }
+
 
 /**
 *   E.g. team - Vec<Annie, Sivir> , opp - Vec<Vayne> -> Annie,Sivir-Vayne
 */
 fn keyname_from_picks(team_picks: &Vec<String>, opp_picks: &Vec<String>) -> String {
-    format!("{}-{}", team_picks.join(","), opp_picks.join(","))
+    let mut tp = team_picks.clone();
+    let mut op = opp_picks.clone();
+    tp.sort();
+    op.sort();
+    format!("{}-{}", tp.join(","), op.join(","))
 }
 
 pub fn get_cached_global_reqs(conn: &Connection, team_picks: &Vec<String>, opp_picks: &Vec<String>) 
