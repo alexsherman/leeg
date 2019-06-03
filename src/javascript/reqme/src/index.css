@@ -118,16 +118,34 @@ body {
 .matrix-container {
     display: grid;
     grid-gap: 0px;
-    grid-template-columns: repeat(145, auto);
-    font-size: 16px;
+    grid-template-columns: repeat(145, 55px);
+    grid-template-rows: repeat(145, 50px);
+    font-size: 14px;
+    width: 50vw;
+    height: 50vh;
+    overflow: scroll;
+    background-color: white;
+    margin-left: 25vw;
+    margin-top: 25vh;
+    transition: 0.5s;
+    font-family: Lato, sans-serif;
+}
+
+.matrix-container.expanded {
     position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
 }
 
 .matrix-cell {
     padding: 3px;
     border: 1px solid #ffffb8;
-    text-align: center;
-    vertical-align: middle;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .matrix-left-column {
@@ -136,7 +154,7 @@ body {
     font-size: 20px;
     z-index: 1;
     transform: translate3d(0,0,0);
-    background-color: rgba(104, 188, 91, 0.9);
+    background-color: rgba(91, 147, 188, 0.9);
     display: flex;
     justify-content: space-between;
 }
@@ -146,7 +164,7 @@ body {
     top: 0;
     font-size: 20px;
     z-index: 2;
-    background-color: rgba(104, 188, 91);
+    background-color: rgb(155, 91, 188);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -154,6 +172,22 @@ body {
 }
 
 .matrix-cell > .champion-square {
-    width: 25px;
-    height: 25px;
+    width: 40px;
+    height: 40px;
+}
+
+.matrix-cell.expanded {
+    width: 150px;
+    height: 150px;
+    z-index: 5;
+}
+
+.expansion-toggle {
+    position: sticky;
+    left: 0;
+    top: 0;
+    background-color: rgba(104, 188, 91);
+    color: white;
+    cursor: pointer;
+    z-index: 4;
 }
