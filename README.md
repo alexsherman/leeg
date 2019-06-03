@@ -15,7 +15,7 @@ connect without ssl (for now)
 ## how to run web app
 0. until merged, you will need to be on branch `webpack-role-frontend`
 1. run `npm install` in src/javascript/websocket-test and src/javascript/reqme
-2. run `cargo install` in src/rust/banana
+2. run `cargo install` in src/rust/banana (requires nightly version of rust: `rustup default nightly`)
 3. install redis:
  ```
  wget http://download.redis.io/redis-stable.tar.gz
