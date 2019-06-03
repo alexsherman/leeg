@@ -33,9 +33,9 @@ function SummonerSquare(props) {
     )
 }
 
-function ChampSquare(props) {
+export function ChampSquare(props) {
     let name = props.champion;
-    name = name.split(' ').join("").split("'").join("");
+    name = name.split(' ').join("").split("'").join("").split('.').join("");
     if (name === "Wukong") {
         name = "MonkeyKing";
     }
@@ -49,11 +49,14 @@ function ChampSquare(props) {
         name = "Khazix";
     }
     if (name === "VelKoz") {
-        name = "Velkoz"
+        name = "Velkoz";
     }
+    if (name === "ChoGath") {
+        name = "Chogath";
+    }
+
     const src = "url(http://ddragon.leagueoflegends.com/cdn/9.10.1/img/champion/" + name + ".png)";
     const style = {"backgroundImage": src, "backgroundSize": "cover", "backgroundPosition": "center"};
-    console.log(style);
     return (
         <div className="champion-square" style={style}></div>
     )
