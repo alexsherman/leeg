@@ -255,7 +255,8 @@ pub fn combine_req_services(services: &Vec<GlobalServiceWithWeight>, roles: Opti
 			combined_service.score_vectors.opp_winrates[i] += adjusted_weight * s.req_service.score_vectors.opp_winrates[i];
 			combined_service.score_vectors.same_pickrates[i] += adjusted_weight * s.req_service.score_vectors.same_pickrates[i];
 			combined_service.score_vectors.opp_pickrates[i] += adjusted_weight * s.req_service.score_vectors.opp_pickrates[i];
-
+			combined_service.score_vectors.same_banrates[i] += adjusted_weight * s.req_service.score_vectors.same_banrates[i];
+			combined_service.score_vectors.opp_banrates[i] += adjusted_weight * s.req_service.score_vectors.opp_banrates[i];
 		}
 	}
 	// filter out champs which don't match the roles specified

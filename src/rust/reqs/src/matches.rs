@@ -207,7 +207,9 @@ pub fn load_summoner_matches_from_db(summoner_name: String, champions: &Champion
 pub struct GlobalMatch {
     pub same_wins: bool,
     pub same_team: Vec<usize>,
-    pub opp_team: Vec<usize>
+    pub opp_team: Vec<usize>,
+    pub same_bans: Vec<usize>,
+    pub opp_bans: Vec<usize>
 }
 
 impl GlobalMatch {
@@ -218,6 +220,14 @@ impl GlobalMatch {
 	pub fn get_opp_team_champion_idxs(&self) -> &Vec<usize> {
 		&(self.opp_team)
 	}
+
+    pub fn get_same_bans(&self) -> &Vec<usize> {
+        &(self.same_bans)
+    }
+
+    pub fn get_opp_bans(&self) -> &Vec<usize> {
+        &(self.opp_bans)
+    }
 }
 
 /*
@@ -235,11 +245,14 @@ pub fn load_global_matches_from_db(same_team: &Vec<String>, opp_team: &Vec<Strin
     for row in &conn.query(Q_GLOBAL_MATCHES_BOTH_TEAM_BLUE, &[&same_team, &opp_team])? {
         let same_champ_names = row.get(1);
         let opp_champ_names = row.get(2);
+        let same_bans = row.get(3);
+        let opp_bans = row.get(4);
         let m = GlobalMatch {
             same_wins: row.get(0),
             same_team: champions.idxs_from_names(&same_champ_names),
-            opp_team: champions.idxs_from_names(&opp_champ_names)
-
+            opp_team: champions.idxs_from_names(&opp_champ_names),
+            same_bans: champions.idxs_from_names(&same_bans),
+            opp_bans: champions.idxs_from_names(&opp_bans)
         };
         matches.push(m);
     }
@@ -247,10 +260,14 @@ pub fn load_global_matches_from_db(same_team: &Vec<String>, opp_team: &Vec<Strin
         let opp_wins: bool = row.get(0);
         let same_champ_names = row.get(2);
         let opp_champ_names = row.get(1);
+        let same_bans = row.get(4);
+        let opp_bans = row.get(3);
         let m = GlobalMatch {
             same_wins: !opp_wins,
             same_team: champions.idxs_from_names(&same_champ_names),
-            opp_team: champions.idxs_from_names(&opp_champ_names)
+            opp_team: champions.idxs_from_names(&opp_champ_names),
+            same_bans: champions.idxs_from_names(&same_bans),
+            opp_bans: champions.idxs_from_names(&opp_bans)
         };
         matches.push(m);
     }

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
-import {ChampSquare} from "./main.js";
+import {ChampSquare} from "./draft.js";
 
 class MatrixCell extends React.Component {
     constructor() {
@@ -11,7 +11,20 @@ class MatrixCell extends React.Component {
     }
 
     onClick() {
+        console.log(this.props.banrate_as, this.props.banrate_against);
         this.setState({expanded: !this.state.expanded});
+    }
+
+    winrateInfo() {
+        return this.props.champ_as.name + " wins against " + this.props.champ_against.name + " " + (this.props.winrate * 100).toFixed(2) + "% of the time.";
+    }
+
+    pickrateInfo() {
+        return this.props.champ_against.name + " is picked against " + this.props.champ_as.name + " " + (this.props.pickrate * 100).toFixed(2) + "% of the time.";
+    }
+
+    banrateInfo() {
+         return this.props.champ_as.name + "'s team bans " + this.props.champ_against.name +  " " + (this.props.banrate_against * 100).toFixed(2) + "% of the time.";
     }
 
     render() {
@@ -20,7 +33,16 @@ class MatrixCell extends React.Component {
                  className={this.state.expanded ? "matrix-cell expanded" : "matrix-cell"}
                  onClick={this.onClick.bind(this)}
             >
-                {(this.props.score * 100).toFixed(2) + '%'}
+                {this.state.expanded 
+                    ?
+                    <React.Fragment> 
+                    <p>{this.winrateInfo()}</p>
+                    <p>{this.pickrateInfo()}</p>
+                    <p>{this.banrateInfo()}</p>
+                    </React.Fragment>
+                    : 
+                    (this.props.winrate * 100).toFixed(2) + "%"
+                }
             </div>)
         }
 }
@@ -77,6 +99,9 @@ class ChampionMatrix extends React.Component {
                             name: champion.champ_name,
                             winrates_into: champion.req_service.score_vectors.same_winrates,
                             pickrates_into: champion.req_service.score_vectors.same_pickrates,
+                            pickrates_against: champion.req_service.score_vectors.opp_pickrates,
+                            banrates_into: champion.req_service.score_vectors.same_banrates,
+                            banrates_as: champion.req_service.score_vectors.opp_banrates,
                             idx: idx
                         }
                     })
@@ -94,13 +119,21 @@ class ChampionMatrix extends React.Component {
         });
         let vs_table = this.state.matrix.map((champion) => {
             let champ_winrates = this.state.matrix.map((vs_champ) => {
+                let pr = champion.pickrates_against[vs_champ.idx];
                 let wr = parseFloat(vs_champ.winrates_into[champion.idx]) - 0.5;
                 let style = {"backgroundColor": 'rgb(' + ((0.5 - wr * 2) * 256) + ',' + ((0.5 + wr * 2) * 256) + ',0)'};
                 if (vs_champ.winrates_into[champion.idx] > 0.999) {
                     style = {"backgroundColor": "#FFFFFF", "color": "#FFFFFF"};
                 }
                 return (
-                    <MatrixCell style={style} score={vs_champ.winrates_into[champion.idx]} />
+                    <MatrixCell style={style}
+                     winrate={vs_champ.winrates_into[champion.idx]}
+                     pickrate={pr}
+                     banrate_as={vs_champ.banrates_as[champion.idx]}
+                     banrate_against={vs_champ.banrates_into[champion.idx]}
+
+                     champ_as={champion}
+                     champ_against={vs_champ} />
                     
                 )
             });
@@ -131,11 +164,5 @@ class ChampionMatrix extends React.Component {
             )
         }
 }
-
-
-ReactDOM.render(
-  <ChampionMatrix />,
-  document.getElementById('app')
-);
 
 export default ChampionMatrix;

@@ -164,7 +164,9 @@ pub struct GlobalMatchCounts {
     same_games: Vec<u32>,
     opp_wins: Vec<u32>,
     opp_games: Vec<u32>,
-    total_games: u32
+    total_games: u32,
+    same_bans: Vec<u32>,
+    opp_bans: Vec<u32>
 }
 
 impl GlobalMatchCounts {
@@ -174,7 +176,9 @@ impl GlobalMatchCounts {
             same_games: vec![0u32; n],
             opp_wins: vec![0u32; n],
             opp_games: vec![0u32; n],
-            total_games: 0
+            total_games: 0,
+            same_bans: vec![0u32; n],
+            opp_bans: vec![0u32; n]
         }
     }
 
@@ -191,18 +195,24 @@ impl GlobalMatchCounts {
             self.opp_games[*champ_idx] += 1;
             self.opp_wins[*champ_idx] += 1 - win_increment;
         }
+        for champ_idx in m.get_same_bans() {
+            self.same_bans[*champ_idx] += 1;
+        }
+        for champ_idx in m.get_opp_bans() {
+            self.opp_bans[*champ_idx] += 1;
+        }
         self.total_games += 1;
     }
 }
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct GlobalScoreVectors {
-    same_team: Vec<usize>,
-    opp_team: Vec<usize>,
     pub same_winrates: Vec<Score>,
     pub opp_winrates: Vec<Score>,
     pub same_pickrates: Vec<Score>,
     pub opp_pickrates: Vec<Score>,
+    pub same_banrates: Vec<Score>,
+    pub opp_banrates: Vec<Score>,
     n: usize
 }
 
@@ -225,12 +235,12 @@ impl ScoreVector for GlobalScoreVectors {
 impl GlobalScoreVectors {
 	pub fn with_dimensions(n: usize) -> GlobalScoreVectors {
         GlobalScoreVectors {
-            same_team: Vec::with_capacity(5),
-            opp_team: Vec::with_capacity(5),
             same_winrates: vec![0f64; n],
             opp_winrates: vec![0f64; n],
             same_pickrates: vec![0f64; n],
             opp_pickrates: vec![0f64; n],
+            same_banrates: vec![0f64; n],
+            opp_banrates: vec![0f64; n],
 			n: n
 		}
 	}
@@ -241,6 +251,8 @@ impl GlobalScoreVectors {
             self.opp_winrates[i] = self.winrate_score(match_counts.opp_wins[i], match_counts.opp_games[i]);
             self.same_pickrates[i] = self.calc_pickrate(match_counts.same_games[i], match_counts.total_games);
             self.opp_pickrates[i] = self.calc_pickrate(match_counts.opp_games[i], match_counts.total_games);
+            self.same_banrates[i] = self.calc_pickrate(match_counts.same_bans[i], match_counts.total_games);
+            self.opp_banrates[i] = self.calc_pickrate(match_counts.opp_bans[i], match_counts.total_games);
         }
     }
     

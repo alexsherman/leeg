@@ -63,9 +63,23 @@ impl Champions {
 	}
 
 	pub fn idxs_from_names(&self, champion_names: &Vec<String>) -> Vec<usize> {
+		let mut ids: Vec<usize> = Vec::new();
+		for name in champion_names {
+			match self.name_hashes.get(name) {
+				Some(n) => {
+					ids.push(n.clone());
+				},
+				None => ()
+			};
+		}
+		ids
+		/*
 		return champion_names.iter()
-				.map(|name| self.name_hashes.get(name).unwrap().clone())
-				.collect();
+				.map(|name| {
+					match
+					self.name_hashes.get(name).unwrap().clone()
+				})
+				.collect();*/
 	}
 
 	pub fn names_from_idxs(&self, champion_idxs: &Vec<usize>) -> Vec<String> {
