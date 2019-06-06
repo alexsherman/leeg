@@ -82,9 +82,7 @@ function Team(props) {
     return (
         <div className={"team-container " + props.team}>
             <TeamLabel label={label} />
-            <CSSTransition in={inProp} timeout={200} classNames="selections">
             {summonerSquares}
-            </CSSTransition>
         </div>
     );
 }

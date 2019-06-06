@@ -240,6 +240,9 @@ impl GlobalMatch {
  */
 pub fn load_global_matches_from_db(same_team: &Vec<String>, opp_team: &Vec<String>, champions: &Champions) -> Result<Vec<GlobalMatch>, Error> {
     println!("{:?}, {:?}", same_team, opp_team);
+    if same_team.is_empty() && opp_team.is_empty() {
+        return load_all_matches(&champions);
+    }
     let conn = get_connection_to_matches_db()?;
     let mut matches: Vec<GlobalMatch> = Vec::new();
     for row in &conn.query(Q_GLOBAL_MATCHES_BOTH_TEAM_BLUE, &[&same_team, &opp_team])? {
@@ -270,6 +273,40 @@ pub fn load_global_matches_from_db(same_team: &Vec<String>, opp_team: &Vec<Strin
             opp_bans: champions.idxs_from_names(&opp_bans)
         };
         matches.push(m);
+    }
+    Ok(matches)
+}
+
+/**
+*   Loads all matches, no champ restrictions. I think this is more efficient than passing
+*   empty arrays, not sure if postgres optimizes it away. Also requires just 1 query
+*   that we can just duplicate for same and opp.
+*/
+fn load_all_matches(champions: &Champions) -> Result<Vec<GlobalMatch>, Error> {
+    let conn = get_connection_to_matches_db()?;
+    let mut matches: Vec<GlobalMatch> = Vec::new();
+    for row in &conn.query(Q_ALL_MATCHES, &[])? {
+        let blue_wins: bool = row.get(0);
+        let blue_champ_names = row.get(1);
+        let red_champ_names = row.get(2);
+        let blue_bans = row.get(3);
+        let red_bans = row.get(4);
+        let m = GlobalMatch {
+            same_wins: blue_wins,
+            same_team: champions.idxs_from_names(&blue_champ_names),
+            opp_team: champions.idxs_from_names(&red_champ_names),
+            same_bans: champions.idxs_from_names(&blue_bans),
+            opp_bans: champions.idxs_from_names(&red_bans)
+        };
+        matches.push(m);
+        let m_flipped = GlobalMatch {
+            same_wins: !blue_wins,
+            same_team: champions.idxs_from_names(&red_champ_names),
+            opp_team: champions.idxs_from_names(&blue_champ_names),
+            same_bans: champions.idxs_from_names(&red_bans),
+            opp_bans: champions.idxs_from_names(&blue_bans)
+        };
+        matches.push(m_flipped);
     }
     Ok(matches)
 }
