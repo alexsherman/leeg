@@ -61,7 +61,6 @@ class ChampionMatrix extends React.Component {
         super();
         this.state = {
             matrix: [],
-            champions: [],
             expanded: false
         }
     }
@@ -106,7 +105,6 @@ class ChampionMatrix extends React.Component {
                         }
                     })
                 });
-                this.setState({champions: j[0].req_service.champions.list});
             }); 
         }).catch(err => {
             console.log(err);
