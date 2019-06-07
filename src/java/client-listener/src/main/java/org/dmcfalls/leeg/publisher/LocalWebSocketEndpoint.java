@@ -5,6 +5,7 @@ import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
+import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
@@ -41,8 +42,17 @@ public class LocalWebSocketEndpoint  {
      */
     @OnOpen
     public void onOpen(Session session) {
-        System.out.println("Opening websocket");
+        System.out.println("Opening websocket session");
         this.session = session;
+    }
+
+    /**
+     * Message handler. Simply prints the message, so we know what we've received!
+     * @param message the message received
+     */
+    @OnMessage
+    public void onMessage(String message) {
+
     }
 
     /**
@@ -53,7 +63,7 @@ public class LocalWebSocketEndpoint  {
      */
     @OnClose
     public void onClose(Session session, CloseReason reason) {
-        System.out.println("Closing websocket: " + reason);
+        System.out.println("Closing websocket session: " + reason);
         try {
             this.session.close();
         } catch (IOException e) {

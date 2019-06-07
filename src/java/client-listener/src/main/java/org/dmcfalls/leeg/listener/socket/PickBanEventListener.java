@@ -29,6 +29,7 @@ public class PickBanEventListener implements ClientWebSocket.SocketListener {
 
     @Override
     public void onEvent(ClientWebSocket.Event event) {
+        publisher.publish("Hello websocket!");
         if (filter.allow(event)) {
             Optional<ChampionSelectSnapshot> result = processor.buildChampionSelectSnapshot(event);
             result.ifPresent(championSelectSnapshot -> publisher.publish(gson.toJson(championSelectSnapshot)));

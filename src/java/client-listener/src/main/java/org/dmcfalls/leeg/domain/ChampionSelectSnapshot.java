@@ -20,8 +20,9 @@ public class ChampionSelectSnapshot implements Serializable {
     private Set<Integer> opponentTeamBans;
 
     /*
-     TODO: Decide if the below are worth implementing and implement if so
+     TODO: Decide if the below are worth implementing and implement if so:
        * cellId and summonerId for each champion selection
+       * pickable champions (for the current summoner, presumably)
      */
 
     public String getSummonerName() {
