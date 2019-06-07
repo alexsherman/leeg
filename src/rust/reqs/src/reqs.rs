@@ -142,10 +142,11 @@ impl ReqService for SingleSummonerReqService {
  */
  #[derive(Clone, Deserialize, Serialize)]
 pub struct GlobalReqService {
-    champions: Champions,
+    team_picks: Vec<String>,
+    opp_picks: Vec<String>,
     score_vectors: GlobalScoreVectors,
 }
-
+/*
 impl ReqService for GlobalReqService {
 
     fn req(&self, team_picks: &Vec<String>, opp_picks: &Vec<String>,
@@ -154,24 +155,32 @@ impl ReqService for GlobalReqService {
         unimplemented!();
     }
 
-    fn req_banless(&self, team_picks: &Vec<String>, opp_picks: &Vec<String>, num_reqs: usize)
+    fn req_banless(&self, champions: &Champions, num_reqs: usize)
             -> Vec<String> {
         
-        let mut scores = self.calculate_scores(team_picks, opp_picks);
+        let mut scores = self.calculate_scores(&champions);
         return self.get_reqs(&mut scores, num_reqs);
         
     } 
 }
-
+*/
 impl GlobalReqService {
+   	pub fn req_banless(&self, champions: &Champions, num_reqs: usize)
+	       		 -> Vec<String> {
+	    
+	    let mut scores = self.calculate_scores(&champions);
+	    return self.get_reqs(&mut scores, num_reqs, &champions);
+    
+    } 
 
 	/**
 	 * Construct a new GlobalReqService given match and champion data
 	 */
-	pub fn from_matches(matches: &Vec<GlobalMatch>, champions: &Champions) -> GlobalReqService {
+	pub fn from_matches(matches: &Vec<GlobalMatch>, team_picks: &Vec<String>, opp_picks: &Vec<String>, num_champions: usize) -> GlobalReqService {
 		return GlobalReqService {
-			champions: champions.clone(),
-			score_vectors: GlobalScoreVectors::from_global_matches(matches, champions.len()),
+			team_picks: team_picks.clone(),
+			opp_picks: opp_picks.clone(),
+			score_vectors: GlobalScoreVectors::from_global_matches(matches, num_champions),
 		};
 	}
 
@@ -179,12 +188,12 @@ impl GlobalReqService {
 	 * Currently only calculates the best picks for someone on the "same" team. Could also return
      * results for "opp" team, representing the best picks against
 	 */
-	fn calculate_scores(&self, team_picks: &Vec<String>, opp_picks: &Vec<String>) -> Vec<f64> {
-        let team_idxs = self.champions.idxs_from_names(team_picks);
-        let opp_idxs = self.champions.idxs_from_names(opp_picks);
+	fn calculate_scores(&self, champions: &Champions) -> Vec<f64> {
+        let team_idxs = champions.idxs_from_names(&self.team_picks);
+        let opp_idxs = champions.idxs_from_names(&self.opp_picks);
 
-		let mut scores: Vec<f64> = Vec::with_capacity(self.champions.len());
-		for i in 0..self.champions.len() { 
+		let mut scores: Vec<f64> = Vec::with_capacity(champions.len());
+		for i in 0..champions.len() { 
 			let mut score_i: f64 = self.score_vectors.same_winrates[i]; 
 			if score_i == ONE_F64 || team_idxs.contains(&i) || opp_idxs.contains(&i) {
 				score_i = ZERO_F64;
@@ -194,7 +203,7 @@ impl GlobalReqService {
 		scores
 	}
 
-    fn get_reqs(&self, scores: &mut Vec<f64>, num_reqs: usize) -> Vec<String> {
+    fn get_reqs(&self, scores: &mut Vec<f64>, num_reqs: usize, champions: &Champions) -> Vec<String> {
 		let mut req_idxs: Vec<usize> = Vec::new();
         let mut top_scores: Vec<f64> = Vec::new();
         let mut pick_rates: Vec<f64> = Vec::new();
@@ -209,7 +218,7 @@ impl GlobalReqService {
 			// Zero-out the score in question so that reqs are not duplicated
 			scores[req_idx] = ZERO_F64;
 		}
-        let names = self.champions.names_from_idxs(&req_idxs);
+        let names = champions.names_from_idxs(&req_idxs);
         for i in 0..top_scores.len() {
             println!("{} -> {:.2}% (picked {:.2}%)", names[i], top_scores[i] * 100f64, pick_rates[i] * 100f64);
         }
@@ -236,10 +245,12 @@ pub struct NamedGlobalService {
 * combines the scores of the vectors given their respective weights.
 * Note that champion vectors should be in the same order for all GSWW.
 */ 
-pub fn combine_req_services(services: &Vec<GlobalServiceWithWeight>, roles: Option<Vec<String>>) -> GlobalReqService {
+pub fn combine_req_services(services: &Vec<GlobalServiceWithWeight>, team_picks: &Vec<String>, 
+							opp_picks: &Vec<String>, roles: Option<Vec<String>>, champions: &Champions) -> GlobalReqService {
 	let mut combined_service = GlobalReqService {
-		champions: services[0].req_service.champions.clone(),
-		score_vectors: GlobalScoreVectors::with_dimensions(services[0].req_service.champions.len()),
+		team_picks: team_picks.clone(),
+		opp_picks: opp_picks.clone(),
+		score_vectors: GlobalScoreVectors::with_dimensions(champions.len()),
 	};
 
 	let mut total_weight: usize = 0;
@@ -260,12 +271,12 @@ pub fn combine_req_services(services: &Vec<GlobalServiceWithWeight>, roles: Opti
 		}
 	}
 	// filter out champs which don't match the roles specified
-	for i in 0..combined_service.champions.len() { 
+	for i in 0..champions.len() { 
 		let champ_matches_roles: bool = match &roles {
 			Some(x) => {
 				let mut found = false;
 				for role in x {
-					if combined_service.champions.get_list()[i].get_roles().contains(&role) {
+					if champions.get_list()[i].get_roles().contains(&role) {
 						found = true;
 					}
 				}
