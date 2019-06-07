@@ -2,6 +2,29 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import {ChampSquare} from "./main.js";
 
+class MatrixCell extends React.Component {
+    constructor() {
+        super()
+        this.state = {
+            expanded: false
+        }
+    }
+
+    onClick() {
+        this.setState({expanded: !this.state.expanded});
+    }
+
+    render() {
+        return (
+            <div style={this.props.style} 
+                 className={this.state.expanded ? "matrix-cell expanded" : "matrix-cell"}
+                 onClick={this.onClick.bind(this)}
+            >
+                {(this.props.score * 100).toFixed(2) + '%'}
+            </div>)
+        }
+}
+
 function FullScreenToggle(props) {
     console.log(props)
     return (
@@ -43,7 +66,8 @@ class ChampionMatrix extends React.Component {
             mode: "cors",
             headers: {
                 "Accept": "application/json"
-            }
+            },
+            cache: 'force-cache'
         }).then(resp => {
 
             resp.json().then(j => {
@@ -76,9 +100,8 @@ class ChampionMatrix extends React.Component {
                     style = {"backgroundColor": "#FFFFFF", "color": "#FFFFFF"};
                 }
                 return (
-                    <div style={style} className="matrix-cell">
-                        {(vs_champ.winrates_into[champion.idx] * 100).toFixed(2) + '%'}
-                    </div>
+                    <MatrixCell style={style} score={vs_champ.winrates_into[champion.idx]} />
+                    
                 )
             });
             return (
