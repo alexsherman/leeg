@@ -28,9 +28,9 @@
 
     <!-- League of Legends local client API -->
     <dependency>
-      <groupId>com.stirante</groupId>
+      <groupId>com.github.stirante</groupId>
       <artifactId>lol-client-java-api</artifactId>
-      <version>0.1.DEV-SNAPSHOT</version>
+      <version>1.1.1</version>
     </dependency>
 
     <!-- For serialization into JSON -->
@@ -93,6 +93,15 @@
               <mainClass>org.dmcfalls.leeg.ClientListenerApp</mainClass>
             </manifest>
           </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <!-- Allow easy execution from the command line with mvn exec:java -->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <configuration>
+          <mainClass>org.dmcfalls.leeg.ClientListenerApp</mainClass>
         </configuration>
       </plugin>
     </plugins>

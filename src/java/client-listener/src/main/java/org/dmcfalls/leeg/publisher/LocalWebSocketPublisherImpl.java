@@ -10,7 +10,7 @@ public class LocalWebSocketPublisherImpl implements LocalWebSocketPublisher {
 
     @Override
     public void open() {
-        System.out.println("Attempting connection...");
+        System.out.println("Attempting connection to " + LOCAL_ADDRESS + " ...");
         URI localAddressUri = URI.create(LOCAL_ADDRESS);
         localEndpoint = new LocalWebSocketEndpoint(localAddressUri);
         System.out.println("Connected!");
