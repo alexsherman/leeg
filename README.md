@@ -13,7 +13,6 @@ log on to google cloud console, get the databse IP from overview page, and white
 connect without ssl (for now)
 
 ## how to run web app
-0. until merged, you will need to be on branch `webpack-role-frontend`
 1. run `npm install` in src/javascript/websocket-test and src/javascript/reqme
 2. run `cargo build` in src/rust/banana (requires nightly version of rust: `rustup default nightly`)
 3. install redis:
