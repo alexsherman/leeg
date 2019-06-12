@@ -19,8 +19,7 @@ const SUFFICIENT_MATCH_THRESHOLD: usize = 1000;
 
 
 pub fn handle_req_req(summoner_name: &str, team_picks: &Vec<String>, opp_picks: &Vec<String>, 
-                        team_bans: &Vec<String>, opp_bans: &Vec<String>) -> Vec<String> {
-    let champions = load_champions(CHAMPIONS_FILE_PATH.to_string());
+                        team_bans: &Vec<String>, opp_bans: &Vec<String>, champions: &Champions) -> Vec<String> {
     let num_reqs = 10;
     let matches = load_summoner_matches_from_db(String::from(summoner_name), &champions).unwrap();
     let req_service = SingleSummonerReqService::from_matches(&matches, &champions);
@@ -28,20 +27,18 @@ pub fn handle_req_req(summoner_name: &str, team_picks: &Vec<String>, opp_picks: 
 }
 
 pub fn simple_handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, champions: &Champions) -> Vec<String> {
-    let champions = load_champions(CHAMPIONS_FILE_PATH.to_string());
     let matches = load_global_matches_from_db(&team_picks, &opp_picks, &champions).unwrap();
     let req_service = GlobalReqService::from_matches(&matches, &team_picks, &opp_picks, champions.len());
     req_service.req_banless(&champions, 10)
 }
 
-pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, roles: Option<Vec<String>>) 
+pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, roles: Option<Vec<String>>, champions: &Champions) 
                             -> Vec<String> {
     // connnect to redis
     let redis_connection = get_connection();
     // this will hold all the req structs which we will combine at the end
     let mut service_vec: Vec<GlobalServiceWithWeight> = Vec::new();
     let mut num_matches_analyzed: usize = 0;
-    let champions = load_champions_with_role(CHAMPIONS_FILE_PATH.to_string(), ROLES_FILE_PATH.to_string());
     let weighted_service = get_or_create_global_req_service(&redis_connection, &team_picks, &opp_picks, &champions, true);
     num_matches_analyzed += weighted_service.weight;
     service_vec.push(weighted_service);

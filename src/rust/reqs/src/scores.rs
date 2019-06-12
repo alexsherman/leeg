@@ -213,7 +213,7 @@ pub struct GlobalScoreVectors {
     pub opp_pickrates: Vec<Score>,
     pub same_banrates: Vec<Score>,
     pub opp_banrates: Vec<Score>,
-    n: usize
+    pub n: usize
 }
 
 pub trait ScoreVector {
@@ -262,11 +262,17 @@ impl GlobalScoreVectors {
 		}
         let raw_winrate = wins as f64 / games as f64;
         let mut small_sample_penalty = 0f64;
-        if games < 100 && raw_winrate > 0.55f64 {
+        let mut factor = 0f65;
+        if games < 100 {
             small_sample_penalty = 0.5 as f64 / games as f64;
         }
+        if raw_winrate > 0.6 {
+            factor = 1;
+        } else if raw_winrate < 0.4 {
+            factor = -1;
+        }
       //  println!("{} - {} = {}", raw_winrate, small_sample_penalty, raw_winrate - small_sample_penalty);
-		raw_winrate - small_sample_penalty
+		raw_winrate - small_sample_penalty * factor
 	}
 
     fn calc_pickrate(&self, games: u32, total_games: u32) -> f64 {
