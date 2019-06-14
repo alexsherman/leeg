@@ -262,14 +262,14 @@ impl GlobalScoreVectors {
 		}
         let raw_winrate = wins as f64 / games as f64;
         let mut small_sample_penalty = 0f64;
-        let mut factor = 0f65;
+        let mut factor = 0f64;
         if games < 100 {
             small_sample_penalty = 0.5 as f64 / games as f64;
         }
         if raw_winrate > 0.6 {
-            factor = 1;
+            factor = 1f64;
         } else if raw_winrate < 0.4 {
-            factor = -1;
+            factor = -1f64;
         }
       //  println!("{} - {} = {}", raw_winrate, small_sample_penalty, raw_winrate - small_sample_penalty);
 		raw_winrate - small_sample_penalty * factor

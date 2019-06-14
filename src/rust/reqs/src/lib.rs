@@ -8,7 +8,7 @@ mod champions;
 mod reqs;
 
 use itertools::Itertools;
-pub use champions::{load_champions,load_champions_with_role,Champions};
+pub use champions::{load_champions,load_champions_with_role,Champions, load_champions_from_db};
 use matches::{load_summoner_matches_from_db, load_global_matches_from_db, GlobalMatch, GlobalMatchMatrices};
 use reqs::{ReqService, SingleSummonerReqService, GlobalReqService, NamedGlobalService, GlobalServiceWithWeight, combine_req_services};
 use utils::redis_utils::{get_connection, Connection, get_cached_global_reqs, insert_cached_global_reqs};

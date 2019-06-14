@@ -19,6 +19,8 @@ pub const Q_GLOBAL_MATCHES_BOTH_TEAM_RED: &str = "select blue_wins, blue_team, r
 pub const Q_GLOBAL_MATCHES_SINGLE_TEAM_BLUE: &str = "select blue_wins, blue_team, red_team from all_matches where blue_team @> $1";
 pub const Q_GLOBAL_MATCHES_SINGLE_TEAM_RED: &str = "select blue_wins, blue_team, red_team from all_matches where red_team @> $1";
 
+pub const Q_ALL_CHAMPIONS: &str = "select * from champions order by id";
+
 /**
  ** Config toml file to connect to database.
  **/
