@@ -146,6 +146,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
 }
 
 .matrix-left-column {
@@ -177,9 +178,10 @@ body {
 }
 
 .matrix-cell.expanded {
-    width: 150px;
-    height: 150px;
+    width: 200px;
+    height: 200px;
     z-index: 5;
+    background-color: #ffffff;
 }
 
 .expansion-toggle {
@@ -190,4 +192,19 @@ body {
     color: white;
     cursor: pointer;
     z-index: 4;
+}
+
+.selections-enter {
+  opacity: 0;
+}
+.selections-enter-active {
+  opacity: 1;
+  transition: opacity 200ms;
+}
+.selections-exit {
+  opacity: 1;
+}
+.selections-exit-active {
+  opacity: 0;
+  transition: opacity 200ms;
 }

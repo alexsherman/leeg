@@ -1,29 +1,6 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
-import {ChampSquare} from "./main.js";
-
-class MatrixCell extends React.Component {
-    constructor() {
-        super()
-        this.state = {
-            expanded: false
-        }
-    }
-
-    onClick() {
-        this.setState({expanded: !this.state.expanded});
-    }
-
-    render() {
-        return (
-            <div style={this.props.style} 
-                 className={this.state.expanded ? "matrix-cell expanded" : "matrix-cell"}
-                 onClick={this.onClick.bind(this)}
-            >
-                {(this.props.score * 100).toFixed(2) + '%'}
-            </div>)
-        }
-}
+import {getMatrix, renderMatrixBody, MatrixCell} from "./matrix-utils";
 
 function FullScreenToggle(props) {
     console.log(props)
@@ -39,13 +16,12 @@ class ChampionMatrix extends React.Component {
         super();
         this.state = {
             matrix: [],
-            champions: [],
             expanded: false
         }
     }
 
     componentDidMount() {
-        this.getMatrix();
+        this.setMatrix();
     }
 
     expand() {
@@ -60,82 +36,24 @@ class ChampionMatrix extends React.Component {
         });
     }
 
-    getMatrix() {
-        fetch( 'http://localhost:8000/championmatrix', {
-            method: "GET",
-            mode: "cors",
-            headers: {
-                "Accept": "application/json"
-            },
-            cache: 'force-cache'
-        }).then(resp => {
-
-            resp.json().then(j => {
-                this.setState({
-                    matrix: j.map((champion, idx) => {
-                        return {
-                            name: champion.champ_name,
-                            winrates_into: champion.req_service.score_vectors.same_winrates,
-                            pickrates_into: champion.req_service.score_vectors.same_pickrates,
-                            idx: idx
-                        }
-                    })
-                });
-                this.setState({champions: j[0].req_service.champions.list});
-            }); 
-        }).catch(err => {
-            console.log(err);
+    setMatrix() {
+        getMatrix().then(matrix => {
+            console.log(matrix);
+            this.setState({
+                matrix: matrix
+            });
         });
     }
 
     render() {
-        this.state.matrix = this.state.matrix.sort((a,b) => {
-            return a.name > b.name;
-        });
-        let vs_table = this.state.matrix.map((champion) => {
-            let champ_winrates = this.state.matrix.map((vs_champ) => {
-                let wr = parseFloat(vs_champ.winrates_into[champion.idx]) - 0.5;
-                let style = {"backgroundColor": 'rgb(' + ((0.5 - wr * 2) * 256) + ',' + ((0.5 + wr * 2) * 256) + ',0)'};
-                if (vs_champ.winrates_into[champion.idx] > 0.999) {
-                    style = {"backgroundColor": "#FFFFFF", "color": "#FFFFFF"};
-                }
-                return (
-                    <MatrixCell style={style} score={vs_champ.winrates_into[champion.idx]} />
-                    
-                )
-            });
-            return (
-                <React.Fragment>
-                    <div className="matrix-cell matrix-left-column">
-                        <ChampSquare champion={champion.name} />
-                    
-                    </div>
-                    {champ_winrates}
-                </React.Fragment>
-            )
-        });
-        let vs_header = (this.state.matrix.map((champ) => champ.name)).map(name => {
-            return (
-                <div className="matrix-cell matrix-header">
-                    <ChampSquare champion={name} />
-                    
-                </div>
-            )
-        });
+       let matrixBody = renderMatrixBody(this.state.matrix);
         return (
-                <div className="matrix-container">
-                    <FullScreenToggle expanded={this.state.expanded} expand={this.expand.bind(this)}/>
-                    {vs_header}
-                    {vs_table}
-                </div>
-            )
-        }
+            <div className="matrix-container">
+                <FullScreenToggle expanded={this.state.expanded} expand={this.expand.bind(this)}/>
+                {matrixBody}
+            </div>
+        )   
+   }
 }
-
-
-ReactDOM.render(
-  <ChampionMatrix />,
-  document.getElementById('app')
-);
 
 export default ChampionMatrix;

@@ -1,13 +1,15 @@
 /**
  * Contains static champion data and functions to load that data from JSON
- * @author dmcfalls
+ * @author dmcfalls, alexsherman
  */
-
 extern crate serde_json;
+extern crate postgres;
 
 use std::fs::File;
 use std::io::Read;
 use std::collections::HashMap;
+use utils::postgres_utils::*;
+use self::postgres::Error;
 
 // Used as a hint to pre-allocate data structures correlated to the set of champions
 pub const EXPECTED_CHAMPIONS_COUNT: usize = 143;
@@ -63,9 +65,16 @@ impl Champions {
 	}
 
 	pub fn idxs_from_names(&self, champion_names: &Vec<String>) -> Vec<usize> {
-		return champion_names.iter()
-				.map(|name| self.name_hashes.get(name).unwrap().clone())
-				.collect();
+		let mut ids: Vec<usize> = Vec::new();
+		for name in champion_names {
+			match self.name_hashes.get(name) {
+				Some(n) => {
+					ids.push(n.clone());
+				},
+				None => ()
+			};
+		}
+		ids
 	}
 
 	pub fn names_from_idxs(&self, champion_idxs: &Vec<usize>) -> Vec<String> {
@@ -128,4 +137,13 @@ pub fn load_champions_with_role(champ_filename: String, role_filename: String) -
 		sorted_champions.push(c.id, c.name, roles_map.get(&c.id).unwrap().clone());
 	}
 	sorted_champions
+}
+
+pub fn load_champions_from_db() -> Result<Champions, Error> {
+ 	let conn = get_connection_to_matches_db()?;
+ 	let mut champions = Champions::new();
+    for row in &conn.query(Q_ALL_CHAMPIONS, &[])? {
+		champions.push(row.get(0), row.get(1), row.get(2));
+    }
+    Ok(champions)
 }

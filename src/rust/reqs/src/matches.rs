@@ -207,7 +207,9 @@ pub fn load_summoner_matches_from_db(summoner_name: String, champions: &Champion
 pub struct GlobalMatch {
     pub same_wins: bool,
     pub same_team: Vec<usize>,
-    pub opp_team: Vec<usize>
+    pub opp_team: Vec<usize>,
+    pub same_bans: Vec<usize>,
+    pub opp_bans: Vec<usize>
 }
 
 impl GlobalMatch {
@@ -218,6 +220,14 @@ impl GlobalMatch {
 	pub fn get_opp_team_champion_idxs(&self) -> &Vec<usize> {
 		&(self.opp_team)
 	}
+
+    pub fn get_same_bans(&self) -> &Vec<usize> {
+        &(self.same_bans)
+    }
+
+    pub fn get_opp_bans(&self) -> &Vec<usize> {
+        &(self.opp_bans)
+    }
 }
 
 /*
@@ -230,16 +240,22 @@ impl GlobalMatch {
  */
 pub fn load_global_matches_from_db(same_team: &Vec<String>, opp_team: &Vec<String>, champions: &Champions) -> Result<Vec<GlobalMatch>, Error> {
     println!("{:?}, {:?}", same_team, opp_team);
+    if same_team.is_empty() && opp_team.is_empty() {
+        return load_all_matches(&champions);
+    }
     let conn = get_connection_to_matches_db()?;
     let mut matches: Vec<GlobalMatch> = Vec::new();
     for row in &conn.query(Q_GLOBAL_MATCHES_BOTH_TEAM_BLUE, &[&same_team, &opp_team])? {
         let same_champ_names = row.get(1);
         let opp_champ_names = row.get(2);
+        let same_bans = row.get(3);
+        let opp_bans = row.get(4);
         let m = GlobalMatch {
             same_wins: row.get(0),
             same_team: champions.idxs_from_names(&same_champ_names),
-            opp_team: champions.idxs_from_names(&opp_champ_names)
-
+            opp_team: champions.idxs_from_names(&opp_champ_names),
+            same_bans: champions.idxs_from_names(&same_bans),
+            opp_bans: champions.idxs_from_names(&opp_bans)
         };
         matches.push(m);
     }
@@ -247,12 +263,50 @@ pub fn load_global_matches_from_db(same_team: &Vec<String>, opp_team: &Vec<Strin
         let opp_wins: bool = row.get(0);
         let same_champ_names = row.get(2);
         let opp_champ_names = row.get(1);
+        let same_bans = row.get(4);
+        let opp_bans = row.get(3);
         let m = GlobalMatch {
             same_wins: !opp_wins,
             same_team: champions.idxs_from_names(&same_champ_names),
-            opp_team: champions.idxs_from_names(&opp_champ_names)
+            opp_team: champions.idxs_from_names(&opp_champ_names),
+            same_bans: champions.idxs_from_names(&same_bans),
+            opp_bans: champions.idxs_from_names(&opp_bans)
         };
         matches.push(m);
+    }
+    Ok(matches)
+}
+
+/**
+*   Loads all matches, no champ restrictions. I think this is more efficient than passing
+*   empty arrays, not sure if postgres optimizes it away. Also requires just 1 query
+*   that we can just duplicate for same and opp.
+*/
+fn load_all_matches(champions: &Champions) -> Result<Vec<GlobalMatch>, Error> {
+    let conn = get_connection_to_matches_db()?;
+    let mut matches: Vec<GlobalMatch> = Vec::new();
+    for row in &conn.query(Q_ALL_MATCHES, &[])? {
+        let blue_wins: bool = row.get(0);
+        let blue_champ_names = row.get(1);
+        let red_champ_names = row.get(2);
+        let blue_bans = row.get(3);
+        let red_bans = row.get(4);
+        let m = GlobalMatch {
+            same_wins: blue_wins,
+            same_team: champions.idxs_from_names(&blue_champ_names),
+            opp_team: champions.idxs_from_names(&red_champ_names),
+            same_bans: champions.idxs_from_names(&blue_bans),
+            opp_bans: champions.idxs_from_names(&red_bans)
+        };
+        matches.push(m);
+        let m_flipped = GlobalMatch {
+            same_wins: !blue_wins,
+            same_team: champions.idxs_from_names(&red_champ_names),
+            opp_team: champions.idxs_from_names(&blue_champ_names),
+            same_bans: champions.idxs_from_names(&red_bans),
+            opp_bans: champions.idxs_from_names(&blue_bans)
+        };
+        matches.push(m_flipped);
     }
     Ok(matches)
 }

@@ -1,11 +1,14 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+
 
 export default function Sidebar(props) {
     return (
         <div className='sidebar-container'>
             <Logo />
-           
+            <Link to="/">Draft</Link>
+            <Link to="/matrix">Matrix</Link>
             <NotEndorsedNotice />
         </div>
     )
@@ -21,16 +24,7 @@ function Logo(props) {
         </div>
     );
 }
-/*
-function NavLinks(props) {
-    const sections = {
 
-    }
-    return (
-
-    )
-}
-*/
 function NotEndorsedNotice(props) {
     return (
         <div className="notice">
