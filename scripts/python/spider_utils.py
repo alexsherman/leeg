@@ -8,6 +8,7 @@ _url_root = 'https://na1.api.riotgames.com'
 _summoner_path = '/lol/summoner/v4/summoners/by-name/'
 _match_history_path = '/lol/match/v4/matchlists/by-account/'
 _match_info_path = '/lol/match/v4/matches/'
+_mastery_path = '/lol/champion-mastery/v4/champion-masteries/by-summoner/'
 
 try:
     key = os.environ['RIOT_API_KEY']
@@ -78,3 +79,6 @@ def getMatch(match_id):
     match_request_url = _url_root + _match_info_path + str(match_id)
     return makeRequest(match_request_url).json()
 
+def getSummonerMasteries(encrypted_summoner_id):
+    mastery_request_url = _url_root + _mastery_path + encrypted_summoner_id
+    return makeRequest(mastery_request_url).json()
