@@ -10,3 +10,5 @@ pub mod vec_deserializer;
 pub mod postgres_utils;
 
 pub mod redis_utils;
+
+pub mod riot_api_utils;

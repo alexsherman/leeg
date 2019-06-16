@@ -20,6 +20,7 @@ chrono = "0.4"
 toml = "0.4.2"
 itertools = "0.8"
 redis = "0.10.0"
+reqwest = "0.9.18"
 
 [dependencies.postgres]
 version = "0.15"

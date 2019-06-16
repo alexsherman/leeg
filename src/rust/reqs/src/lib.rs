@@ -6,32 +6,23 @@ mod scores;
 mod utils;
 mod champions;
 mod reqs;
+mod summoners;
 
 use itertools::Itertools;
 pub use champions::{load_champions,load_champions_with_role,Champions, load_champions_from_db};
-use matches::{load_summoner_matches_from_db, load_global_matches_from_db, GlobalMatch, GlobalMatchMatrices};
+use matches::{load_global_matches_from_db, GlobalMatch, GlobalMatchMatrices};
 use reqs::{ReqService, SingleSummonerReqService, GlobalReqService, NamedGlobalService, GlobalServiceWithWeight, combine_req_services};
-use utils::redis_utils::{get_connection, Connection, get_cached_global_reqs, insert_cached_global_reqs};
+use utils::redis_utils::{get_connection, Connection, get_cached_global_reqs, insert_cached_global_reqs, REDIS_DEFAULT_EXPIRE_TIME};
+use utils::riot_api_utils::{request_summoner_id_from_api, request_masteries_from_api};
 
 const CHAMPIONS_FILE_PATH: &str = "/mnt/c/Users/Alex/Documents/dev/leeg/champions.json";
 const ROLES_FILE_PATH: &str = "/mnt/c/Users/Alex/Documents/dev/leeg/champion_roles.json";
 const SUFFICIENT_MATCH_THRESHOLD: usize = 1000;
 
 
-pub fn handle_req_req(summoner_name: &str, team_picks: &Vec<String>, opp_picks: &Vec<String>, 
-                        team_bans: &Vec<String>, opp_bans: &Vec<String>, champions: &Champions) -> Vec<String> {
-    let num_reqs = 10;
-    let matches = load_summoner_matches_from_db(String::from(summoner_name), &champions).unwrap();
-    let req_service = SingleSummonerReqService::from_matches(&matches, &champions);
-    req_service.req(&team_picks, &opp_picks, &team_bans, &opp_bans, num_reqs)
-}
-
-pub fn simple_handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, champions: &Champions) -> Vec<String> {
-    let matches = load_global_matches_from_db(&team_picks, &opp_picks, &champions).unwrap();
-    let req_service = GlobalReqService::from_matches(&matches, &team_picks, &opp_picks, champions.len());
-    req_service.req_banless(&champions, 10)
-}
-
+/*
+    TODO add comments
+*/
 pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, roles: Option<Vec<String>>, champions: &Champions) 
                             -> Vec<String> {
     // connnect to redis
@@ -95,7 +86,7 @@ fn get_or_create_global_req_service(conn: &Connection, team_picks: &Vec<String>,
         req_service: service,
         weight: matches.len()
     };
-    insert_cached_global_reqs(&conn, &team_picks, &opp_picks, weighted_service.clone());
+    insert_cached_global_reqs(&conn, &team_picks, &opp_picks, weighted_service.clone(), Some(REDIS_DEFAULT_EXPIRE_TIME));
     if derive {
         derive_and_cache_granular_services(&conn, &matches, &team_picks, &opp_picks, &champions);
     }
@@ -144,12 +135,12 @@ fn create_then_cache_services(conn: &Connection, derived_matrices: &GlobalMatchM
             true => {
                 let mut potential_team_picks = team_picks.clone();
                 potential_team_picks.push(champ_name.clone());
-                insert_cached_global_reqs(&conn, &potential_team_picks, &opp_picks, weighted_service);    
+                insert_cached_global_reqs(&conn, &potential_team_picks, &opp_picks, weighted_service, Some(REDIS_DEFAULT_EXPIRE_TIME));    
             },
             false => {
                 let mut potential_opp_picks = opp_picks.clone();
                 potential_opp_picks.push(champ_name.clone());
-                insert_cached_global_reqs(&conn, &team_picks, &potential_opp_picks, weighted_service);    
+                insert_cached_global_reqs(&conn, &team_picks, &potential_opp_picks, weighted_service, Some(REDIS_DEFAULT_EXPIRE_TIME));    
             }
         }
         
