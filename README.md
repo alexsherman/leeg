@@ -15,32 +15,32 @@ connect without ssl (for now)
 ## how to run web app
 1. run `npm install` in src/javascript/websocket-test and src/javascript/reqme
 2. run `cargo build` in src/rust/banana (requires nightly version of rust: `rustup default nightly`)
-2.5 make sure `libssl-dev` and `pkg-config` are installed on your machine - necessary for rust request library used to call riot API routes.
-3. install redis:
+3 make sure `libssl-dev` and `pkg-config` are installed on your machine - necessary for rust request library used to call riot API routes.
+4. install redis:
  ```
  wget http://download.redis.io/redis-stable.tar.gz
 tar xvzf redis-stable.tar.gz
 cd redis-stable
 sudo make install //this will add redis-cli and redis-server to your path
  ```
- 4. run redis with the conf file in the main directory
+ 5. run redis with the conf file in the main directory
  ```
  redis-server redis.conf
  ```
  6. make sure you have a Db_config.toml filled out with the right values in src/rust/banana
- 5. start your api. from src/rust/banana. You may need to adjust the paths for the champion files in lib.rs until we figure out a better solution for that:
+ 7. start your api. from src/rust/banana. You may need to adjust the paths for the champion files in lib.rs until we figure out a better solution for that:
  ```
  cargo run
  ```
- 6. start the test websocket. go to src/javascript/websocket-test and run:
+ 8. start the test websocket. go to src/javascript/websocket-test and run:
  ```
  node test.js
  ```
- 7. start the web app. go to src/javascript/reqme and run:
+ 9. start the web app. go to src/javascript/reqme and run:
  ```
  npm start
  ```
- 8. Now you can test it out! In the shell that is running the test websocket, you should see a message 'connected'. That means you're ready to broadcast champion picks to the webapp. Type the exact name of any champion in the shell and hit enter. That champ should pop up in the webapp, and it should automatically fire off a request to your api and display the reqs. Keep adding champs this way. You can type 'clear' and hit enter to remove all champs added. 
+ 10. Now you can test it out! In the shell that is running the test websocket, you should see a message 'connected'. That means you're ready to broadcast champion picks to the webapp. Type the exact name of any champion in the shell and hit enter. That champ should pop up in the webapp, and it should automatically fire off a request to your api and display the reqs. Keep adding champs this way. You can type 'clear' and hit enter to remove all champs added. 
 
 ## how to setup and run the java client listener
 
