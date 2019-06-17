@@ -15,6 +15,7 @@ connect without ssl (for now)
 ## how to run web app
 1. run `npm install` in src/javascript/websocket-test and src/javascript/reqme
 2. run `cargo build` in src/rust/banana (requires nightly version of rust: `rustup default nightly`)
+2.5 make sure `libssl-dev` and `pkg-config` are installed on your machine - necessary for rust request library used to call riot API routes.
 3. install redis:
  ```
  wget http://download.redis.io/redis-stable.tar.gz
