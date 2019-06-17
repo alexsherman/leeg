@@ -1,7 +1,7 @@
 use std::collections::HashMap;
-extern crate serde_json;
-use self::serde_json::json;
+use std::fmt;
 
+#[derive(Debug, Deserialize, Serialize, Clone)] 
 pub enum Region {
     BR,
     EUNE,
@@ -22,7 +22,7 @@ impl fmt::Display for Region {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Mastery {
     #[serde(rename="championId")]
     pub champion_id: i16,
@@ -32,7 +32,7 @@ pub struct Mastery {
     pub mastery_points: i32
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Masteries {
     pub id: String,
     pub map: HashMap<i16, Mastery>
@@ -40,13 +40,15 @@ pub struct Masteries {
 
 impl Masteries {
 
-    pub fn from_mastery_response(id: &String, response: Vec<Mastery>) -> Masteries {
-        let masteries = Masteries {
+    pub fn from_mastery_vec(id: &String, response: Vec<Mastery>) -> Masteries {
+        let mut masteries = Masteries {
             id: id.clone(),
             map: HashMap::new()
         };
         for mastery in response {
-            masteries.insert(mastery.champion_id, mastery);
+            masteries.map.insert(mastery.champion_id, mastery);
         }
+        masteries
     }
+
 }

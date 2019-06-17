@@ -3,7 +3,7 @@ pub use self::redis::{Client, Connection, Commands, RedisError};
 use reqs::GlobalServiceWithWeight;
 extern crate serde_json;
 use self::serde_json::json;
-use summoner_utils::Region;
+use super::summoner_utils::{Region, Masteries};
 
 pub const REDIS_DEFAULT_EXPIRE_TIME: usize = 3600;
 pub const REDIS_DEFAULT_EXPIRE_TIME_SUMMONER_ID: usize = 86400;
@@ -29,6 +29,10 @@ fn keyname_from_picks(team_picks: &Vec<String>, opp_picks: &Vec<String>) -> Stri
 */
 fn keyname_from_name_and_region(name: &String, region: &Region) -> String {
     format!("summonerid+{}-{}", name, region.to_string())
+}
+
+fn keyname_from_id_masteries(id: &String) -> String {
+    format!("masteries+{}", id)
 }
 
 /**
@@ -59,7 +63,8 @@ pub fn insert_cached_global_reqs(conn: &Connection, team_picks: &Vec<String>, op
 /**
 *   Gets cached summoner id from name and region, if one exists.
 */
-pub fn get_cached_summoner_id(conn: &Connection, name: &String, region: &Region) -> Result<String, RedisError> {
+pub fn get_cached_summoner_id(conn: &Connection, name: &String, region: &Region) 
+                              -> Result<String, RedisError> {
     let key = keyname_from_name_and_region(name, region);
     println!("getting id for {}", key);
     get_key_from_cache(&conn, &key)
@@ -68,10 +73,36 @@ pub fn get_cached_summoner_id(conn: &Connection, name: &String, region: &Region)
 /**
 *   Inserts summoner id to redis - default expire time 1 day.
 */
-pub fn insert_cached_summoner_id(conn: &Connection, name: &String, region: &Region, id: &String) -> Result<Vec<String>, RedisError> {
+pub fn insert_cached_summoner_id(conn: &Connection, name: &String, 
+                                 region: &Region, id: &String) 
+                                 -> Result<Vec<String>, RedisError> {
     let key = keyname_from_name_and_region(name, region);
     println!("inserting id for {}", key);
-    insert_key_value_to_cache(&conn, key, id.clone(), REDIS_DEFAULT_EXPIRE_TIME_SUMMONER_ID)
+    insert_key_value_to_cache(&conn, key, id.clone(), Some(REDIS_DEFAULT_EXPIRE_TIME_SUMMONER_ID))
+}
+
+/**
+*   Gets cached summoner masteries by id, if one exists.
+*/
+pub fn get_cached_summoner_masteries(conn: &Connection, id: &String) -> Result<Masteries, RedisError> {
+    let key = keyname_from_id_masteries(id);
+    println!("getting masteries for {}", key);
+    match get_key_from_cache(&conn, &key) {
+        Ok(res) => Ok(serde_json::from_str(&(res)).unwrap()),
+        Err(e) => Err(e)
+    }
+}
+
+
+/**
+*   Inserts summoner masteries to redis - default expire time 1 day.
+*/
+pub fn insert_cached_summoner_masteries(conn: &Connection, id: &String, 
+                                        masteries: Masteries) -> Result<Vec<String>, RedisError> {
+    let key = keyname_from_id_masteries(id);
+    println!("inserting masteries for {}", key);
+    let val = json!(masteries).to_string();
+    insert_key_value_to_cache(&conn, key, val, Some(REDIS_DEFAULT_EXPIRE_TIME_SUMMONER_ID))
 }
 
 /**

@@ -5,7 +5,7 @@
 
 use rocket_contrib::json::JsonValue;
 use std::vec::Vec;
-use reqs::{handle_global_req_req, get_global_matrix, load_champions_from_db, Champions};
+use reqs::{handle_global_req_req, get_global_matrix, load_champions_from_db,  get_summoner_mastery_by_name, Champions};
 use rocket::{Request, Response, State};
 use rocket::fairing::{Fairing, Info, Kind};
 use rocket::http::{Header, ContentType, Method};
@@ -38,11 +38,19 @@ fn champion_matrix() -> JsonValue {
     json!(get_global_matrix())
 }
 
+#[get("/summonermasteries?<name>")]
+fn summoner_masteries(name: String) -> JsonValue {
+    match get_summoner_mastery_by_name(name) {
+        Ok(masteries) => json!(masteries),
+        Err(_) => json!("no data")
+    }
+} 
+
 fn main() {
     // this will put all global winrates and 1 to 1 winrate services in cache if not cached already
     let champions: Champions = load_champions_from_db().unwrap();
     handle_global_req_req(&Vec::new(), &Vec::new(), None, &champions);
-    rocket::ignite().manage(champions).attach(CORS()).mount("/", routes![global_recommendation, champion_matrix]).launch();
+    rocket::ignite().manage(champions).attach(CORS()).mount("/", routes![global_recommendation, champion_matrix, summoner_masteries]).launch();
 }
 
 pub struct CORS();

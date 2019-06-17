@@ -1,19 +1,24 @@
 #[macro_use]
 extern crate serde_derive;
 extern crate itertools;
+#[macro_use]
+extern crate simple_error;
 mod matches;
 mod scores;
 mod utils;
 mod champions;
 mod reqs;
-mod summoners;
+mod summoner;
 
 use itertools::Itertools;
 pub use champions::{load_champions,load_champions_with_role,Champions, load_champions_from_db};
 use matches::{load_global_matches_from_db, GlobalMatch, GlobalMatchMatrices};
-use reqs::{ReqService, SingleSummonerReqService, GlobalReqService, NamedGlobalService, GlobalServiceWithWeight, combine_req_services};
+use reqs::{GlobalReqService, NamedGlobalService, GlobalServiceWithWeight, combine_req_services};
 use utils::redis_utils::{get_connection, Connection, get_cached_global_reqs, insert_cached_global_reqs, REDIS_DEFAULT_EXPIRE_TIME};
-use utils::riot_api_utils::{request_summoner_id_from_api, request_masteries_from_api};
+use utils::postgres_utils::get_connection_to_matches_db;
+use summoner::*;
+use utils::summoner_utils::Region;
+use std::error::Error;
 
 const CHAMPIONS_FILE_PATH: &str = "/mnt/c/Users/Alex/Documents/dev/leeg/champions.json";
 const ROLES_FILE_PATH: &str = "/mnt/c/Users/Alex/Documents/dev/leeg/champion_roles.json";
@@ -163,4 +168,11 @@ pub fn get_global_matrix() -> Vec<NamedGlobalService> {
         });
     }
     service_vector
+}
+
+pub fn get_summoner_mastery_by_name(name: String) -> Result<Summoner, Box<Error>> {
+    let region = Region::NA;
+    let redis_connection = get_connection();
+    let postgres_connection = get_connection_to_matches_db()?;
+    Summoner::from_name_and_region(&redis_connection, &postgres_connection, name, region)
 }
