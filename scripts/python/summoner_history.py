@@ -86,9 +86,6 @@ def main():
     global _db
     _db = connect() 
     seed_summoner = getSummonerByName(args.summoner_name)
-    print(seed_summoner)
-    mastery = getSummonerMasteries(seed_summoner['id'])
-    print(mastery)
     crawl(args, seed_summoner['accountId'])
 
 def exit():
