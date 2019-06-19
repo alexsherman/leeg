@@ -157,29 +157,24 @@ class ChampionSelect extends React.Component {
             oppTeam: {
                     champs: []
             },
+            bans: {
+                champs: []
+            },
+            blueTeam: {
+                    champs: []
+                },
+            redTeam: {
+                    champs: []
+            },
             req: [],
             roles: ["Top", "Bottom", "Jungle", "Mid", "Support"],
-            champions: []
+            champions: [],
+            mode: "manual" // enum - manual, websocket
         }
         this.updateRoles = this.updateRoles;
     }
 
     componentDidMount() {
-        // todo - move to separate file, have retry every 10s or manual button
-        let tm = undefined;
-        let webSocket = new WebSocket('ws://localhost:5000');
-        webSocket.onmessage = event => {
-            const teams = JSON.parse(event.data);
-            this.setState({
-                sameTeam: teams.sameTeam,
-                oppTeam: teams.oppTeam
-            });
-            if (tm) {
-                tm.clearTimeout
-            }
-            tm = setTimeout(this.getReqs.bind(this), 500);
-        }
-
         getChampions().then(champions => {
             this.setState({
                     champions: champions.sort()
@@ -195,6 +190,32 @@ class ChampionSelect extends React.Component {
       if (this.state.roles.length !== prevState.roles.length) {
         this.getReqs();
       }
+      if (this.state.mode === 'websocket' && prevState.mode === "manual") {
+            // todo - move to separate file, have retry every 10s or manual button
+            let tm = undefined;
+            let webSocket = new WebSocket('ws://localhost:5000');
+            webSocket.onmessage = event => {
+                const teams = JSON.parse(event.data);
+                this.setState({
+                    sameTeam: teams.sameTeam,
+                    oppTeam: teams.oppTeam
+                });
+                if (tm) {
+                    tm.clearTimeout
+                }
+                tm = setTimeout(this.getReqs.bind(this), 500);
+            }
+        }
+    }
+
+    chooseDraftMode(mode) {
+        this.setState({
+            mode: mode
+        });
+    }
+
+    alterSelection(team, type, champion) {
+        updateTeamsAndBans(team, type, champion);
     }
 
     getReqs() {
@@ -215,14 +236,17 @@ class ChampionSelect extends React.Component {
 
     render() {
         //<Reqs resp={this.state.req} roles={this.state.roles} updateRoles={this.updateRoles.bind(this)} />
+        /*
+                     <CenterContainer 
+                        champions={this.state.champions}
+                        alterSelection={this.alterTeam.bind(this)}
+                        chooseDraftMode={this.chooseDraftMode.bind(this)}
+                    />
+        */
         return (
                 <div className="app-container">
                     <Team team={"blue-team"} teamdata={this.state.sameTeam} label="Blue Team" />
-                    <CenterContainer 
-                        champions={this.state.champions}
-                        alterTeam={this.alterTeam.bind(this)}
-                        chooseDraftMode={this.chooseDraftMode.bind(this)}
-                    />
+                   
                     <AllChamps champions={this.state.champions} />
                     <Team team={"red-team"} teamdata={this.state.oppTeam} label="Red Team"/>
                 </div>
