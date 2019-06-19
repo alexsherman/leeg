@@ -5,6 +5,7 @@ import Sidebar from './sidebar.js';
 import Topbar from './topbar.js';
 import { CSSTransition } from 'react-transition-group';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { getChampions, getGlobalRecommendations } from './requests.js';
 
 function RoleToggles(props) {
     const options = [
@@ -160,7 +161,7 @@ class ChampionSelect extends React.Component {
             roles: ["Top", "Bottom", "Jungle", "Mid", "Support"],
             champions: []
         }
-        this.updateRoles = this.updateRoles.bind(this);
+        this.updateRoles = this.updateRoles;
     }
 
     componentDidMount() {
@@ -179,19 +180,10 @@ class ChampionSelect extends React.Component {
             tm = setTimeout(this.getReqs.bind(this), 500);
         }
 
-        fetch("http://localhost:8000/champions", {
-            method: "GET",
-            mode: "cors",
-
-            headers: {
-                "Accept": "application/json"
-            }
-        }).then(resp => {
-            resp.json().then(champions => {
-                this.setState({
-                    champions: champions
+        getChampions().then(champions => {
+            this.setState({
+                    champions: champions.sort()
                 });
-            }); 
         });
     }
 
@@ -206,38 +198,10 @@ class ChampionSelect extends React.Component {
     }
 
     getReqs() {
-
-        // todo - move to separate file to handle all recommendation API call logic
-        const baseUrl = 'http://localhost:8000/globalreq';
-        let params = '?';
-        if (this.state.sameTeam.champs.length > 0) {
-            params += 'team=' + this.state.sameTeam.champs.join(',');
-        }
-        if (this.state.oppTeam.champs.length > 0) {
-            params += '&opp=' + this.state.oppTeam.champs.join(',');
-        }
-        if (this.state.oppTeam.champs.length === 0 && this.state.sameTeam.champs.length === 0) {
-            return;
-        }
-
-        if (this.state.roles.length) {
-            params += "&roles=" + this.state.roles.join(",");
-        }
-
-        fetch(baseUrl + params, {
-            method: "GET",
-            mode: "cors",
-
-            headers: {
-                "Accept": "application/json"
-            }
-        }).then(resp => {
-
-            resp.json().then(text => {
-                this.setState({
-                    req: text.reqs
-                });
-            }); 
+        getGlobalRecommendations(this.state.sameTeam, this.state.oppTeam, this.state.roles).then(recommendations => {
+            this.setState({
+                req: recommendations.reqs
+            });
         }).catch(err => {
             console.log(err);
         });
@@ -250,10 +214,15 @@ class ChampionSelect extends React.Component {
     }
 
     render() {
-        //<Reqs resp={this.state.req} roles={this.state.roles} updateRoles={this.updateRoles} />
+        //<Reqs resp={this.state.req} roles={this.state.roles} updateRoles={this.updateRoles.bind(this)} />
         return (
                 <div className="app-container">
                     <Team team={"blue-team"} teamdata={this.state.sameTeam} label="Blue Team" />
+                    <CenterContainer 
+                        champions={this.state.champions}
+                        alterTeam={this.alterTeam.bind(this)}
+                        chooseDraftMode={this.chooseDraftMode.bind(this)}
+                    />
                     <AllChamps champions={this.state.champions} />
                     <Team team={"red-team"} teamdata={this.state.oppTeam} label="Red Team"/>
                 </div>
