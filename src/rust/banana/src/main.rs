@@ -46,11 +46,16 @@ fn summoner_masteries(name: String) -> JsonValue {
     }
 } 
 
+#[get("/champions")]
+fn champions(champions: State<Champions>) -> JsonValue {
+    json!(champions.get_list().clone())
+}
+
 fn main() {
     // this will put all global winrates and 1 to 1 winrate services in cache if not cached already
     let champions: Champions = load_champions_from_db().unwrap();
     handle_global_req_req(&Vec::new(), &Vec::new(), None, &champions);
-    rocket::ignite().manage(champions).attach(CORS()).mount("/", routes![global_recommendation, champion_matrix, summoner_masteries]).launch();
+    rocket::ignite().manage(champions).attach(CORS()).mount("/", routes![global_recommendation, champion_matrix, summoner_masteries, champions]).launch();
 }
 
 pub struct CORS();

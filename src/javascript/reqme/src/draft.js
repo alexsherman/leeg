@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import Select from 'react-select';
 import Sidebar from './sidebar.js';
+import Topbar from './topbar.js';
 import { CSSTransition } from 'react-transition-group';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
@@ -107,22 +108,57 @@ function Reqs(props) {
     );
 }
 
+function ChampButtonGroup(props) {
+        return (
+            <div className='champ-button-group'>
+                <div className='champ-button add-to-blue'>
+                    {'<'}
+                </div>
+                <div className='champ-button add-to-red'>
+                    {'>'}
+                </div>
+                <div className='champ-button add-to-bans'>
+                    {'x'}
+                </div>
+            </div>
+        )
+
+}
+
+function AllChamps(props) {
+    if (!props.champions.length) {
+       return (
+            <div className="champ-list">
+            </div>
+        )
+    }
+    const champs = props.champions.map(champ => {
+        return <div className="champ-and-options">
+            <ChampSquare champion={champ.name} />
+            <ChampButtonGroup />
+        </div>
+    });
+
+    return (
+        <div className="champ-list">
+            {champs}
+        </div>
+    )
+}
+
 class ChampionSelect extends React.Component {
     constructor() {
         super();
         this.state = {
             sameTeam: {
-                    champs: [
-                        "Ahri", "Ezreal",
-                    ]
+                    champs: []
                 },
             oppTeam: {
-                    champs: [
-                        "Riven"
-                    ]
+                    champs: []
             },
             req: [],
-            roles: ["Top", "Bottom", "Jungle", "Mid", "Support"]
+            roles: ["Top", "Bottom", "Jungle", "Mid", "Support"],
+            champions: []
         }
         this.updateRoles = this.updateRoles.bind(this);
     }
@@ -142,6 +178,21 @@ class ChampionSelect extends React.Component {
             }
             tm = setTimeout(this.getReqs.bind(this), 500);
         }
+
+        fetch("http://localhost:8000/champions", {
+            method: "GET",
+            mode: "cors",
+
+            headers: {
+                "Accept": "application/json"
+            }
+        }).then(resp => {
+            resp.json().then(champions => {
+                this.setState({
+                    champions: champions
+                });
+            }); 
+        });
     }
 
     componentWillUnmount() {
@@ -189,7 +240,7 @@ class ChampionSelect extends React.Component {
             }); 
         }).catch(err => {
             console.log(err);
-        })
+        });
     }
 
     updateRoles(roles) {
@@ -199,11 +250,12 @@ class ChampionSelect extends React.Component {
     }
 
     render() {
+        //<Reqs resp={this.state.req} roles={this.state.roles} updateRoles={this.updateRoles} />
         return (
                 <div className="app-container">
-                    <Team team={"blue-team"} teamdata={this.state.sameTeam} label="Your Team" />
-                    <Reqs resp={this.state.req} roles={this.state.roles} updateRoles={this.updateRoles} />
-                    <Team team={"red-team"} teamdata={this.state.oppTeam} label="Enemy Team"/>
+                    <Team team={"blue-team"} teamdata={this.state.sameTeam} label="Blue Team" />
+                    <AllChamps champions={this.state.champions} />
+                    <Team team={"red-team"} teamdata={this.state.oppTeam} label="Red Team"/>
                 </div>
             )
         }
@@ -212,7 +264,7 @@ class ChampionSelect extends React.Component {
 function DraftView() {
     return (
         <div className="main-view-container">
-            <Sidebar />
+            <Topbar />
             <ChampionSelect />
         </div>
     );

@@ -1,5 +1,5 @@
-html {
-}
+@import 'topbar'; 
+@import 'championlist';
 
 body {
     background-color: rgba(104, 188, 91, 0.5);
@@ -14,11 +14,13 @@ body {
 	display: flex;
     justify-content: space-around;
     height: 100vh;
-    flex: 1 1 auto;
+    width: 80vw;
+    margin: auto;
 }
 
 .main-view-container {
     display: flex;
+    flex-direction: column;
     min-height: 100vh;
 }
 
@@ -28,7 +30,7 @@ body {
 	flex-direction: column;
     padding: 10px;
     align-items: center;
-    flex: 1 1 175px;
+    width: 100px;
 }
 
 .req-container {
@@ -62,8 +64,8 @@ body {
 
 .team-label {
     margin-bottom: 20px;
-    color: black;
-    font-size: 30px;
+    color: white;
+    font-size: 20px;
     white-space: nowrap;
 }
 
@@ -90,6 +92,7 @@ body {
 }
 
 .logo {
+    position: absolute;
     text-align: center;
     font-size: 42px;
 }
@@ -104,11 +107,11 @@ body {
 }
 
 .red-team {
-    background-color: #dd614a;
+    border-left: 3px solid $red-team;
 }
 
 .blue-team {
-    background-color: #494bdd;
+    border-right: 3px solid $blue-team;
 }
 
 .role-select {
@@ -188,7 +191,7 @@ body {
     position: sticky;
     left: 0;
     top: 0;
-    background-color: rgba(104, 188, 91);
+    background-color: rgb(104, 188, 91);
     color: white;
     cursor: pointer;
     z-index: 4;

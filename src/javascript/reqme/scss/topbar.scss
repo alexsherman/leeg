@@ -1,0 +1,29 @@
+.topbar-container {
+    width: 100vw;
+    margin-bottom: 10px;
+    height: 70px;
+}
+
+.topbar-inner-container {
+    position: absolute;
+    display: flex;
+    width: 60vw;
+    margin: 0 20vw;
+}
+
+.topbar-item {
+    border-bottom: 1px solid #FFFFFF;
+    flex-grow: 1;
+    height: 70px;
+    text-align: center;
+    line-height: 70px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 20px;
+    font-family: 'Lato';
+    color: white;
+}
+
+.topbar-item:hover {
+    background-color: #49dd75;
+}

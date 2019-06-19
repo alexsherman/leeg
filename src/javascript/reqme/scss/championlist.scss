@@ -1,0 +1,71 @@
+@import 'colors';
+
+.champ-list {
+    width: 1000px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-content: flex-start;
+}
+
+.champ-and-options {
+    padding: 10px;
+    position: relative;
+}
+
+.champ-list > .champ-and-options > .champion-square {
+    width: 60px;
+    height: 60px;
+    border-radius: 0;
+}
+
+.champ-button-group {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: 0.25s;
+}
+
+.champ-button {
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    position: absolute;
+    color: white;
+    display: flex;
+    transition: 0.1s;
+    transform: scale(0.66, 0.66);
+    justify-content: space-around;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 20px;
+
+    &:hover {
+        transform: scale(1, 1);
+    };
+}
+
+.champ-and-options:hover > .champ-button-group {
+    opacity: 1;
+}
+
+.add-to-blue {
+    bottom: 0;
+    left: 0;
+    background-color: $blue-team;
+}
+
+.add-to-red {
+    bottom: 0;
+    right: 0;
+    background-color: $red-team;
+}
+
+.add-to-bans {
+    top: 0;
+    left: 0;
+    background-color: $bans;
+}
