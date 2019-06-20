@@ -10,3 +10,7 @@ src/rust/banana/Db_config.toml
 scripts/python/database.ini
 node_modules/
 *.rdb
+src/java/client-listener/client-listener.iml
+src/java/client-listener/target
+src/java/client-listener/target/*
+
