@@ -12,10 +12,11 @@ body {
 
 .app-container {
 	display: flex;
+    flex-direction: column;
     justify-content: space-around;
-    height: 100vh;
     width: 80vw;
-    margin: auto;
+    margin-right: auto;
+    margin-left: auto;
 }
 
 .main-view-container {
@@ -30,7 +31,7 @@ body {
 	flex-direction: column;
     padding: 10px;
     align-items: center;
-    width: 100px;
+    width: 150px;
 }
 
 .req-container {
@@ -49,17 +50,24 @@ body {
 }
 
 .champion-square {
-    width: 110px;
-    height: 110px;
-    border-radius: 100px;
+
 }
 
 .summoner-square {
-    width: 120px;
     display: flex;
     flex-direction: column;
     margin-bottom: 30px;
     align-items: center;
+    position: relative;
+
+    .champion-name {
+        position: absolute;
+        bottom: 2px;
+        color: white;
+        background-color: #0000006b;
+        font-style: italic;
+        width: 100%;
+    }
 }   
 
 .team-label {
@@ -67,10 +75,6 @@ body {
     color: white;
     font-size: 20px;
     white-space: nowrap;
-}
-
-.summoner-square .champion-name {
-    font-size: 18px;
 }
 
 .center-container {
@@ -107,11 +111,15 @@ body {
 }
 
 .red-team {
-    border-left: 3px solid $red-team;
+     .champion-square {
+        border: 2px solid $red-team;
+    }
 }
 
 .blue-team {
-    border-right: 3px solid $blue-team;
+    .champion-square {
+        border: 2px solid $blue-team;
+    }
 }
 
 .role-select {

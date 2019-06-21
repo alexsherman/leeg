@@ -6,6 +6,8 @@ import Topbar from './topbar.js';
 import { CSSTransition } from 'react-transition-group';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import { getChampions, getGlobalRecommendations } from './requests.js';
+import { SummonerSquare, ChampSquare } from './champions-squares.js';
+import { MiddleContainer, ReqsContainer, TeamsContainer } from './smartdraft-container.js';
 
 function RoleToggles(props) {
     const options = [
@@ -27,67 +29,6 @@ function RoleToggles(props) {
     )
 }
 
-function SummonerSquare(props) {
-    const champ = props.champion;
-    const rank = (props.idx !== undefined) ? "#" + (props.idx + 1) + " - " : "";
-    return (
-        <div className="summoner-square">
-            <ChampSquare champion={champ} />
-            <div className="champion-name">{rank}{champ}</div>
-        </div>
-    )
-}
-
-export function ChampSquare(props) {
-    let name = props.champion;
-    name = name.split(' ').join("").split("'").join("").split('.').join("");
-    if (name === "Wukong") {
-        name = "MonkeyKing";
-    }
-    if (name === "LeBlanc") {
-        name = "Leblanc";
-    }
-    if (name === "KaiSa") {
-        name = "Kaisa";
-    }
-    if (name === "KhaZix") {
-        name = "Khazix";
-    }
-    if (name === "VelKoz") {
-        name = "Velkoz";
-    }
-    if (name === "ChoGath") {
-        name = "Chogath";
-    }
-
-    const src = "url(http://ddragon.leagueoflegends.com/cdn/9.10.1/img/champion/" + name + ".png)";
-    const style = {"backgroundImage": src, "backgroundSize": "cover", "backgroundPosition": "center"};
-    return (
-        <div className="champion-square" style={style}></div>
-    )
-}
-
-function TeamLabel(props) {
-    return (
-        <div className="team-label">
-            {props.label}
-        </div>
-    )
-}
-
-function Team(props) {
-    const champs = props.teamdata.champs;
-    const label = props.label;
-    const summonerSquares = champs.map((champ) => 
-        <SummonerSquare key={champ} champion={champ} />
-    );
-    return (
-        <div className={"team-container " + props.team}>
-            <TeamLabel label={label} />
-            {summonerSquares}
-        </div>
-    );
-}
 
 function Reqs(props) {
     if (props.resp === null) {
@@ -126,7 +67,7 @@ function ChampButtonGroup(props) {
 
 }
 
-function AllChamps(props) {
+function ChampionPicker(props) {
     if (!props.champions.length) {
        return (
             <div className="champ-list">
@@ -147,7 +88,7 @@ function AllChamps(props) {
     )
 }
 
-class ChampionSelect extends React.Component {
+class Smartdraft extends React.Component {
     constructor() {
         super();
         this.state = {
@@ -243,12 +184,17 @@ class ChampionSelect extends React.Component {
                         chooseDraftMode={this.chooseDraftMode.bind(this)}
                     />
         */
+          /*   <Team team={"blue-team"} teamdata={this.state.sameTeam} label="Blue Team" />
+                   
+                    
+                    <Team team={"red-team"} teamdata={this.state.oppTeam} label="Red Team"/>*/
         return (
                 <div className="app-container">
-                    <Team team={"blue-team"} teamdata={this.state.sameTeam} label="Blue Team" />
-                   
-                    <AllChamps champions={this.state.champions} />
-                    <Team team={"red-team"} teamdata={this.state.oppTeam} label="Red Team"/>
+                    <MiddleContainer>
+                        <ReqsContainer />
+                        <TeamsContainer />
+                    </MiddleContainer>
+                    <ChampionPicker champions={this.state.champions} />
                 </div>
             )
         }
@@ -258,7 +204,7 @@ function DraftView() {
     return (
         <div className="main-view-container">
             <Topbar />
-            <ChampionSelect />
+            <Smartdraft />
         </div>
     );
 }

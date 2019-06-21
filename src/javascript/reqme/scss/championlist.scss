@@ -1,5 +1,63 @@
 @import 'colors';
 
+.middle-container {
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.reqs-container, .teams-container {
+    flex: 1 1 50%;
+    display: flex;
+}
+
+.reqs-container {
+    background-color: lightgreen;
+}
+
+.teams-container {
+    .champion-square {
+        width: 60px;
+        height: 60px;
+    }
+
+    .summoner-square {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+}
+
+.vs-container {
+    width: 20px;
+    text-align: center;
+    font-size: 20px;
+    padding: 20px;
+    color: white;
+}
+
+.team-pick {
+    text-align: left;
+    display: flex;
+
+    .team-pick-stats {
+        font-family: 'Lato';
+        font-size: 12px;
+        padding: 3px;
+        .winrate {
+            color: darkgreen;
+        }
+
+        .banrate {
+            color: blue;
+        }
+
+        .pickrate {
+            color: orange;
+        }
+    }
+}
+
 .champ-list {
     width: 1000px;
     display: flex;
