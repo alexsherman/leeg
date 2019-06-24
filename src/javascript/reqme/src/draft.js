@@ -1,69 +1,40 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
-import Select from 'react-select';
-import Sidebar from './sidebar.js';
 import Topbar from './topbar.js';
 import { CSSTransition } from 'react-transition-group';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import { getChampions, getGlobalRecommendations } from './requests.js';
 import { SummonerSquare, ChampSquare } from './champions-squares.js';
-import { MiddleContainer, ReqsContainer, TeamsContainer } from './smartdraft-container.js';
+import { MiddleContainer, TeamsContainer } from './smartdraft-container.js';
+import {  ReqsContainer, Reqs, RoleToggle } from './reqs-container.js'; 
 
-function RoleToggles(props) {
-    const options = [
-        {"value": "Top", "label": "Top"},
-        {"value": "Jungle", "label": "Jungle"},
-        {"value": "Mid", "label": "Mid"},
-        {"value": "Bottom", "label": "Bottom"},
-        {"value": "Support", "label": "Support"},
-    ];
-    const placeholder = "Select one or more roles to filter recommendations."
-    return (
-        <Select
-        className="role-select"
-        isMulti
-        placeholder={placeholder}
-        onChange={props.updateRoles}
-        options={options}
-      />
-    )
-}
-
-
-function Reqs(props) {
-    if (props.resp === null) {
-        return;
-    }
-    const reqs = props.resp;
-    const indivReqs = reqs.map((champ, idx) => 
-        <React.Fragment>
-            <SummonerSquare idx={idx} key={champ} champion={champ} />
-        </React.Fragment>
-    );
-    return (
-        <div className="center-container">
-            <RoleToggles roles={props.roles} updateRoles={props.updateRoles} />
-            <div className="req-container">
-                {indivReqs}            
-            </div>
-        </div>
-    );
-}
+const MAX_BANS = 10;
+const MAX_PICKS = 5;
 
 function ChampButtonGroup(props) {
-        return (
-            <div className='champ-button-group'>
-                <div className='champ-button add-to-blue'>
-                    {'<'}
-                </div>
-                <div className='champ-button add-to-red'>
-                    {'>'}
-                </div>
-                <div className='champ-button add-to-bans'>
-                    {'x'}
-                </div>
+    function removeFromAllTeams(champion) {
+        props.teamFns.removeChampFromSameTeam(champion);
+        props.teamFns.removeChampFromOppTeam(champion);
+    }
+    return (
+        <div className='champ-button-group'>
+            <div 
+                className='champ-button add-to-blue'
+                onClick={(e) => props.teamFns.addChampToSameTeam(props.champion)}
+            >  
             </div>
-        )
+            <div 
+                className='champ-button add-to-red'
+                onClick={(e) => props.teamFns.addChampToOppTeam(props.champion)}
+            >
+            </div>
+            <div 
+                className='champ-button add-to-bans'
+                onClick={(e) => removeFromAllTeams(props.champion)}
+            >
+            </div>
+        </div>
+    )
 
 }
 
@@ -77,7 +48,10 @@ function ChampionPicker(props) {
     const champs = props.champions.map(champ => {
         return <div className="champ-and-options">
             <ChampSquare champion={champ.name} />
-            <ChampButtonGroup />
+            <ChampButtonGroup 
+                teamFns={props.teamFns} 
+                champion={champ}
+            />
         </div>
     });
 
@@ -92,34 +66,31 @@ class Smartdraft extends React.Component {
     constructor() {
         super();
         this.state = {
-            sameTeam: {
-                    champs: []
-                },
-            oppTeam: {
-                    champs: []
-            },
-            bans: {
-                champs: []
-            },
-            blueTeam: {
-                    champs: []
-                },
-            redTeam: {
-                    champs: []
-            },
-            req: [],
+            sameTeam: [],
+            oppTeam: [],
+            sameTeamIsRed: true,
+            sameBans: [],
+            oppBans: [],
+            globalreqs: [],
             roles: ["Top", "Bottom", "Jungle", "Mid", "Support"],
             champions: [],
             mode: "manual" // enum - manual, websocket
-        }
+        };
         this.updateRoles = this.updateRoles;
     }
 
     componentDidMount() {
         getChampions().then(champions => {
+            champions.sort((a,b) => {
+                const x = a.name.toLowerCase();
+                const y = b.name.toLowerCase();
+                if (x < y) { return -1; }
+                if (x > y) { return 1; }
+                return 0;
+            });
             this.setState({
-                    champions: champions.sort()
-                });
+                champions: champions
+            });
         });
     }
 
@@ -155,17 +126,65 @@ class Smartdraft extends React.Component {
         });
     }
 
-    alterSelection(team, type, champion) {
-        updateTeamsAndBans(team, type, champion);
+    addChampToSameTeam(champion) {
+        let team = this.state.sameTeam;
+        if (team.indexOf(champion.name) > -1 || team.length >= MAX_PICKS) {
+            return;
+        }
+        return this.setState({
+            sameTeam: team.concat([champion.name])
+        });
+    }
+
+    addChampToOppTeam(champion) {
+        let team = this.state.oppTeam;
+        if (team.indexOf(champion.name) > -1 || team.length >= MAX_PICKS) {
+            return;
+        }
+        return this.setState({
+            oppTeam: team.concat([champion.name])
+        });
+    }
+
+    removeChampFromSameTeam(champion) {
+        let team = this.state.sameTeam;
+        let champIdx = team.indexOf(champion.name)
+        if (champIdx === -1 || !team.length) {
+            return;
+        }
+        let newTeam = [];
+        team.forEach(champName => {
+            if (champName !== champion.name) {
+                newTeam.push(champName);
+            }
+        })
+        return this.setState({
+            sameTeam: newTeam
+        });
+    }
+
+     removeChampFromOppTeam(champion) {
+        let team = this.state.oppTeam;
+        let champIdx = team.indexOf(champion.name)
+        if (champIdx === -1 || !team.length) {
+            return;
+        }
+        let newTeam = [];
+        team.forEach(champName => {
+            if (champName !== champion.name) {
+                newTeam.push(champName);
+            }
+        })
+        return this.setState({
+            oppTeam: newTeam
+        });
     }
 
     getReqs() {
-        getGlobalRecommendations(this.state.sameTeam, this.state.oppTeam, this.state.roles).then(recommendations => {
-            this.setState({
-                req: recommendations.reqs
+        return getGlobalRecommendations(this.state.sameTeam, this.state.oppTeam, this.state.roles).then(recommendations => {
+            return this.setState({
+                globalreqs: recommendations.reqs
             });
-        }).catch(err => {
-            console.log(err);
         });
     }
 
@@ -176,25 +195,36 @@ class Smartdraft extends React.Component {
     }
 
     render() {
-        //<Reqs resp={this.state.req} roles={this.state.roles} updateRoles={this.updateRoles.bind(this)} />
-        /*
-                     <CenterContainer 
-                        champions={this.state.champions}
-                        alterSelection={this.alterTeam.bind(this)}
-                        chooseDraftMode={this.chooseDraftMode.bind(this)}
-                    />
-        */
-          /*   <Team team={"blue-team"} teamdata={this.state.sameTeam} label="Blue Team" />
-                   
-                    
-                    <Team team={"red-team"} teamdata={this.state.oppTeam} label="Red Team"/>*/
+        let teamFns = {
+            addChampToSameTeam: this.addChampToSameTeam.bind(this),
+            addChampToOppTeam: this.addChampToOppTeam.bind(this),
+            removeChampFromSameTeam: this.removeChampFromSameTeam.bind(this),
+            removeChampFromOppTeam: this.removeChampFromOppTeam.bind(this)
+        };
+        let reqHelpers = {
+            getReqs: this.getReqs.bind(this),
+            updateRoles: this.updateRoles.bind(this),
+            roles: this.state.roles,
+            reqs: this.state.globalreqs
+        };
         return (
                 <div className="app-container">
                     <MiddleContainer>
-                        <ReqsContainer />
-                        <TeamsContainer />
+                        <ReqsContainer 
+                            reqHelpers={reqHelpers}
+                            allChampions={this.state.champions}
+                        />
+                        <TeamsContainer
+                            sameTeam={this.state.sameTeam} 
+                            oppTeam={this.state.oppTeam}
+                        />
                     </MiddleContainer>
-                    <ChampionPicker champions={this.state.champions} />
+                    <ChampionPicker 
+                        teamFns={teamFns}
+                        sameTeam={this.state.sameTeam} 
+                        oppTeam={this.state.oppTeam}
+                        champions={this.state.champions} 
+                    />
                 </div>
             )
         }

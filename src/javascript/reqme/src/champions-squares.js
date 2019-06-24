@@ -21,7 +21,7 @@ export function TeamPick(props) {
     return (
         <div className="team-pick">
             <SummonerSquare championName={champName} />
-            <ChampionStats champStats={champStats} />
+            {props.champion && <ChampionStats champStats={champStats} />}
         </div>
     )
 }

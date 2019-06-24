@@ -5,11 +5,11 @@ export function getChampions() {
 export function getGlobalRecommendations(sameTeam, oppTeam, roles) {
     const baseUrl = 'http://localhost:8000/globalreq';
     let params = '?';
-    if (sameTeam.champs.length > 0) {
-        params += 'team=' + sameTeam.champs.join(',');
+    if (sameTeam.length > 0) {
+        params += 'team=' + sameTeam.join(',');
     }
-    if (oppTeam.champs.length > 0) {
-        params += '&opp=' + oppTeam.champs.join(',');
+    if (oppTeam.length > 0) {
+        params += '&opp=' + oppTeam.join(',');
     }
     if (roles.length) {
         params += "&roles=" + roles.join(",");

@@ -16,16 +16,20 @@
     background-color: lightgreen;
 }
 
-.teams-container {
+.teams-container, .reqs-container {
     .champion-square {
-        width: 60px;
-        height: 60px;
+        width: 70px;
+        height: 70px;
     }
 
     .summoner-square {
         text-align: center;
         margin-bottom: 10px;
     }
+}
+
+.reqs-container {
+
 }
 
 .vs-container {
@@ -59,11 +63,12 @@
 }
 
 .champ-list {
-    width: 1000px;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
     align-content: flex-start;
+    height: 30vh;
+    overflow-y: scroll;
 }
 
 .champ-and-options {
@@ -95,7 +100,7 @@
     color: white;
     display: flex;
     transition: 0.1s;
-    transform: scale(0.66, 0.66);
+    transform: scale(0.9, 0.9);
     justify-content: space-around;
     cursor: pointer;
     font-weight: 700;
