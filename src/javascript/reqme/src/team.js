@@ -13,7 +13,6 @@ function TeamLabel(props) {
 export default function Team(props) {
     const champs = props.team;
     const label = props.label;
-    console.log(champs);
     if (!champs) {
         return null;
     }

@@ -172,15 +172,16 @@ class Smartdraft extends React.Component {
         return (
                 <div className="app-container">
                     <MiddleContainer>
-                        <ReqsContainer 
-                            reqHelpers={reqHelpers}
-                            allChampions={this.state.champions}
-                        />
-                        <TeamsContainer
+                     <TeamsContainer
                             teamFns={teamFns}
                             sameTeam={this.state.sameTeam} 
                             oppTeam={this.state.oppTeam}
                         />
+                    <ReqsContainer 
+                        reqHelpers={reqHelpers}
+                        allChampions={this.state.champions}
+                    />
+                       
                     </MiddleContainer>
                     {this.state.mode === 'manual' && 
                         <ChampionPicker 
@@ -189,8 +190,7 @@ class Smartdraft extends React.Component {
                         oppTeam={this.state.oppTeam}
                         champions={this.state.champions} 
                         />
-                    }
-                    
+                    } 
                 </div>
             )
         }

@@ -18,13 +18,18 @@
 
 .teams-container, .reqs-container {
     .champion-square {
-        width: 70px;
-        height: 70px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50px;
     }
 
     .summoner-square {
         text-align: center;
         margin-bottom: 10px;
+        .champion-name {
+            bottom: -4px;
+        }
+
     }
 }
 
