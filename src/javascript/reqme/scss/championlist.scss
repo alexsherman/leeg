@@ -43,9 +43,9 @@
 .team-pick {
     text-align: left;
     display: flex;
+    position: relative;
 
     .team-pick-stats {
-        font-family: 'Lato';
         font-size: 12px;
         padding: 3px;
         .winrate {
@@ -89,6 +89,7 @@
     width: 100%;
     height: 100%;
     opacity: 0;
+    z-index: 1;
     transition: 0.25s;
 }
 
@@ -111,8 +112,9 @@
     };
 }
 
-.champ-and-options:hover > .champ-button-group {
+.champ-button-group:hover {
     opacity: 1;
+ 
 }
 
 .add-to-blue {

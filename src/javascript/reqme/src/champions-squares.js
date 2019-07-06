@@ -20,7 +20,14 @@ export function TeamPick(props) {
     };
     return (
         <div className="team-pick">
-            <SummonerSquare championName={champName} />
+            <div className='champ-button-group'>
+                <div 
+                    className='champ-button add-to-bans'
+                    onClick={(e) => props.removeFn({name: props.champion})}
+                >
+                </div>
+            </div>
+            <SummonerSquare championName={champName} /> 
             {props.champion && <ChampionStats champStats={champStats} />}
         </div>
     )

@@ -7,60 +7,12 @@ import { getChampions, getGlobalRecommendations } from './requests.js';
 import { SummonerSquare, ChampSquare } from './champions-squares.js';
 import { MiddleContainer, TeamsContainer } from './smartdraft-container.js';
 import {  ReqsContainer, Reqs, RoleToggle } from './reqs-container.js'; 
+import ChampionPicker from './champion-picker.js';
 
 const MAX_BANS = 10;
 const MAX_PICKS = 5;
 
-function ChampButtonGroup(props) {
-    function removeFromAllTeams(champion) {
-        props.teamFns.removeChampFromSameTeam(champion);
-        props.teamFns.removeChampFromOppTeam(champion);
-    }
-    return (
-        <div className='champ-button-group'>
-            <div 
-                className='champ-button add-to-blue'
-                onClick={(e) => props.teamFns.addChampToSameTeam(props.champion)}
-            >  
-            </div>
-            <div 
-                className='champ-button add-to-red'
-                onClick={(e) => props.teamFns.addChampToOppTeam(props.champion)}
-            >
-            </div>
-            <div 
-                className='champ-button add-to-bans'
-                onClick={(e) => removeFromAllTeams(props.champion)}
-            >
-            </div>
-        </div>
-    )
 
-}
-
-function ChampionPicker(props) {
-    if (!props.champions.length) {
-       return (
-            <div className="champ-list">
-            </div>
-        )
-    }
-    const champs = props.champions.map(champ => {
-        return <div className="champ-and-options">
-            <ChampSquare champion={champ.name} />
-            <ChampButtonGroup 
-                teamFns={props.teamFns} 
-                champion={champ}
-            />
-        </div>
-    });
-
-    return (
-        <div className="champ-list">
-            {champs}
-        </div>
-    )
-}
 
 class Smartdraft extends React.Component {
     constructor() {
@@ -74,7 +26,8 @@ class Smartdraft extends React.Component {
             globalreqs: [],
             roles: ["Top", "Bottom", "Jungle", "Mid", "Support"],
             champions: [],
-            mode: "manual" // enum - manual, websocket
+            mode: "manual", // enum - manual, websocket
+            reqsloading: false
         };
         this.updateRoles = this.updateRoles;
     }
@@ -181,11 +134,17 @@ class Smartdraft extends React.Component {
     }
 
     getReqs() {
+        this.setState({
+            globalreqs: [],
+            reqsloading: true
+        });
         return getGlobalRecommendations(this.state.sameTeam, this.state.oppTeam, this.state.roles).then(recommendations => {
             return this.setState({
-                globalreqs: recommendations.reqs
+                globalreqs: recommendations.reqs,
+                reqsloading: false
             });
         });
+
     }
 
     updateRoles(roles) {
@@ -205,7 +164,10 @@ class Smartdraft extends React.Component {
             getReqs: this.getReqs.bind(this),
             updateRoles: this.updateRoles.bind(this),
             roles: this.state.roles,
-            reqs: this.state.globalreqs
+            reqs: this.state.globalreqs,
+            mode: this.state.mode,
+            loading: this.state.reqsloading,
+            chooseDraftMode: this.chooseDraftMode.bind(this)
         };
         return (
                 <div className="app-container">
@@ -215,16 +177,20 @@ class Smartdraft extends React.Component {
                             allChampions={this.state.champions}
                         />
                         <TeamsContainer
+                            teamFns={teamFns}
                             sameTeam={this.state.sameTeam} 
                             oppTeam={this.state.oppTeam}
                         />
                     </MiddleContainer>
-                    <ChampionPicker 
+                    {this.state.mode === 'manual' && 
+                        <ChampionPicker 
                         teamFns={teamFns}
                         sameTeam={this.state.sameTeam} 
                         oppTeam={this.state.oppTeam}
                         champions={this.state.champions} 
-                    />
+                        />
+                    }
+                    
                 </div>
             )
         }

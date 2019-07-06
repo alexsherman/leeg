@@ -13,8 +13,12 @@ function TeamLabel(props) {
 export default function Team(props) {
     const champs = props.team;
     const label = props.label;
+    console.log(champs);
+    if (!champs) {
+        return null;
+    }
     const summonerSquares = champs.map((champ) => 
-        <TeamPick key={champ} champion={champ} />
+        <TeamPick key={champ} champion={champ} removeFn={props.removeFn} />
     );
     let unpickedSquares = [];
     for (let i = 0; i < (5 - champs.length); i++) {

@@ -13,9 +13,9 @@ export function MiddleContainer(props) {
 export function TeamsContainer(props) {
     return (
         <div className='teams-container'>
-            <Team teamColor={"blue-team"} team={props.sameTeam} label="Blue Team" />
+            <Team teamColor={"blue-team"} team={props.sameTeam} removeFn={props.teamFns.removeChampFromSameTeam} label="Blue Team" />
             <div className="vs-container">vs.</div>
-            <Team teamColor={"red-team"} team={props.oppTeam} label="Red Team" />
+            <Team teamColor={"red-team"} team={props.oppTeam}  removeFn={props.teamFns.removeChampFromOppTeam} label="Red Team" />
         </div>
     )
 }

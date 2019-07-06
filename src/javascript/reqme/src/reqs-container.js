@@ -2,17 +2,24 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import Select from 'react-select';
 import { SummonerSquare, ChampSquare } from './champions-squares.js';
+import Loader from './loader.js';
+
 
 export function ReqsContainer(props) {
     return (
-        <div className='reqs-container'>
-           <ReqsButton getReqs={props.reqHelpers.getReqs} />
-           <Reqs reqs={props.reqHelpers.reqs}
-                 roles={props.reqHelpers.roles} 
-                 updateRoles={props.reqHelpers.updateRoles} 
-                 allChampions={props.allChampions}
-            />
-        </div>
+            props.reqHelpers.loading 
+            ? 
+            <Loader />
+            :
+            <div className='reqs-container'>
+               <ReqsButton getReqs={props.reqHelpers.getReqs} />
+               <ModeButton switchDraftMode={props.reqHelpers.chooseDraftMode} mode={props.reqHelpers.mode} />
+               <Reqs reqs={props.reqHelpers.reqs}
+                     roles={props.reqHelpers.roles} 
+                     updateRoles={props.reqHelpers.updateRoles} 
+                     allChampions={props.allChampions}
+                />
+            </div>  
     )
 }
 
@@ -23,6 +30,16 @@ function ReqsButton(props) {
             Click to get reqs for these teams
         </div>
      )  
+}
+
+function ModeButton(props) {
+    const otherMode = props.mode === "manual" ? "websocket" : "manual";
+    return (
+        <div className='mode-button'
+             onClick={(e) => props.switchDraftMode(otherMode)}>
+            Click to witch from manual mode to websocket mode
+        </div>
+    )
 }
 
 function RoleToggles(props) {
@@ -53,9 +70,6 @@ function Reqs(props) {
     const reqs = props.reqs;
     reqs.splice(5);
     const indivReqs = reqs.map((champName, idx) => {
-        /*let champ = props.allChampions.find(champion => {
-            return champion.name === champName;
-        });*/
         return (<React.Fragment>
             <SummonerSquare key={champName} championName={champName} />
         </React.Fragment>)

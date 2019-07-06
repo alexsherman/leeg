@@ -22,7 +22,7 @@ use std::error::Error;
 
 const CHAMPIONS_FILE_PATH: &str = "/mnt/c/Users/Alex/Documents/dev/leeg/champions.json";
 const ROLES_FILE_PATH: &str = "/mnt/c/Users/Alex/Documents/dev/leeg/champion_roles.json";
-const SUFFICIENT_MATCH_THRESHOLD: usize = 1000;
+const SUFFICIENT_MATCH_THRESHOLD: usize = 10000;
 
 
 /*
@@ -41,17 +41,9 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, 
     // if we haven't analyzed enough matches, this is because the current query was too specific
     // to get enough data. so broaden the query by doing partial combinations of team_picks and opp_picks
     println!("{} matches analyzed so far", num_matches_analyzed);
-    let mut team_n = team_picks.len();
-    let mut opp_n = opp_picks.len();
-    while num_matches_analyzed < SUFFICIENT_MATCH_THRESHOLD && (team_n > 0 || opp_n > 0) {
-        team_n = match team_n {
-            0 => 0,
-            x => x - 1
-        };
-        opp_n = match opp_n {
-            0 => 0,
-            x => x - 1
-        };
+    let mut team_n = 2;
+    let mut opp_n = 2;
+    while num_matches_analyzed < SUFFICIENT_MATCH_THRESHOLD && (team_n >= 0 || opp_n >= 0) {
         for team_combination in team_picks.iter().cloned().combinations(team_n) {
             for opp_combination in opp_picks.iter().cloned().combinations(opp_n) {
                 let w_service = get_or_create_global_req_service(&redis_connection, &team_combination, &opp_combination, &champions, false);
@@ -61,6 +53,13 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, 
             }
         }
         println!("{} matches analyzed so far", num_matches_analyzed);
+        if team_n > opp_n && team_n > 0 {
+            team_n -= 1;
+        } else if opp_n > 0 {
+            opp_n -= 1;
+        } else {
+            break;
+        }
     }
    
     let combined_service = combine_req_services(&service_vec, &team_picks, &opp_picks, roles, &champions);
