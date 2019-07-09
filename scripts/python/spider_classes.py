@@ -1,19 +1,6 @@
 import json
 import datetime
 import psycopg2
-champ_dict = {}
-champ_indexes = {}
-
-with open('../../champions.json') as champs:
-    try:
-        champ_dict = json.load(champs)
-        idx = 0
-        for name in champ_dict.values():
-            champ_indexes[name] = idx
-            idx += 1
-    except:
-        print("No champions.json found!")
-        raise
 
 def getTeam(match, teamColor):
     idsToColors = {
@@ -23,11 +10,12 @@ def getTeam(match, teamColor):
     return next((t for t in match['teams'] if idsToColors[t['teamId']] == teamColor), None)
 
 class Match: 
-    def __init__(self, match):
+    def __init__(self, match, tier = 'None'):
         self.id = match['gameId']
         self.play_date = match['gameCreation']
         self.duration = match['gameDuration']
         self.game_mode = match['queueId']
+        self.tier = tier
         blueTeam = getTeam(match, 'blue')
         redTeam = getTeam(match, 'red')
         if blueTeam['win'] == 'Win':
@@ -46,35 +34,37 @@ class Match:
         self.red_team = []
         self.blue_bans = []
         self.red_bans = []
-        self.red_summoners = []
-        self.blue_summoners = []
+        self.red_roles = []
+        self.blue_roles = []
         
         for pc in self.playersAndChamps:
-            champ = pc['champion']['name']
-            summoner = pc['accountId'] 
+            champid = pc['champion']['id']
+            role = pc['role'] 
             if pc['team'] is 'blue':
-                self.blue_team.append(champ)
-                self.blue_summoners.append(summoner)
+                self.blue_team.append(champid)
+                self.blue_roles.append(role)
             else:
-                self.red_team.append(champ)
-                self.red_summoners.append(summoner)
+                self.red_team.append(champid)
+                self.red_roles.append(role)
         
         for ban in blueTeam['bans']:
-            self.blue_bans.append(getChampById(ban['championId']))
+            self.blue_bans.append(ban['championId'])
         
         for ban in redTeam['bans']:
-            self.red_bans.append(getChampById(ban['championId']))
+            self.red_bans.append(ban['championId'])
 
     def insert_into_all_matches(self, cursor):
         sql = '''
-                INSERT INTO all_matches
+                INSERT INTO all_matches_2
                 (id, blue_wins, blue_team, red_team, blue_bans, red_bans, 
-                blue_summoners, red_summoners, play_date, duration, game_version, game_mode)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                blue_roles, red_roles, play_date, game_version, rank)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             '''
         play_date = datetime.datetime.fromtimestamp(self.play_date / 1000)
-        duration = datetime.timedelta(seconds=self.duration)
-        sql_tuple = (self.id, self.blue_wins, self.blue_team, self.red_team, self.blue_bans, self.red_bans, self.blue_summoners, self.red_summoners, play_date, duration, self.game_version, self.game_mode)
+        game_version_list = self.game_version.split('.', 2)
+        game_version = game_version_list[0] + '.' + game_version_list[1]
+        sql_tuple = (self.id, self.blue_wins, self.blue_team, self.red_team, self.blue_bans, self.red_bans, 
+                    self.blue_roles, self.red_roles, play_date, game_version, self.tier)
         try:
             cursor.execute(sql, sql_tuple)
             print('Writing {} to all_matches'.format(self.id))
@@ -144,7 +134,6 @@ class PlayerChamp:
         if participant is not None:
             self.id = participant['player']['currentAccountId']
             self.name = participant['player']['summonerName']
-       # self.rank = player['highestAchievedSeasonTier']
         self.role = player['timeline']['lane']
         if self.role in ('BOT', 'BOTTOM'):
            self.role = player['timeline']['role']
@@ -161,20 +150,9 @@ class PlayerChamp:
 class Champ:
     def __init__(self, champ_id):
         self.id = champ_id
-        if champ_id == -1:
-            self.name = 'None'
-        else:
-            self.name = champ_dict[str(champ_id)]
     def __str__(self):
         return "% - %" & (self.name, self.id)
     def info(self):
         return {
-            'name': self.name,
             'id': self.id
         }
-
-def getChampById(champ_id):
-    if champ_id == -1:
-        return 'None'
-    else:
-        return champ_dict[str(champ_id)]   

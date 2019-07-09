@@ -36,4 +36,26 @@ CREATE TABLE summoner_matches (
 
 CREATE UNIQUE INDEX idx_summoner_id_match_id ON summoner_matches(id, match_id);
 
+-- NEW 
+CREATE TABLE all_matches_2 (
+	id bigint PRIMARY KEY, 
+	play_date timestamp,
+	blue_wins boolean NOT NULL,
+	blue_team smallint[] NOT NULL, -- the following are all arrays of text representing champion names
+	red_team smallint[] NOT NULL,
+	blue_bans smallint[] NOT NULL,
+	red_bans smallint[] NOT NULL,
+	red_roles text[] NOT NULL, --account ids - order same as x_team order
+	blue_roles text[] NOT NULL,
+	rank text,
+	game_version text
+);
 
+CREATE INDEX idx_champions_in_match ON all_matches_2 USING GIN(blue_team, red_team);
+CREATE INDEX idx_banned_champions ON all_matches_2(red_bans, blue_bans);
+CREATE INDEX idx_rank_of_match ON all_matches_2(rank);
+CREATE INDEX idx_playdate_of_match on all_matches_2(play_date);
+CREATE INDEX idx_version_of_match on all_matches_2(game_version);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON all_matches_2 to spider;
+GRANT SELECT ON all_matches_2 to api;

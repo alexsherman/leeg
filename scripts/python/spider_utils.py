@@ -1,14 +1,19 @@
 import requests
 from requests.exceptions import HTTPError
+import datetime
 import time
 import json
 import os
 import sys 
 _url_root = 'https://na1.api.riotgames.com'
 _summoner_path = '/lol/summoner/v4/summoners/by-name/'
+_summoner_by_id_path = '/lol/summoner/v4/summoners/'
 _match_history_path = '/lol/match/v4/matchlists/by-account/'
 _match_info_path = '/lol/match/v4/matches/'
 _mastery_path = '/lol/champion-mastery/v4/champion-masteries/by-summoner/'
+_ranked_league_path = '/lol/league/v4/entries/RANKED_SOLO_5x5/'
+LEAGUE_DIVISIONS = ["I", "II", "III", "IV"]
+LEAGUE_TIERS = ["IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "DIAMOND"] #todo other tiers
 
 try:
     key = os.environ['RIOT_API_KEY']
@@ -82,3 +87,58 @@ def getMatch(match_id):
 def getSummonerMasteries(encrypted_summoner_id):
     mastery_request_url = _url_root + _mastery_path + encrypted_summoner_id
     return makeRequest(mastery_request_url).json()
+
+
+def getLeagueEntriesForDivision(tier, division, page):
+    league_url = _url_root + _ranked_league_path + tier + '/' + division
+    return makeRequest(league_url, {page: page}).json()
+
+def getLeagueEntriesForTier(tier, page): 
+    if tier in ('MASTER', 'GRANDMASTER', 'CHALLENGER'):
+        #todo - handle later because these require different routes without divisions
+        return
+    results = []
+    for division in LEAGUE_DIVISIONS:
+        try:
+            print('Getting entries for {} {}'.format(tier, division))
+            league_entries = getLeagueEntriesForDivision(tier, division, page)
+            results = results + league_entries;
+        except Exception as e:
+            raise e
+    return results
+
+
+def getAccountIdFromSummonerId(summoner_id):
+    url = _url_root + _summoner_by_id_path + summoner_id
+    return makeRequest(url).json()['accountId']
+
+def getMatchesFromLeagueEntries(leagueEntries):
+    matches = [];
+    for entry in leagueEntries:
+        account_id = getAccountIdFromSummonerId(entry['summonerId'])
+        beginTime = int(time.time()) - 24 * 60 * 60;
+        params = {
+            'beginTime': beginTime,
+            'queue': [420]
+        }
+        try: 
+            match_history = getSummonerMatchHistory(account_id, params)
+            if len(match_history['matches']) > 0:
+                matches = matches + match_history['matches']
+        except Exception as e:
+            print("No matches found for {} - {}".format(account_id, e))
+    return matches
+
+def all_matches_today(page):
+    matches = []
+    for tier in LEAGUE_TIERS:
+        try:
+            entries = getLeagueEntriesForTier(tier, page)
+            tier_matches = getMatchesFromLeagueEntries(entries)
+            for match in tier_matches:
+                match['approximateTier'] = tier
+            matches = matches + tier_matches
+        except Exception as e:
+            print("Error getting entries for {} - page {} {}".format(tier, page, e))
+    page += 1
+    yield matches
