@@ -91,7 +91,10 @@ def getSummonerMasteries(encrypted_summoner_id):
 
 def getLeagueEntriesForDivision(tier, division, page):
     league_url = _url_root + _ranked_league_path + tier + '/' + division
-    return makeRequest(league_url, {page: page}).json()
+    params = {
+        'page': page
+    }
+    return makeRequest(league_url, params).json()
 
 def getLeagueEntriesForTier(tier, page): 
     if tier in ('MASTER', 'GRANDMASTER', 'CHALLENGER'):
@@ -114,6 +117,7 @@ def getAccountIdFromSummonerId(summoner_id):
 
 def getMatchesFromLeagueEntries(leagueEntries):
     matches = [];
+    n = 0
     for entry in leagueEntries:
         account_id = getAccountIdFromSummonerId(entry['summonerId'])
         beginTime = int(time.time()) - 24 * 60 * 60;
@@ -123,6 +127,9 @@ def getMatchesFromLeagueEntries(leagueEntries):
         }
         try: 
             match_history = getSummonerMatchHistory(account_id, params)
+            n += 1
+            if n > 10:
+                break;
             if len(match_history['matches']) > 0:
                 matches = matches + match_history['matches']
         except Exception as e:
@@ -130,15 +137,16 @@ def getMatchesFromLeagueEntries(leagueEntries):
     return matches
 
 def all_matches_today(page):
-    matches = []
-    for tier in LEAGUE_TIERS:
-        try:
-            entries = getLeagueEntriesForTier(tier, page)
-            tier_matches = getMatchesFromLeagueEntries(entries)
-            for match in tier_matches:
-                match['approximateTier'] = tier
-            matches = matches + tier_matches
-        except Exception as e:
-            print("Error getting entries for {} - page {} {}".format(tier, page, e))
-    page += 1
-    yield matches
+    while True:
+        matches = []
+        for tier in LEAGUE_TIERS:
+            try:
+                entries = getLeagueEntriesForTier(tier, page)
+                tier_matches = getMatchesFromLeagueEntries(entries)
+                for match in tier_matches:
+                    match['approximateTier'] = tier
+                matches = matches + tier_matches
+            except Exception as e:
+                print("Error getting entries for {} - page {} {}".format(tier, page, e))
+        page += 1
+        yield matches

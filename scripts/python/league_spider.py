@@ -4,6 +4,7 @@ import json
 import csv
 import argparse
 import atexit
+import datetime
 from requests.exceptions import HTTPError
 from math import ceil
 from queue import Queue, Empty
@@ -25,15 +26,18 @@ def recordMatch(match, tier):
     _db['connection'].commit()
     if _num_processed % 10 == 0:
         
-        print("Processed {} matches.".format(_num_processed))
+        print("{}   Processed {} matches.".format(datetime.datetime.now(), _num_processed))
 
 def crawl():
     # generator yields a bunch of matches endlessly
-    for matches in all_matches_today(1):
+    for matches in all_matches_today(4):
         print("{} more matches to process".format(len(matches)))
         for matchdto in matches: 
-            match = getMatch(matchdto['gameId'])
-            recordMatch(match, matchdto['approximateTier'])
+            try:
+                match = getMatch(matchdto['gameId'])
+                recordMatch(match, matchdto['approximateTier'])
+            except Exception as e:
+                print("{}".format(e))
 
 def main():
     global _db
