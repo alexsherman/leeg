@@ -60,6 +60,10 @@ impl Champions {
 		return &self.name_hashes.get(name).unwrap();
 	}
 
+	pub fn index_by_id(&self, id: &i16) -> &usize {
+		return &self.id_hashes.get(id).unwrap();
+	}
+
 	pub fn len(&self) -> usize {
 		return self.list.len();
 	}
@@ -77,6 +81,19 @@ impl Champions {
 		ids
 	}
 
+	pub fn idxs_from_ids(&self, champion_ids: &Vec<i16>) -> Vec<usize> {
+		let mut ids: Vec<usize> = Vec::new();
+		for id in champion_ids {
+			match self.id_hashes.get(id) {
+				Some(i) => {
+					ids.push(i.clone());
+				},
+				None => ()
+			};
+		}
+		ids
+	}
+
 	pub fn names_from_idxs(&self, champion_idxs: &Vec<usize>) -> Vec<String> {
 		return champion_idxs.iter()
 				.map(|idx| self.list[*idx].name.clone())
@@ -85,6 +102,16 @@ impl Champions {
 
 	pub fn get_list(&self) -> &Vec<Champion> {
 		&self.list
+	}
+
+	pub fn name_from_id(&self, id: &i16) -> String {
+		let idx = *self.index_by_id(id);
+		self.list[idx].name.clone()
+	}
+
+	pub fn id_from_name(&self, name: &String) -> i16 {
+		let idx = *self.index_by_name(name);
+		self.list[idx].id
 	}
 
 	fn push(&mut self, id: i16, name: String, roles: Vec<String>) {

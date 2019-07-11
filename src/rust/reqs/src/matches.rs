@@ -176,33 +176,42 @@ pub fn load_global_matches_from_db(same_team: &Vec<String>, opp_team: &Vec<Strin
         return load_all_matches(&champions);
     }
     let conn = get_connection_to_matches_db()?;
+    let mut same_ids: Vec<i16> = Vec::new();
+    for name in same_team {
+        same_ids.push(champions.id_from_name(&name));
+    }
+
+    let mut opp_ids: Vec<i16> = Vec::new();
+    for name in opp_team {
+        opp_ids.push(champions.id_from_name(&name));    
+    }
     let mut matches: Vec<GlobalMatch> = Vec::new();
-    for row in &conn.query(Q_GLOBAL_MATCHES_BOTH_TEAM_BLUE, &[&same_team, &opp_team])? {
-        let same_champ_names = row.get(1);
-        let opp_champ_names = row.get(2);
+    for row in &conn.query(Q_GLOBAL_MATCHES_BOTH_TEAM_BLUE, &[&same_ids, &opp_ids])? {
+        let same_champ_ids = row.get(1);
+        let opp_champ_ids = row.get(2);
         let same_bans = row.get(3);
         let opp_bans = row.get(4);
         let m = GlobalMatch {
             same_wins: row.get(0),
-            same_team: champions.idxs_from_names(&same_champ_names),
-            opp_team: champions.idxs_from_names(&opp_champ_names),
-            same_bans: champions.idxs_from_names(&same_bans),
-            opp_bans: champions.idxs_from_names(&opp_bans)
+            same_team: champions.idxs_from_ids(&same_champ_ids),
+            opp_team: champions.idxs_from_ids(&opp_champ_ids),
+            same_bans: champions.idxs_from_ids(&same_bans),
+            opp_bans: champions.idxs_from_ids(&opp_bans)
         };
         matches.push(m);
     }
-    for row in &conn.query(Q_GLOBAL_MATCHES_BOTH_TEAM_RED, &[&same_team, &opp_team])? {
+    for row in &conn.query(Q_GLOBAL_MATCHES_BOTH_TEAM_RED, &[&same_ids, &opp_ids])? {
         let opp_wins: bool = row.get(0);
-        let same_champ_names = row.get(2);
-        let opp_champ_names = row.get(1);
+        let same_champ_ids = row.get(2);
+        let opp_champ_ids = row.get(1);
         let same_bans = row.get(4);
         let opp_bans = row.get(3);
         let m = GlobalMatch {
             same_wins: !opp_wins,
-            same_team: champions.idxs_from_names(&same_champ_names),
-            opp_team: champions.idxs_from_names(&opp_champ_names),
-            same_bans: champions.idxs_from_names(&same_bans),
-            opp_bans: champions.idxs_from_names(&opp_bans)
+            same_team: champions.idxs_from_ids(&same_champ_ids),
+            opp_team: champions.idxs_from_ids(&opp_champ_ids),
+            same_bans: champions.idxs_from_ids(&same_bans),
+            opp_bans: champions.idxs_from_ids(&opp_bans)
         };
         matches.push(m);
     }
@@ -219,24 +228,24 @@ fn load_all_matches(champions: &Champions) -> Result<Vec<GlobalMatch>, Error> {
     let mut matches: Vec<GlobalMatch> = Vec::new();
     for row in &conn.query(Q_ALL_MATCHES, &[])? {
         let blue_wins: bool = row.get(0);
-        let blue_champ_names = row.get(1);
-        let red_champ_names = row.get(2);
+        let blue_champ_ids = row.get(1);
+        let red_champ_ids = row.get(2);
         let blue_bans = row.get(3);
         let red_bans = row.get(4);
         let m = GlobalMatch {
             same_wins: blue_wins,
-            same_team: champions.idxs_from_names(&blue_champ_names),
-            opp_team: champions.idxs_from_names(&red_champ_names),
-            same_bans: champions.idxs_from_names(&blue_bans),
-            opp_bans: champions.idxs_from_names(&red_bans)
+            same_team: champions.idxs_from_ids(&blue_champ_ids),
+            opp_team: champions.idxs_from_ids(&red_champ_ids),
+            same_bans: champions.idxs_from_ids(&blue_bans),
+            opp_bans: champions.idxs_from_ids(&red_bans)
         };
         matches.push(m);
         let m_flipped = GlobalMatch {
             same_wins: !blue_wins,
-            same_team: champions.idxs_from_names(&red_champ_names),
-            opp_team: champions.idxs_from_names(&blue_champ_names),
-            same_bans: champions.idxs_from_names(&red_bans),
-            opp_bans: champions.idxs_from_names(&blue_bans)
+            same_team: champions.idxs_from_ids(&red_champ_ids),
+            opp_team: champions.idxs_from_ids(&blue_champ_ids),
+            same_bans: champions.idxs_from_ids(&red_bans),
+            opp_bans: champions.idxs_from_ids(&blue_bans)
         };
         matches.push(m_flipped);
     }

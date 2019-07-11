@@ -128,7 +128,7 @@ def getMatchesFromLeagueEntries(leagueEntries):
         try: 
             match_history = getSummonerMatchHistory(account_id, params)
             n += 1
-            if n > 10:
+            if n > 20:
                 break;
             if len(match_history['matches']) > 0:
                 matches = matches + match_history['matches']
@@ -149,4 +149,9 @@ def all_matches_today(page):
             except Exception as e:
                 print("Error getting entries for {} - page {} {}".format(tier, page, e))
         page += 1
+        if len(matches) == 0 and page > 10:
+            break
         yield matches
+
+
+        

@@ -10,9 +10,9 @@ pub use self::postgres::{Connection, Error, TlsMode};
 const DB_CONFIG_PATH: &str = "Db_config.toml";
 // TODO: it would be pretty cool to have a macro that takes care of this stuff depending on arrays
 // you pass in or something
-pub const Q_ALL_MATCHES: &str = "select blue_wins, blue_team, red_team, blue_bans, red_bans from all_matches";
-pub const Q_GLOBAL_MATCHES_BOTH_TEAM_BLUE: &str = "select blue_wins, blue_team, red_team, blue_bans, red_bans from all_matches where blue_team @> $1 and red_team @> $2";
-pub const Q_GLOBAL_MATCHES_BOTH_TEAM_RED: &str = "select blue_wins, blue_team, red_team, blue_bans, red_bans from all_matches where red_team @> $1 and blue_team @> $2";
+pub const Q_ALL_MATCHES: &str = "select blue_wins, blue_team, red_team, blue_bans, red_bans from all_matches_2";
+pub const Q_GLOBAL_MATCHES_BOTH_TEAM_BLUE: &str = "select blue_wins, blue_team, red_team, blue_bans, red_bans from all_matches_2 where blue_team @> $1 and red_team @> $2";
+pub const Q_GLOBAL_MATCHES_BOTH_TEAM_RED: &str = "select blue_wins, blue_team, red_team, blue_bans, red_bans from all_matches_2 where red_team @> $1 and blue_team @> $2";
 pub const Q_ALL_CHAMPIONS: &str = "select * from champions order by id";
 pub const Q_SUMMONER_MASTERIES: &str = "SELECT champion_id, mastery_level, mastery_points FROM summoner_masteries WHERE summoner_id = $1";
 pub const INSERT_SUMMONER_MASTERIES: &str = "INSERT INTO summoner_masteries

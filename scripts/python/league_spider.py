@@ -30,7 +30,7 @@ def recordMatch(match, tier):
 
 def crawl():
     # generator yields a bunch of matches endlessly
-    for matches in all_matches_today(4):
+    for matches in all_matches_today(page = 1):
         print("{} more matches to process".format(len(matches)))
         for matchdto in matches: 
             try:
@@ -45,6 +45,7 @@ def main():
     crawl()
 
 def exit():
+    _db['connection'].commit()
     _db['connection'].close()
     _db['cursor'].close()
     sys.exit(0)
@@ -55,3 +56,4 @@ if __name__ == '__main__':
         main()
     except KeyboardInterrupt:
         exit()
+        

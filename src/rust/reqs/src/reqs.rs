@@ -278,6 +278,7 @@ pub fn combine_req_services(services: &Vec<GlobalServiceWithWeight>, team_picks:
 				for role in x {
 					if champions.get_list()[i].get_roles().contains(&role) {
 						found = true;
+						break;
 					}
 				}
 				found
