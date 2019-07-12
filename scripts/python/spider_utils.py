@@ -5,6 +5,7 @@ import time
 import json
 import os
 import sys 
+from random import shuffle
 _url_root = 'https://na1.api.riotgames.com'
 _summoner_path = '/lol/summoner/v4/summoners/by-name/'
 _summoner_by_id_path = '/lol/summoner/v4/summoners/'
@@ -21,7 +22,7 @@ except KeyError:
     print('You forgot to export your development key as RIOT_API_KEY!')
     sys.exit(1)
 
-def makeRequest(url, optional_params = {}):
+def makeRequest(url, optional_params = {}, print_err = True):
     '''
     Make an http request to the given URL with the specified parameters.
     
@@ -44,7 +45,8 @@ def makeRequest(url, optional_params = {}):
         time.sleep(rate_limit)
         return response
     except HTTPError as http_err:
-        print(http_err)
+        if print_err:
+            print(http_err)
         raise
 
 def getSummonerByName(name):
@@ -73,7 +75,7 @@ def getSummonerMatchHistory(encrypted_account_id, params = {'endIndex': 10}):
         MatchlistDto as json
     '''
     match_history_request_url = _url_root + _match_history_path + encrypted_account_id
-    return makeRequest(match_history_request_url, params).json()
+    return makeRequest(match_history_request_url, params, print_err = False).json()
 
 def getMatchIds(match_history):
     ''' Given MatchlistDto, return list of match ids.'''
@@ -118,22 +120,25 @@ def getAccountIdFromSummonerId(summoner_id):
 def getMatchesFromLeagueEntries(leagueEntries):
     matches = [];
     n = 0
+    n_days = 7
     for entry in leagueEntries:
         account_id = getAccountIdFromSummonerId(entry['summonerId'])
-        beginTime = int(time.time()) - 24 * 60 * 60;
+        beginTime = int(time.time()- n_days * 24 * 60 * 60) * 1000;
         params = {
             'beginTime': beginTime,
             'queue': [420]
         }
         try: 
             match_history = getSummonerMatchHistory(account_id, params)
+            n_matches = len(match_history['matches'])
+            print("Got {} matches from {} ".format(n_matches, account_id))
             n += 1
-            if n > 20:
+            if n > 50:
                 break;
-            if len(match_history['matches']) > 0:
+            if n_matches > 0:
                 matches = matches + match_history['matches']
         except Exception as e:
-            print("No matches found for {} - {}".format(account_id, e))
+            print("No matches found for {} in last {} days".format(account_id, n_days))
     return matches
 
 def all_matches_today(page):
@@ -142,6 +147,7 @@ def all_matches_today(page):
         for tier in LEAGUE_TIERS:
             try:
                 entries = getLeagueEntriesForTier(tier, page)
+                shuffle(entries)
                 tier_matches = getMatchesFromLeagueEntries(entries)
                 for match in tier_matches:
                     match['approximateTier'] = tier
