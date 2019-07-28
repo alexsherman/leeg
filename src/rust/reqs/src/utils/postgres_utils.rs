@@ -36,11 +36,15 @@ struct Config {
 }
 
 pub fn get_connection_to_matches_db() -> Result<Connection, Error> {
+    let connection_string = get_connection_string();
+    Connection::connect(connection_string, TlsMode::None)
+}
+
+pub fn get_connection_string() -> String {
     let mut config_file = File::open(&Path::new(DB_CONFIG_PATH)).expect("No db config toml found!");
     let mut config_string = String::new();
-    config_file.read_to_string(&mut config_string)?;
+    config_file.read_to_string(&mut config_string).unwrap();
     let config: Config = toml::from_str(&config_string).unwrap();
-    let connection_string = format!( "postgres://{}:{}@{}:{}/{}", config.user, 
-                                     config.password, config.host, config.port, config.database);
-    Connection::connect(connection_string, TlsMode::None)
+    format!("postgresql://{}:{}@{}:{}/{}", config.user, 
+             config.password, config.host, config.port, config.database)
 }

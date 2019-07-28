@@ -4,6 +4,8 @@ use utils::redis_utils::{get_cached_summoner_id, get_cached_summoner_masteries, 
 use utils::riot_api_utils::*;
 use utils::summoner_utils::*;
 use std::error::Error;
+use r2d2::Pool;
+use r2d2_postgres::PostgresConnectionManager;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Summoner {
@@ -15,11 +17,11 @@ pub struct Summoner {
 
 impl Summoner {
 
-    pub fn from_name_and_region(redis_conn: &redis_utils::Connection, db_conn: &postgres_utils::Connection, 
+    pub fn from_name_and_region(redis_conn: &redis_utils::Connection, pool: Pool<PostgresConnectionManager>, 
                                 name: String, region: Region) 
                                 -> Result<Summoner, Box<Error>> {
         let id = get_summoner_id(redis_conn, &name, &region)?;
-        let masteries = get_summoner_masteries(redis_conn, db_conn, &id)?;
+        let masteries = get_summoner_masteries(redis_conn, pool, &id)?;
         Ok(Summoner {
             name: name,
             region: region,
@@ -57,7 +59,7 @@ fn get_summoner_id (conn: &redis_utils::Connection, name: &String, region: &Regi
 *   If the database does not have them, then request them from Riot's API.
 *   Then insert into the database and the cache and return.
 */
-fn get_summoner_masteries(redis_conn: &redis_utils::Connection, db_conn: &postgres_utils::Connection, id: &String) 
+fn get_summoner_masteries(redis_conn: &redis_utils::Connection, pool: Pool<PostgresConnectionManager>, id: &String) 
                           -> Result<Masteries, Box<Error>> {
     // try cache
     match get_cached_summoner_masteries(redis_conn, id) {
@@ -68,7 +70,8 @@ fn get_summoner_masteries(redis_conn: &redis_utils::Connection, db_conn: &postgr
         Err(_) => ()
     };
     // try db, cache if found
-    match get_masteries_from_database(db_conn, id) {
+    let db_conn = pool.get().unwrap();
+    match get_masteries_from_database(&db_conn, id) {
         Ok(masteries) => {
             println!("Successfully got masteries from DB");
             match insert_cached_summoner_masteries(redis_conn, id, masteries.clone()) {
@@ -84,7 +87,7 @@ fn get_summoner_masteries(redis_conn: &redis_utils::Connection, db_conn: &postgr
     // get from api, then try insert to db, then insert into cache, and return
     let masteries = request_masteries_from_api(id)?;
     println!("Successfully got masteries from API, inserting into DB and Redis");
-    match insert_masteries_into_database(db_conn, id, &masteries) {
+    match insert_masteries_into_database(&db_conn, id, &masteries) {
         Ok(_) => {
             match insert_cached_summoner_masteries(redis_conn, id, masteries.clone()) {
                 Ok(_) => (),
