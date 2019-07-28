@@ -23,6 +23,8 @@ redis = "0.10.0"
 reqwest = "0.9.18"
 simple-error= "0.1"
 crossbeam = "0.6.0"
+r2d2 = "0.8.5"
+r2d2_postgres = "0.14.0"
 
 [dependencies.postgres]
 version = "0.15"

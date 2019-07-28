@@ -15,6 +15,9 @@ use utils::postgres_utils::*;
 use utils::bool_deserializer::bool_from_string;
 use utils::vec_deserializer::vec_from_python_list;
 
+use r2d2::Pool;
+use r2d2_postgres::PostgresConnectionManager;
+
 use self::postgres::Error;
 
 const ALLIED_CHAMPS_SIZE: usize = 4;
@@ -170,12 +173,14 @@ impl GlobalMatch {
  * It should be pretty trivial to take this vector and calculate every champion present in those
  * games' scores and return.
  */
-pub fn load_global_matches_from_db(same_team: &Vec<String>, opp_team: &Vec<String>, champions: &Champions) -> Result<Vec<GlobalMatch>, Error> {
+pub fn load_global_matches_from_db(same_team: &Vec<String>, opp_team: &Vec<String>, 
+                                   champions: &Champions, pool: Pool<PostgresConnectionManager>) 
+                                   -> Result<Vec<GlobalMatch>, Error> {
     println!("{:?}, {:?}", same_team, opp_team);
     if same_team.is_empty() && opp_team.is_empty() {
-        return load_all_matches(&champions);
+        return load_all_matches(&champions, pool);
     }
-    let conn = get_connection_to_matches_db()?;
+    let conn = pool.get().unwrap();
     let mut same_ids: Vec<i16> = Vec::new();
     for name in same_team {
         same_ids.push(champions.id_from_name(&name));
@@ -223,8 +228,8 @@ pub fn load_global_matches_from_db(same_team: &Vec<String>, opp_team: &Vec<Strin
 *   empty arrays, not sure if postgres optimizes it away. Also requires just 1 query
 *   that we can just duplicate for same and opp.
 */
-fn load_all_matches(champions: &Champions) -> Result<Vec<GlobalMatch>, Error> {
-    let conn = get_connection_to_matches_db()?;
+fn load_all_matches(champions: &Champions, pool: Pool<PostgresConnectionManager>) -> Result<Vec<GlobalMatch>, Error> {
+    let conn = pool.get().unwrap();
     let mut matches: Vec<GlobalMatch> = Vec::new();
     for row in &conn.query(Q_ALL_MATCHES, &[])? {
         let blue_wins: bool = row.get(0);
