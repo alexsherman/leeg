@@ -3,6 +3,7 @@ extern crate serde_derive;
 extern crate itertools;
 #[macro_use]
 extern crate simple_error;
+extern crate crossbeam;
 mod matches;
 mod scores;
 mod utils;
@@ -19,6 +20,8 @@ use utils::postgres_utils::get_connection_to_matches_db;
 use summoner::*;
 use utils::summoner_utils::Region;
 use std::error::Error;
+use crossbeam::crossbeam_channel::unbounded;
+use crossbeam::thread;
 
 const CHAMPIONS_FILE_PATH: &str = "/mnt/c/Users/Alex/Documents/dev/leeg/champions.json";
 const ROLES_FILE_PATH: &str = "/mnt/c/Users/Alex/Documents/dev/leeg/champion_roles.json";
@@ -43,25 +46,45 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, 
     println!("{} matches analyzed so far", num_matches_analyzed);
     let mut team_n = 2;
     let mut opp_n = 2;
-    while num_matches_analyzed < SUFFICIENT_MATCH_THRESHOLD && (team_n >= 0 || opp_n >= 0) {
-        for team_combination in team_picks.iter().cloned().combinations(team_n) {
-            for opp_combination in opp_picks.iter().cloned().combinations(opp_n) {
-                let w_service = get_or_create_global_req_service(&redis_connection, &team_combination, &opp_combination, &champions, false);
-                num_matches_analyzed += w_service.weight;
-                service_vec.push(w_service);
-                println!("{} matches analyzed so far", num_matches_analyzed);
+    // Create an unbounded channel.
+    let (s, r) = unbounded();
+    let mut n_threads = 0;
+    thread::scope(|scope| {
+            while team_n >= 0 || opp_n >= 0 {
+                for team_combination in team_picks.iter().cloned().combinations(team_n) {
+                    for opp_combination in opp_picks.iter().cloned().combinations(opp_n) {
+                        n_threads += 1;
+                        let s2 = s.clone();
+                        let tc2 = team_combination.clone();
+                        // use scoped threads until async syntax formalized
+                        scope.spawn(move |_| {
+                            let mut w_service = get_or_create_global_req_service(&get_connection(), 
+                                                                                 &tc2, 
+                                                                                 &opp_combination, 
+                                                                                 &champions, 
+                                                                                 false);
+                            w_service.weight *= (team_n * opp_n) + 1;
+                            println!("{}", w_service.weight);
+                            s2.send(w_service).unwrap();      
+                        });               
+                    }
+                }
+
+                if team_n > opp_n && team_n > 0 {
+                    team_n -= 1;
+                } else if opp_n > 0 {
+                    opp_n -= 1;
+                } else {
+                    break;
+                }
             }
-        }
-        println!("{} matches analyzed so far", num_matches_analyzed);
-        if team_n > opp_n && team_n > 0 {
-            team_n -= 1;
-        } else if opp_n > 0 {
-            opp_n -= 1;
-        } else {
-            break;
-        }
+    }).unwrap();
+
+    for _ in 0..n_threads {
+        let thread_created_service = r.recv().unwrap();
+        service_vec.push(thread_created_service);
     }
-   
+     
     let combined_service = combine_req_services(&service_vec, &team_picks, &opp_picks, roles, &champions);
     let res = combined_service.req_banless(&champions, 144);    
     res
