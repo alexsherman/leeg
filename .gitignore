@@ -8,6 +8,7 @@ src/rust/banana/target/*
 src/rust/banana/Cargo.lock
 src/rust/banana/Db_config.toml
 src/rust/banana/Rocket.toml
+src/rust/env_variables.yaml
 scripts/python/database.ini
 node_modules/
 *.rdb
