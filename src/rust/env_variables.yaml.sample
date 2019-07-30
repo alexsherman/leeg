@@ -1,0 +1,2 @@
+env_variables:
+  RIOT_API_KEY: "super secret api key here"
