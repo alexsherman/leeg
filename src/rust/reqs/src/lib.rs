@@ -44,7 +44,11 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>,
     // this will hold all the req structs which we will combine at the end
     let mut service_vec: Vec<GlobalServiceWithWeight> = Vec::new();
     let mut num_matches_analyzed: usize = 0;
-    let weighted_service = get_or_create_global_req_service(&redis_connection, pool.clone(), &team_picks, &opp_picks, &champions, true);
+    let weighted_service = get_or_create_global_req_service(&redis_connection, pool.clone(), 
+                                                            &team_picks, 
+                                                            &opp_picks, 
+                                                            &champions, 
+                                                            true);
     num_matches_analyzed += weighted_service.weight;
     service_vec.push(weighted_service);
     // if we haven't analyzed enough matches, this is because the current query was too specific
@@ -102,7 +106,8 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>,
 *   Attempts to get the requested global req service from cache. If not in cache, generate from database matches
 *   and put it in the cache.
 */
-fn get_or_create_global_req_service(conn: &Connection, pool: Pool<PostgresConnectionManager>, team_picks: &Vec<String>, opp_picks: &Vec<String>, 
+fn get_or_create_global_req_service(conn: &Connection, pool: Pool<PostgresConnectionManager>, 
+                                    team_picks: &Vec<String>, opp_picks: &Vec<String>, 
                                     champions: &Champions, derive: bool) 
                                     -> GlobalServiceWithWeight {
     let cached_entry = get_cached_global_reqs(&conn, &team_picks, &opp_picks);

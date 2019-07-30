@@ -17,19 +17,10 @@ RUN cd banana && cargo build --release
 
 FROM ubuntu:latest
 
-RUN apt-get update && apt-get install -y libpq-dev
-
-RUN ls
-
-COPY --from=builder \
-  banana/target/release/banana \
-  /usr/local/bin/
-
-WORKDIR /root
-ENV ROCKET_ENV="production"
-
 # Install Redis. https://github.com/dockerfile/redis/blob/master/Dockerfile
 RUN \
+ apt-get update && \
+  apt-get install -y wget build-essential tar sed && \
   cd /tmp && \
   wget http://download.redis.io/redis-stable.tar.gz && \
   tar xvzf redis-stable.tar.gz && \
@@ -51,5 +42,16 @@ VOLUME ["/data"]
 WORKDIR /data
 
 RUN redis-server /etc/redis/redis.conf &
+
+RUN apt-get update && apt-get install -y libpq-dev
+
+RUN ls
+
+COPY --from=builder \
+  banana/target/release/banana \
+  /usr/local/bin/
+
+WORKDIR /root
+ENV ROCKET_ENV="production"
 
 CMD ROCKET_PORT=$PORT /usr/local/bin/banana
