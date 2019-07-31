@@ -51,7 +51,13 @@ COPY --from=builder \
   banana/target/release/banana \
   /usr/local/bin/
 
+
 WORKDIR /root
+
+COPY --from=builder \
+  banana/Db_config.toml \
+  .
+
 ENV ROCKET_ENV="production"
 
 CMD ROCKET_PORT=$PORT /usr/local/bin/banana
