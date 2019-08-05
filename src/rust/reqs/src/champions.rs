@@ -2,9 +2,13 @@
  * Contains static champion data and functions to load that data from JSON
  * @author dmcfalls, alexsherman
  */
+extern crate r2d2;
+extern crate r2d2_postgres;
 extern crate serde_json;
 extern crate postgres;
 
+use r2d2::Pool;
+use r2d2_postgres::PostgresConnectionManager;
 use std::fs::File;
 use std::io::Read;
 use std::collections::HashMap;
@@ -166,8 +170,8 @@ pub fn load_champions_with_role(champ_filename: String, role_filename: String) -
 	sorted_champions
 }
 
-pub fn load_champions_from_db() -> Result<Champions, Error> {
- 	let conn = get_connection_to_matches_db()?;
+pub fn load_champions_from_db(pool: Pool<PostgresConnectionManager>) -> Result<Champions, Error> {
+ 	let conn = pool.get().unwrap();
  	let mut champions = Champions::new();
     for row in &conn.query(Q_ALL_CHAMPIONS, &[])? {
 		champions.push(row.get(0), row.get(1), row.get(2));

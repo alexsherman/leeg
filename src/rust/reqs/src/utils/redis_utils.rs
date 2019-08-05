@@ -4,15 +4,27 @@ use reqs::GlobalServiceWithWeight;
 extern crate serde_json;
 use self::serde_json::json;
 use super::summoner_utils::{Region, Masteries};
+use std::env;
 
 pub const REDIS_DEFAULT_EXPIRE_TIME: usize = 3600;
 pub const REDIS_DEFAULT_EXPIRE_TIME_SUMMONER_ID: usize = 86400;
+const REDIS_HOST_KEY: &str = "REDISHOST";
+const REDIS_PORT_KEY: &str = "REDISPORT";
 
-pub fn get_connection() -> Connection {
-    let client = redis::Client::open("redis://127.0.0.1:6379").unwrap();    
-    client.get_connection().unwrap()
+pub fn get_connection() -> Result<Connection, RedisError> {
+    let ip: String = match env::var(REDIS_HOST_KEY) {
+        Ok(host) => host,
+        Err(_) => "127.0.0.1".to_string()
+    };
+    let port: String =  match env::var(REDIS_PORT_KEY) {
+        Ok(p) => p,
+        Err(_) => "6379".to_string()
+    };
+    let client_str: &str = &format!("redis://{}:{}", ip, port);
+    debug!("client str for redis: {}", client_str);
+    let client = redis::Client::open(client_str)?;    
+    client.get_connection()
 }
-
 /**
 *   E.g. team - Vec<Annie, Sivir> , opp - Vec<Vayne> -> globalreqs+Annie,Sivir-Vayne
 */

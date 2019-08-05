@@ -15,4 +15,5 @@ node_modules/
 src/java/client-listener/client-listener.iml
 src/java/client-listener/target
 src/java/client-listener/target/*
+cloud_sql_proxy
 

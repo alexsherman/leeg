@@ -1,6 +1,11 @@
 #[macro_use]
 extern crate serde_derive;
 extern crate itertools;
+
+#[macro_use]
+extern crate log;
+extern crate env_logger;
+
 #[macro_use]
 extern crate simple_error;
 extern crate crossbeam;
@@ -38,9 +43,9 @@ const SUFFICIENT_MATCH_THRESHOLD: usize = 10000;
 pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>, 
                              roles: Option<Vec<String>>, champions: &Champions,
                              pool: Pool<PostgresConnectionManager>) 
-                            -> Vec<String> {
+                            -> Result<Vec<String>, Box<Error>> {
     // connnect to redis
-    let redis_connection = get_connection();
+    let redis_connection = get_connection()?;
     // this will hold all the req structs which we will combine at the end
     let mut service_vec: Vec<GlobalServiceWithWeight> = Vec::new();
     let mut num_matches_analyzed: usize = 0;
@@ -69,7 +74,7 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>,
                         let pool2 = pool.clone();
                         // use scoped threads until async syntax formalized
                         scope.spawn(move |_| {
-                            let mut w_service = get_or_create_global_req_service(&get_connection(),
+                            let mut w_service = get_or_create_global_req_service(&get_connection().unwrap(),
                                                                                  pool2, 
                                                                                  &tc2, 
                                                                                  &opp_combination, 
@@ -99,7 +104,7 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>,
      
     let combined_service = combine_req_services(&service_vec, &team_picks, &opp_picks, roles, &champions);
     let res = combined_service.req_banless(&champions, 144);    
-    res
+    Ok(res)
 }    
 
 /**
@@ -208,6 +213,6 @@ pub fn get_global_matrix() -> Vec<NamedGlobalService> {
 
 pub fn get_summoner_mastery_by_name(name: String, pool: Pool<PostgresConnectionManager>) -> Result<Summoner, Box<Error>> {
     let region = Region::NA;
-    let redis_connection = get_connection();
+    let redis_connection = get_connection()?;
     Summoner::from_name_and_region(&redis_connection, pool, name, region)
 }
