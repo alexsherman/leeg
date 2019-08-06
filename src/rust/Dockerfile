@@ -1,3 +1,7 @@
+#Steps below are commented out because google app engine seems to 
+#not have these layers cached and it takes 20 min to compile all libs
+#while testing, just take the binary from your local
+
 #FROM ubuntu:latest AS builder
 
 # install prereqs
@@ -26,9 +30,5 @@ WORKDIR /root
 COPY banana/Db_config.toml .
 
 COPY banana/Rocket.toml .
-
-EXPOSE 8080
-EXPOSE 1234
-EXPOSE 6379
 
 CMD ROCKET_ENV="production" RUST_LOG="debug" ROCKET_PORT=$PORT /usr/local/bin/banana

@@ -28,6 +28,7 @@ pub const INSERT_SUMMONER_MASTERIES: &str = "INSERT INTO summoner_masteries
  **/
 
 #[derive(Deserialize)]
+#[allow(dead_code)]
 struct Config {
     database: String,
     host: String,
@@ -36,11 +37,10 @@ struct Config {
     port: String
 }
 
-pub fn get_connection_to_matches_db() -> Result<Connection, Error> {
-    let connection_string = get_connection_string();
-    Connection::connect(connection_string, TlsMode::None)
-}
-
+/*
+    Get a string representing the location of the database. Derived from db config file, but
+    the host name can be overwritten by POSTGRES_CONNECTION_NAME environment variable.
+*/
 pub fn get_connection_string() -> String {
     let mut config_file = File::open(&Path::new(DB_CONFIG_PATH)).expect("No db config toml found!");
     let mut config_string = String::new();
