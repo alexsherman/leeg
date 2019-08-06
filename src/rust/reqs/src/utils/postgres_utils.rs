@@ -8,6 +8,9 @@ use std::env;
 
 pub use self::postgres::{Connection, Error, TlsMode};
 
+
+pub type ConnectionPool = r2d2::Pool<r2d2_postgres::PostgresConnectionManager>;
+
 const DB_CONFIG_PATH: &str = "Db_config.toml";
 // TODO: it would be pretty cool to have a macro that takes care of this stuff depending on arrays
 // you pass in or something
@@ -53,4 +56,9 @@ pub fn get_connection_string() -> String {
 
     let connection_string = format!("postgres://{}:{}@{}/{}", config.user, config.password, host, config.database);
     connection_string
+}
+
+trait FromPostgres {
+    type Data; 
+    fn from_database(&self, pool: ConnectionPool) -> Result<Self::Data, self::postgres::Error>;
 }
