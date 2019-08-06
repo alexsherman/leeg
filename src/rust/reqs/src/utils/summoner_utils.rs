@@ -1,3 +1,4 @@
+use postgres_utils::*;
 use std::collections::HashMap;
 use std::fmt;
 
@@ -51,4 +52,11 @@ impl Masteries {
         masteries
     }
 
+}
+
+impl FromPostgres for Masteries {
+    type Data = Masteries; 
+    fn from_database(&self, pool: ConnectionPool) -> Result<Self::Data, self::postgres::Error> {
+        unimplemented!();
+    };
 }

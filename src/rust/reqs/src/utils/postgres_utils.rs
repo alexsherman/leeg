@@ -58,7 +58,11 @@ pub fn get_connection_string() -> String {
     connection_string
 }
 
-trait FromPostgres {
+pub trait FromPostgres {
     type Data; 
     fn from_database(&self, pool: ConnectionPool) -> Result<Self::Data, self::postgres::Error>;
+}
+
+pub trait ToPostgres {
+    fn insert_into_database(&self, pool: ConnectionPool) -> Result<(), self::postgres::Error>;
 }
