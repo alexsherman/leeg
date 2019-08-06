@@ -5,6 +5,9 @@
 extern crate r2d2;
 extern crate postgres;
 extern crate r2d2_postgres;
+#[macro_use]
+extern crate log;
+extern crate env_logger;
 
 use rocket_contrib::json::JsonValue;
 use std::vec::Vec;
@@ -36,14 +39,16 @@ fn global_recommendation(team: Option<String>, opp: Option<String>, roles: Optio
         },
         None => None
     };
-    json!({"reqs": handle_global_req_req(
-                    &champ_string_to_vec(&team), 
-                    &champ_string_to_vec(&opp), 
-                    roles_option, 
-                    &champions, 
-                    postgres_pool.clone()
-                   )
-        })
+    match handle_global_req_req(
+        &champ_string_to_vec(&team), 
+        &champ_string_to_vec(&opp), 
+        roles_option, 
+        &champions, 
+        postgres_pool.clone()
+       ) {
+        Ok(r) => json!({"reqs": r}),
+        Err(e) => json!({"err": e.to_string()})
+    }
 }
 /*
 #[get("/championmatrix")]
@@ -66,12 +71,17 @@ fn champions(champions: State<Champions>) -> JsonValue {
 }
 
 fn main() {
-    
-    let champions: Champions = load_champions_from_db().unwrap();
-    let manager: PostgresConnectionManager = PostgresConnectionManager::new(get_connection_string(), TlsMode::None).unwrap();
+    env_logger::init();
+    debug!("started main in rocket main.rs");
+    debug!("{:?}", get_connection_string());
+    let manager: PostgresConnectionManager = PostgresConnectionManager::new(get_connection_string(),
+        TlsMode::None
+    ).unwrap();
     let pool = r2d2::Pool::new(manager).unwrap();
+    let champions: Champions = load_champions_from_db(pool.clone()).unwrap();
     // this will put all global winrates and 1 to 1 winrate services in cache if not cached already
-    handle_global_req_req(&Vec::new(), &Vec::new(), None, &champions, pool.clone());
+    //handle_global_req_req(&Vec::new(), &Vec::new(), None, &champions, pool.clone());
+    debug!("{:?}", champions.clone());
     rocket::ignite()
         .manage(champions)
         .manage(pool)
@@ -94,7 +104,7 @@ impl Fairing for CORS {
     fn on_response(&self, request: &Request, response: &mut Response) {
         if request.method() == Method::Options || response.content_type() == Some(ContentType::JSON) {
             response.set_header(Header::new("Access-Control-Allow-Origin", "*"));
-            response.set_header(Header::new("Access-Control-Allow-Methods", "POST, GET, OPTIONS"));
+            response.set_header(Header::new("Access-Control-Allow-Methods", "GET, OPTIONS"));
             response.set_header(Header::new("Access-Control-Allow-Headers", "Content-Type"));
             response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
         }

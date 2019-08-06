@@ -8,10 +8,12 @@ src/rust/banana/target/*
 src/rust/banana/Cargo.lock
 src/rust/banana/Db_config.toml
 src/rust/banana/Rocket.toml
+src/rust/env_variables.yaml
 scripts/python/database.ini
 node_modules/
 *.rdb
 src/java/client-listener/client-listener.iml
 src/java/client-listener/target
 src/java/client-listener/target/*
+cloud_sql_proxy
 

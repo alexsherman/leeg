@@ -1,0 +1,5 @@
+env_variables:
+  RIOT_API_KEY: "super secret api key here"
+  REDISHOST: 'secret ip'
+  REDISPORT: 6379
+  POSTGRES_CONNECTION_NAME: "%2Fcloudsql%2Frealdbname here"

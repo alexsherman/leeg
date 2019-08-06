@@ -4,6 +4,7 @@ extern crate toml;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
+use std::env;
 
 pub use self::postgres::{Connection, Error, TlsMode};
 
@@ -27,6 +28,7 @@ pub const INSERT_SUMMONER_MASTERIES: &str = "INSERT INTO summoner_masteries
  **/
 
 #[derive(Deserialize)]
+#[allow(dead_code)]
 struct Config {
     database: String,
     host: String,
@@ -35,16 +37,20 @@ struct Config {
     port: String
 }
 
-pub fn get_connection_to_matches_db() -> Result<Connection, Error> {
-    let connection_string = get_connection_string();
-    Connection::connect(connection_string, TlsMode::None)
-}
-
+/*
+    Get a string representing the location of the database. Derived from db config file, but
+    the host name can be overwritten by POSTGRES_CONNECTION_NAME environment variable.
+*/
 pub fn get_connection_string() -> String {
     let mut config_file = File::open(&Path::new(DB_CONFIG_PATH)).expect("No db config toml found!");
     let mut config_string = String::new();
     config_file.read_to_string(&mut config_string).unwrap();
-    let config: Config = toml::from_str(&config_string).unwrap();
-    format!("postgresql://{}:{}@{}:{}/{}", config.user, 
-             config.password, config.host, config.port, config.database)
+    let config: Config = toml::from_str(&config_string).unwrap();   
+    let host = match env::var("POSTGRES_CONNECTION_NAME") {
+        Ok(connection_name) => connection_name,
+        Err(_) => config.host
+    };
+
+    let connection_string = format!("postgres://{}:{}@{}/{}", config.user, config.password, host, config.database);
+    connection_string
 }

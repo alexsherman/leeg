@@ -1,9 +1,11 @@
+const API_HOST = "https://leeg-240122.appspot.com"
+
 export function getChampions() {
-    return getAsJSON("http://localhost:8000/champions")
+    return getAsJSON(API_HOST + "/champions")
 }
 
 export function getGlobalRecommendations(sameTeam, oppTeam, roles) {
-    const baseUrl = 'http://localhost:8000/globalreq';
+    const baseUrl = API_HOST + '/globalreq';
     let params = '?';
     if (sameTeam.length > 0) {
         params += 'team=' + sameTeam.join(',');
