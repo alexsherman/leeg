@@ -11,29 +11,42 @@ const RIOT_API_MASTERIES_PATH: &str = "/lol/champion-mastery/v4/champion-masteri
 const RIOT_API_KEY_PARAM: &str = "?api_key=";
 const RIOT_API_KEY_ENV_VAR: &str = "RIOT_API_KEY";
 
+pub type SummonerId = String;
+
 #[derive(Debug, Deserialize)]
-struct SummonerID {
-    id: String
+struct SummonerIdContainer {
+    id: SummonerId
 }
 
-pub fn request_summoner_id_from_api(name: &String) -> Result<String, Box<Error>> {
-    let riot_api_key = env::var(RIOT_API_KEY_ENV_VAR)?;
-    let query_url = format!("{}{}{}{}{}", RIOT_API_URL_ROOT, 
-                             RIOT_API_SUMMONER_PATH, name, 
-                             RIOT_API_KEY_PARAM, riot_api_key
-                            );
-    let id: SummonerID = reqwest::get(&query_url)?.json()?;
-    Ok(id.id)
+pub trait FromRiotApi {
+    type DeserializedResponse;
+    fn from_riot_api(identifier: &str) -> Result<Self::DeserializedResponse, Box<Error>>;
 }
 
+impl FromRiotApi for SummonerId {
+    type DeserializedResponse = SummonerId;
 
-pub fn request_masteries_from_api(id: &String) -> Result<Masteries, Box<Error>> {
-    let riot_api_key = env::var(RIOT_API_KEY_ENV_VAR)?;
-    let query_url = format!("{}{}{}{}{}", RIOT_API_URL_ROOT, 
-                             RIOT_API_MASTERIES_PATH, id, 
-                             RIOT_API_KEY_PARAM, riot_api_key
-                            );
-    let response: Vec<Mastery> = reqwest::get(&query_url)?.json()?;
-    let masteries = Masteries::from_mastery_vec(id, response);
-    Ok(masteries)
+    fn from_riot_api(identifier: &str) -> Result<SummonerId, Box<Error>> {
+        let riot_api_key = env::var(RIOT_API_KEY_ENV_VAR)?;
+        let query_url = format!("{}{}{}{}{}", RIOT_API_URL_ROOT, 
+                                 RIOT_API_SUMMONER_PATH, identifier, 
+                                 RIOT_API_KEY_PARAM, riot_api_key
+                                );
+        let idc: SummonerIdContainer = reqwest::get(&query_url)?.json()?;
+        Ok(idc.id)
+    }
+}
+
+impl FromRiotApi for Masteries {
+    type DeserializedResponse = Masteries;
+
+    fn from_riot_api(identifier: &str) -> Result<Masteries, Box<Error>> {
+        let riot_api_key = env::var(RIOT_API_KEY_ENV_VAR)?;
+        let query_url = format!("{}{}{}{}{}", RIOT_API_URL_ROOT, 
+                                 RIOT_API_MASTERIES_PATH, identifier, 
+                                 RIOT_API_KEY_PARAM, riot_api_key
+                                );
+        let response: Vec<Mastery> = reqwest::get(&query_url)?.json()?;
+        Ok(Masteries::with_id(&identifier.to_string()).populate_from_mastery_vec(response))
+    }
 }

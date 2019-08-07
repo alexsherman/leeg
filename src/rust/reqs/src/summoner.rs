@@ -1,4 +1,4 @@
-use utils::postgres_utils;
+use utils::postgres_utils::*;
 use utils::redis_utils;
 use utils::redis_utils::{get_cached_summoner_id, get_cached_summoner_masteries, insert_cached_summoner_id, insert_cached_summoner_masteries};
 use utils::riot_api_utils::*;
@@ -10,7 +10,7 @@ use r2d2_postgres::PostgresConnectionManager;
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Summoner {
     name: String,
-    id: String,
+    id: SummonerId,
     region: Region, 
     masteries: Masteries
 }
@@ -43,7 +43,7 @@ fn get_summoner_id (conn: &redis_utils::Connection, name: &String, region: &Regi
         },
         Err(_) => ()
     };
-    let id = request_summoner_id_from_api(name)?;
+    let id = SummonerId::from_riot_api(name)?;
     match insert_cached_summoner_id(conn, name, region, &id) {
         Ok(_) => (),
         Err(e) => { 
@@ -59,7 +59,7 @@ fn get_summoner_id (conn: &redis_utils::Connection, name: &String, region: &Regi
 *   If the database does not have them, then request them from Riot's API.
 *   Then insert into the database and the cache and return.
 */
-fn get_summoner_masteries(redis_conn: &redis_utils::Connection, pool: Pool<PostgresConnectionManager>, id: &String) 
+fn get_summoner_masteries(redis_conn: &redis_utils::Connection, pool: ConnectionPool, id: &String) 
                           -> Result<Masteries, Box<Error>> {
     // try cache
     match get_cached_summoner_masteries(redis_conn, id) {
@@ -69,9 +69,7 @@ fn get_summoner_masteries(redis_conn: &redis_utils::Connection, pool: Pool<Postg
         },
         Err(_) => ()
     };
-    // try db, cache if found
-    let db_conn = pool.get().unwrap();
-    match get_masteries_from_database(&db_conn, id) {
+    match Masteries::with_id(id).from_database(pool.clone()) {
         Ok(masteries) => {
             println!("Successfully got masteries from DB");
             match insert_cached_summoner_masteries(redis_conn, id, masteries.clone()) {
@@ -85,9 +83,9 @@ fn get_summoner_masteries(redis_conn: &redis_utils::Connection, pool: Pool<Postg
         Err(_) => ()
     };
     // get from api, then try insert to db, then insert into cache, and return
-    let masteries = request_masteries_from_api(id)?;
+    let masteries = Masteries::from_riot_api(id)?;
     println!("Successfully got masteries from API, inserting into DB and Redis");
-    match insert_masteries_into_database(&db_conn, id, &masteries) {
+    match masteries.insert_into_database(pool) {
         Ok(_) => {
             match insert_cached_summoner_masteries(redis_conn, id, masteries.clone()) {
                 Ok(_) => (),
@@ -107,29 +105,4 @@ fn get_summoner_masteries(redis_conn: &redis_utils::Connection, pool: Pool<Postg
         }
     }
     Ok(masteries)
-}
-
-fn get_masteries_from_database(conn: &postgres_utils::Connection, id: &String) -> Result<Masteries, Box<Error>> {
-    let mut mastery_vec: Vec<Mastery> = Vec::new();
-    for row in &conn.query(postgres_utils::Q_SUMMONER_MASTERIES, &[&id])? {
-        mastery_vec.push(Mastery {
-            champion_id: row.get(0),
-            mastery_level: row.get(1),
-            mastery_points: row.get(2)
-        });
-    }
-    if mastery_vec.len() == 0 {
-        bail!("No masteries found in DB");
-    }
-    Ok(Masteries::from_mastery_vec(id, mastery_vec))
-}
-
-fn insert_masteries_into_database(conn: &postgres_utils::Connection, id: &String, masteries: &Masteries) -> Result<(), Box<Error>> {
-    let transaction = conn.transaction()?;
-    let stmt = transaction.prepare(postgres_utils::INSERT_SUMMONER_MASTERIES)?;
-    for (_, mastery) in masteries.map.clone().into_iter() {
-        stmt.execute(&[id, &mastery.champion_id, &mastery.mastery_level, &mastery.mastery_points])?;
-    }
-    transaction.commit()?;
-    Ok(())
 }
