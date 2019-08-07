@@ -1,5 +1,5 @@
 use utils::postgres_utils::*;
-use utils::redis_utils::{RedisConnection, get_cached_summoner_id, get_cached_summoner_masteries, insert_cached_summoner_id, insert_cached_summoner_masteries};
+use utils::redis_utils::{Cacheable, RedisConnection, get_cached_summoner_id, insert_cached_summoner_id};
 use utils::riot_api_utils::*;
 use utils::summoner_utils::*;
 use std::error::Error;
