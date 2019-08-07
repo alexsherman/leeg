@@ -20,7 +20,7 @@ mod reqs;
 mod summoner;
 
 pub use utils::postgres_utils::get_connection_string;
-pub use champions::{load_champions,load_champions_with_role,Champions, load_champions_from_db};
+pub use champions::{Champions, load_champions_from_db};
 use matches::{load_global_matches_from_db, GlobalMatch, GlobalMatchMatrices};
 use reqs::{GlobalReqService, GlobalServiceWithWeight, combine_req_services};
 use utils::redis_utils::{get_connection, Connection, get_cached_global_reqs, insert_cached_global_reqs, REDIS_DEFAULT_EXPIRE_TIME};
@@ -179,25 +179,6 @@ fn create_then_cache_services(conn: &Connection, derived_matrices: &GlobalMatchM
         
     }
 }
-
-/*
-pub fn get_global_matrix() -> Vec<NamedGlobalService> {
-    let champions = load_champions_with_role(CHAMPIONS_FILE_PATH.to_string(), ROLES_FILE_PATH.to_string());
-    let redis_connection = get_connection();
-    let mut service_vector: Vec<NamedGlobalService> = Vec::with_capacity(champions.get_list().len());
-    for index in 0..champions.get_list().len() {
-        let champ_name = &champions.get_list()[index].name;
-        let empty_vec: Vec<String> = Vec::new();
-        let mut single_champ_vec: Vec<String> = Vec::new();
-        single_champ_vec.push(champ_name.clone());
-        let r = get_or_create_global_req_service(&redis_connection, &empty_vec, &single_champ_vec, &champions, false);
-        service_vector.push(NamedGlobalService {
-            req_service: r.req_service,
-            champ_name:  champ_name.clone()
-        });
-    }
-    service_vector
-}*/
 
 pub fn get_summoner_mastery_by_name(name: String, pool: Pool<PostgresConnectionManager>) -> Result<Summoner, Box<Error>> {
     let region = Region::NA;
