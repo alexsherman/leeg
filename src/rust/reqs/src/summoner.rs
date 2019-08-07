@@ -1,31 +1,37 @@
 use utils::postgres_utils::*;
-use utils::redis_utils;
-use utils::redis_utils::{get_cached_summoner_id, get_cached_summoner_masteries, insert_cached_summoner_id, insert_cached_summoner_masteries};
+use utils::redis_utils::{RedisConnection, get_cached_summoner_id, get_cached_summoner_masteries, insert_cached_summoner_id, insert_cached_summoner_masteries};
 use utils::riot_api_utils::*;
 use utils::summoner_utils::*;
 use std::error::Error;
-use r2d2::Pool;
-use r2d2_postgres::PostgresConnectionManager;
+
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Summoner {
+    info: SummonerInfo,
+    masteries: Masteries
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct SummonerInfo {
     name: String,
     id: SummonerId,
     region: Region, 
-    masteries: Masteries
 }
 
 impl Summoner {
 
-    pub fn from_name_and_region(redis_conn: &redis_utils::Connection, pool: Pool<PostgresConnectionManager>, 
+    pub fn from_name_and_region(redis_conn: &RedisConnection, pool: ConnectionPool, 
                                 name: String, region: Region) 
                                 -> Result<Summoner, Box<Error>> {
         let id = get_summoner_id(redis_conn, &name, &region)?;
         let masteries = get_summoner_masteries(redis_conn, pool, &id)?;
-        Ok(Summoner {
+        let summoner_info = SummonerInfo {
             name: name,
-            region: region,
             id: id,
+            region: region
+        };
+        Ok(Summoner {
+            info: summoner_info,
             masteries: masteries
         })
     }
@@ -36,7 +42,7 @@ impl Summoner {
 *   Returns an error only if the id is not in the cache and the request to Riot API fails.
 *   TODO: region included for future use. currently, all requests to Riot are going to the NA endpoint.
 */
-fn get_summoner_id (conn: &redis_utils::Connection, name: &String, region: &Region) -> Result<String, Box<Error>> {
+fn get_summoner_id (conn: &RedisConnection, name: &String, region: &Region) -> Result<String, Box<Error>> {
     match get_cached_summoner_id(conn, name, region) {
         Ok(id) => {
             return Ok(id);
@@ -59,7 +65,7 @@ fn get_summoner_id (conn: &redis_utils::Connection, name: &String, region: &Regi
 *   If the database does not have them, then request them from Riot's API.
 *   Then insert into the database and the cache and return.
 */
-fn get_summoner_masteries(redis_conn: &redis_utils::Connection, pool: ConnectionPool, id: &String) 
+fn get_summoner_masteries(redis_conn: &RedisConnection, pool: ConnectionPool, id: &String) 
                           -> Result<Masteries, Box<Error>> {
     // try cache
     match get_cached_summoner_masteries(redis_conn, id) {

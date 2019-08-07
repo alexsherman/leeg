@@ -6,7 +6,7 @@ use std::io::prelude::*;
 use std::path::Path;
 use std::env;
 
-pub use self::postgres::{Connection, Error, TlsMode};
+pub use self::postgres::{Error, TlsMode};
 
 
 pub type ConnectionPool = r2d2::Pool<r2d2_postgres::PostgresConnectionManager>;

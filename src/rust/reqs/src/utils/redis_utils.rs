@@ -1,7 +1,11 @@
 pub extern crate redis;
-pub use self::redis::{Client, Connection, Commands, RedisError};
-use reqs::GlobalServiceWithWeight;
 extern crate serde_json;
+extern crate serde;
+
+use self::redis::{Client, Connection, Commands};
+pub use self::redis::RedisError;
+use reqs::GlobalServiceWithWeight;
+use self::serde::{Serialize, Deserialize};
 use self::serde_json::json;
 use super::summoner_utils::{Region, Masteries};
 use std::env;
@@ -10,6 +14,8 @@ pub const REDIS_DEFAULT_EXPIRE_TIME: usize = 3600;
 pub const REDIS_DEFAULT_EXPIRE_TIME_SUMMONER_ID: usize = 86400;
 const REDIS_HOST_KEY: &str = "REDISHOST";
 const REDIS_PORT_KEY: &str = "REDISPORT";
+
+pub type RedisConnection = Connection;
 
 pub fn get_connection() -> Result<Connection, RedisError> {
     let ip: String = match env::var(REDIS_HOST_KEY) {
@@ -120,14 +126,14 @@ pub fn insert_cached_summoner_masteries(conn: &Connection, id: &String,
 /**
 * Yep.
 */
-fn get_key_from_cache(conn: &Connection, key: &String) -> Result<String, RedisError> {
+pub fn get_key_from_cache(conn: &Connection, key: &String) -> Result<String, RedisError> {
     conn.get(key)
 }
 
 /**
 * If an expiry time in seconds is specified, set the key to expire then. Otherwise, set without expiry.
 */
-fn insert_key_value_to_cache(conn: &Connection, key: String, val: String, expire_time: Option<usize>) 
+pub fn insert_key_value_to_cache(conn: &Connection, key: String, val: String, expire_time: Option<usize>) 
                                 -> Result<Vec<String>, RedisError> {
      match expire_time {
         Some(time) => {
@@ -137,4 +143,12 @@ fn insert_key_value_to_cache(conn: &Connection, key: String, val: String, expire
             conn.set(key, val)
         }
     }
+}
+
+pub trait Cacheable<'de> {
+    type CacheItem: Deserialize<'de> + Serialize;
+
+    fn from_cache(self, conn: &Connection) -> Result<Self::CacheItem, RedisError>;
+
+    fn insert_into_cache(&self, conn: &Connection) -> Result<Vec<String>, RedisError>;
 }

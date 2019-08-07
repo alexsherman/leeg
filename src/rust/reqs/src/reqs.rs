@@ -6,8 +6,8 @@
 
 use champions::Champions;
 use matches::{GlobalMatch};
-use scores::{ScoreVector, GlobalScoreVectors};
-
+use scores::{Score, ScoreVector, GlobalScoreVectors};
+use champions::Champion;
 use utils::argmax::argmax_idx;
 
 // Used for comparisons. The "empty product" is 1 instead of 0, but 1 is greater than any
@@ -151,4 +151,10 @@ pub fn combine_req_services(services: &Vec<GlobalServiceWithWeight>, team_picks:
 		}
 	}
 	combined_service
+}
+
+struct Req {
+	champion: Champion,
+	score: Score,
+	message: Option<String>
 }

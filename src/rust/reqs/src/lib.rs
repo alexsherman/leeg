@@ -23,7 +23,7 @@ pub use utils::postgres_utils::get_connection_string;
 pub use champions::{Champions, load_champions_from_db};
 use matches::{load_global_matches_from_db, GlobalMatch, GlobalMatchMatrices};
 use reqs::{GlobalReqService, GlobalServiceWithWeight, combine_req_services};
-use utils::redis_utils::{get_connection, Connection, get_cached_global_reqs, insert_cached_global_reqs, REDIS_DEFAULT_EXPIRE_TIME};
+use utils::redis_utils::{get_connection, RedisConnection, get_cached_global_reqs, insert_cached_global_reqs, REDIS_DEFAULT_EXPIRE_TIME};
 use itertools::Itertools;
 use summoner::*;
 use utils::summoner_utils::Region;
@@ -99,7 +99,7 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>,
 *   Attempts to get the requested global req service from cache. If not in cache, generate from database matches
 *   and put it in the cache.
 */
-fn get_or_create_global_req_service(conn: &Connection, pool: Pool<PostgresConnectionManager>, 
+fn get_or_create_global_req_service(conn: &RedisConnection, pool: Pool<PostgresConnectionManager>, 
                                     team_picks: &Vec<String>, opp_picks: &Vec<String>, 
                                     champions: &Champions, derive: bool) 
                                     -> GlobalServiceWithWeight {
@@ -133,7 +133,7 @@ fn get_or_create_global_req_service(conn: &Connection, pool: Pool<PostgresConnec
 *    Then, create a service for that set of matches and cache it. 
 *
 */
-fn derive_and_cache_granular_services(conn: &Connection, matches: &Vec<GlobalMatch>, team_picks: &Vec<String>, 
+fn derive_and_cache_granular_services(conn: &RedisConnection, matches: &Vec<GlobalMatch>, team_picks: &Vec<String>, 
                                       opp_picks: &Vec<String>, champions: &Champions) 
                                       {
     let derived_matrices = GlobalMatchMatrices::from_matches(&matches, &champions);
@@ -146,7 +146,7 @@ fn derive_and_cache_granular_services(conn: &Connection, matches: &Vec<GlobalMat
 *   creates a service for each possible champion selection, and caches.
 *   If potential_is_team is false, the we do the same with opp_derived_matrix
 */
-fn create_then_cache_services(conn: &Connection, derived_matrices: &GlobalMatchMatrices, team_picks: &Vec<String>, 
+fn create_then_cache_services(conn: &RedisConnection, derived_matrices: &GlobalMatchMatrices, team_picks: &Vec<String>, 
                               opp_picks: &Vec<String>, champions: &Champions, potential_is_team: bool) {
     let matrix = match potential_is_team {
         true => &derived_matrices.same_derived_matrix,

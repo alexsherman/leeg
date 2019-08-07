@@ -1,4 +1,9 @@
+extern crate serde_json;
+
 use super::postgres_utils::*;
+use super::redis_utils::{RedisConnection, Cacheable, RedisError, REDIS_DEFAULT_EXPIRE_TIME_SUMMONER_ID};
+use self::serde_json::json;
+use utils::redis_utils::redis::Commands;
 use std::collections::HashMap;
 use std::fmt;
 
@@ -55,6 +60,10 @@ impl Masteries {
         }
     }
 
+    fn get_cache_key_name(&self) -> String {
+        format!("masteries+{}", self.id)
+    }
+
 }
 
 impl FromDatabase for Masteries {
@@ -84,5 +93,24 @@ impl ToDatabase for Masteries {
         }
         transaction.commit()?;
         Ok(())
+    }
+}
+
+impl Cacheable<'_> for Masteries {
+    type CacheItem = Masteries;
+
+    fn from_cache(self, conn: &RedisConnection) -> Result<Masteries, RedisError> {
+        debug!("getting masteries for {}", self.id);
+
+        let key = self.get_cache_key_name();
+        let result: String = conn.get(key)?;
+        Ok(serde_json::from_str(&(result)).unwrap())
+    }
+
+    fn insert_into_cache(&self, conn: &RedisConnection) -> Result<Vec<String>, RedisError> {
+         debug!("inserting masteries for {}", self.id);
+       
+        let key = self.get_cache_key_name();
+        conn.set_ex(key, json!(self).to_string(), REDIS_DEFAULT_EXPIRE_TIME_SUMMONER_ID)
     }
 }
