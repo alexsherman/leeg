@@ -68,20 +68,20 @@ fn get_summoner_id (conn: &RedisConnection, name: &String, region: &Region) -> R
 fn get_summoner_masteries(redis_conn: &RedisConnection, pool: ConnectionPool, id: &String) 
                           -> Result<Masteries, Box<Error>> {
     // try cache
-    match get_cached_summoner_masteries(redis_conn, id) {
+    match  Masteries::with_id(id).from_cache(redis_conn) {
         Ok(masteries) => {
-            println!("Successfully got masteries from Redis");
+            debug!("Successfully got masteries from Redis");
             return Ok(masteries);
         },
         Err(_) => ()
     };
     match Masteries::with_id(id).from_database(pool.clone()) {
         Ok(masteries) => {
-            println!("Successfully got masteries from DB");
-            match insert_cached_summoner_masteries(redis_conn, id, masteries.clone()) {
+            debug!("Successfully got masteries from DB");
+            match masteries.insert_into_cache(redis_conn) {
                 Ok(_) => (),
                 Err(e) => { 
-                    println!("{:?}", e);
+                    debug!("{:?}", e);
                 }
             };
             return Ok(masteries);
@@ -93,19 +93,19 @@ fn get_summoner_masteries(redis_conn: &RedisConnection, pool: ConnectionPool, id
     println!("Successfully got masteries from API, inserting into DB and Redis");
     match masteries.insert_into_database(pool) {
         Ok(_) => {
-            match insert_cached_summoner_masteries(redis_conn, id, masteries.clone()) {
+            match masteries.insert_into_cache(redis_conn) {
                 Ok(_) => (),
                 Err(e) => { 
-                    println!("redis {:?}", e);
+                    debug!("redis {:?}", e);
                 }
             };
         },
         Err(e) => { 
             println!("postgres {:?}", e);
-            match insert_cached_summoner_masteries(redis_conn, id, masteries.clone()) {
+            match masteries.insert_into_cache(redis_conn) {
                 Ok(_) => (),
                 Err(er) => { 
-                    println!("redis {:?}", er);
+                    debug!("redis {:?}", er);
                 }
             };
         }
