@@ -9,8 +9,6 @@ extern crate postgres;
 
 use r2d2::Pool;
 use r2d2_postgres::PostgresConnectionManager;
-use std::fs::File;
-use std::io::Read;
 use std::collections::HashMap;
 use utils::postgres_utils::*;
 use self::postgres::Error;
@@ -126,48 +124,6 @@ impl Champions {
 		self.list.push(champion);
 	}
 
-}
-
-/**
- * Loads a Champions vector from JSON file data
- */
-pub fn load_champions(filename: String) -> Champions {
-	let mut json_file = File::open(filename).expect("Unable to open file");
-	let mut raw_json = String::new();
-	json_file.read_to_string(&mut raw_json).expect("Unable to read file");
-
-	let champs_map : HashMap<i16, String> = serde_json::from_str(&raw_json).unwrap();
-	let mut champions = Champions::new();
-	for (id, name) in champs_map {
-		let role: Vec<String> = Vec::new();
-		champions.push(id, name, role);
-	}
-	champions
-}
-
-pub fn load_champions_with_role(champ_filename: String, role_filename: String) -> Champions {
-	let mut champ_json_file = File::open(champ_filename).expect("Unable to open file");
-	let mut champ_raw_json = String::new();
-	champ_json_file.read_to_string(&mut champ_raw_json).expect("Unable to read file");
-
-	let mut roles_json_file = File::open(role_filename).expect("Unable to open file");
-	let mut roles_raw_json = String::new();
-	roles_json_file.read_to_string(&mut roles_raw_json).expect("Unable to read file");
-
-
-	let champs_map : HashMap<i16, String> = serde_json::from_str(&champ_raw_json).unwrap();
-	let roles_map : HashMap<i16, Vec<String>> = serde_json::from_str(&roles_raw_json).unwrap();
-	let mut champions = Champions::new();
-	for (id, name) in champs_map {
-		champions.push(id, name, roles_map.get(&id).unwrap().clone());
-	}
-	// This is my horrible fix to make the cache work until we do the thing we said we'd do
-	let mut sorted_champions = Champions::new();
-	champions.list.sort_by_key(|key| key.id);
-	for c in champions.list {
-		sorted_champions.push(c.id, c.name, roles_map.get(&c.id).unwrap().clone());
-	}
-	sorted_champions
 }
 
 pub fn load_champions_from_db(pool: Pool<PostgresConnectionManager>) -> Result<Champions, Error> {

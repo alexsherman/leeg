@@ -1,4 +1,5 @@
-const API_HOST = "https://leeg-240122.appspot.com"
+//const API_HOST = "https://leeg-240122.appspot.com";
+const API_HOST = "http://localhost:8000";
 
 export function getChampions() {
     return getAsJSON(API_HOST + "/champions")

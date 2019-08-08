@@ -11,7 +11,7 @@ use matches::GlobalMatch;
  * The "meaning" of a Score is determined by the structure using it,
  * but a higher score is generally better than a lower one.
  */
-type Score = f64;
+pub type Score = f64;
 
 pub struct GlobalMatchCounts {
     same_wins: Vec<u32>,

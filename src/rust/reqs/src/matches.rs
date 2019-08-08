@@ -10,9 +10,6 @@ extern crate postgres;
 use champions::Champions;
 use utils::postgres_utils::*;
 
-use r2d2::Pool;
-use r2d2_postgres::PostgresConnectionManager;
-
 use self::postgres::Error;
 
 #[derive(Debug, Clone)]
@@ -51,7 +48,7 @@ impl GlobalMatch {
  * games' scores and return.
  */
 pub fn load_global_matches_from_db(same_team: &Vec<String>, opp_team: &Vec<String>, 
-                                   champions: &Champions, pool: Pool<PostgresConnectionManager>) 
+                                   champions: &Champions, pool: ConnectionPool) 
                                    -> Result<Vec<GlobalMatch>, Error> {
     println!("{:?}, {:?}", same_team, opp_team);
     if same_team.is_empty() && opp_team.is_empty() {
@@ -105,7 +102,7 @@ pub fn load_global_matches_from_db(same_team: &Vec<String>, opp_team: &Vec<Strin
 *   empty arrays, not sure if postgres optimizes it away. Also requires just 1 query
 *   that we can just duplicate for same and opp.
 */
-fn load_all_matches(champions: &Champions, pool: Pool<PostgresConnectionManager>) -> Result<Vec<GlobalMatch>, Error> {
+fn load_all_matches(champions: &Champions, pool: ConnectionPool) -> Result<Vec<GlobalMatch>, Error> {
     let conn = pool.get().unwrap();
     let mut matches: Vec<GlobalMatch> = Vec::new();
     for row in &conn.query(Q_ALL_MATCHES, &[])? {
@@ -132,6 +129,36 @@ fn load_all_matches(champions: &Champions, pool: Pool<PostgresConnectionManager>
         matches.push(m_flipped);
     }
     Ok(matches)
+}
+
+pub struct GlobalMatchContainer<'a> {
+    pub matches: Vec<GlobalMatch>,
+    pub champions: &'a Champions,
+    pub same_team: &'a Vec<String>,
+    pub opp_team: &'a Vec<String>
+}
+
+impl<'a> GlobalMatchContainer<'a> {
+    pub fn with_teams_and_champs(same_team: &'a Vec<String>, opp_team: &'a Vec<String>, 
+                                   champions: &'a Champions) -> GlobalMatchContainer<'a> {
+        GlobalMatchContainer {
+            matches: Vec::new(),
+            champions: champions,
+            same_team: same_team,
+            opp_team: opp_team
+        }
+    }
+}
+
+impl<'a> FromDatabase for GlobalMatchContainer<'a> {
+    type Data = GlobalMatchContainer<'a>; 
+
+    fn from_database(self, pool: ConnectionPool) -> Result<Self::Data, Error> {
+       let matches = load_global_matches_from_db(self.same_team, self.opp_team, self.champions, pool)?;
+       let mut container = GlobalMatchContainer::with_teams_and_champs(self.same_team, self.opp_team, self.champions);
+       container.matches = matches;
+       Ok(container)
+    }
 }
 
 pub struct GlobalMatchMatrices {
