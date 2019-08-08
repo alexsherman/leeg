@@ -1,7 +1,7 @@
 extern crate serde_json;
 
-use super::postgres_utils::*;
-use super::redis_utils::{RedisConnection, Cacheable, RedisError, REDIS_DEFAULT_EXPIRE_TIME_SUMMONER_ID};
+use utils::postgres_utils::*;
+use utils::redis_utils::{RedisConnection, Cacheable, RedisError, REDIS_DEFAULT_EXPIRE_TIME, REDIS_DEFAULT_EXPIRE_TIME_SUMMONER_ID};
 use self::serde_json::json;
 use utils::redis_utils::redis::Commands;
 use std::collections::HashMap;
@@ -111,6 +111,6 @@ impl Cacheable<'_> for Masteries {
          debug!("inserting masteries for {}", self.id);
        
         let key = self.get_cache_key_name();
-        conn.set_ex(key, json!(self).to_string(), REDIS_DEFAULT_EXPIRE_TIME_SUMMONER_ID)
+        conn.set_ex(key, json!(self).to_string(), REDIS_DEFAULT_EXPIRE_TIME)
     }
 }

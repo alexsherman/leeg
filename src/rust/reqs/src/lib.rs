@@ -5,8 +5,6 @@ extern crate itertools;
 #[macro_use]
 extern crate log;
 extern crate env_logger;
-
-#[macro_use]
 extern crate simple_error;
 extern crate crossbeam;
 extern crate r2d2;
@@ -23,7 +21,7 @@ pub use utils::postgres_utils::{get_connection_string, FromDatabase};
 pub use champions::{Champions, load_champions_from_db};
 use matches::{load_global_matches_from_db, GlobalMatch, GlobalMatchContainer, GlobalMatchMatrices};
 use reqs::{GlobalReqService, GlobalServiceWithWeight, combine_req_services};
-use utils::redis_utils::{get_connection, RedisConnection, get_cached_global_reqs, insert_cached_global_reqs, REDIS_DEFAULT_EXPIRE_TIME};
+use utils::redis_utils::{get_connection, RedisConnection, Cacheable};
 use itertools::Itertools;
 use summoner::*;
 use utils::summoner_utils::Region;
@@ -102,7 +100,7 @@ fn get_or_create_global_req_service(conn: &RedisConnection, pool: Pool<PostgresC
                                     team_picks: &Vec<String>, opp_picks: &Vec<String>, 
                                     champions: &Champions, derive: bool) 
                                     -> Result<GlobalServiceWithWeight, Box<Error>> {
-    match get_cached_global_reqs(&conn, &team_picks, &opp_picks) {
+    match GlobalServiceWithWeight::with_picks(team_picks, opp_picks).from_cache(&conn) {
         Ok(cache_entry) => return Ok(cache_entry),
         Err(_) => ()
     };
@@ -113,7 +111,7 @@ fn get_or_create_global_req_service(conn: &RedisConnection, pool: Pool<PostgresC
         req_service: service,
         weight: weight
     };
-    insert_cached_global_reqs(&conn, &team_picks, &opp_picks,  weighted_service.clone(), Some(REDIS_DEFAULT_EXPIRE_TIME));
+    weighted_service.insert_into_cache(&conn);
     if derive {
         derive_and_cache_granular_services(&conn, &match_container.matches, &team_picks, &opp_picks, &champions);
     }
@@ -153,21 +151,19 @@ fn create_then_cache_services(conn: &RedisConnection, derived_matrices: &GlobalM
         }
 
         let service = GlobalReqService::from_matches(&champ_match_vec, &team_picks, &opp_picks, champions.len());
-        let weighted_service = GlobalServiceWithWeight {
+        let mut weighted_service = GlobalServiceWithWeight {
             req_service: service,
             weight: champ_match_vec.len()
         };
 
         match potential_is_team {
             true => {
-                let mut potential_team_picks = team_picks.clone();
-                potential_team_picks.push(champ_name.clone());
-                insert_cached_global_reqs(&conn, &potential_team_picks, &opp_picks, weighted_service, Some(REDIS_DEFAULT_EXPIRE_TIME));    
+                weighted_service.req_service.team_picks.push(champ_name.clone());
+                weighted_service.insert_into_cache(&conn);
             },
             false => {
-                let mut potential_opp_picks = opp_picks.clone();
-                potential_opp_picks.push(champ_name.clone());
-                insert_cached_global_reqs(&conn, &team_picks, &potential_opp_picks, weighted_service, Some(REDIS_DEFAULT_EXPIRE_TIME));    
+                weighted_service.req_service.opp_picks.push(champ_name.clone());
+                weighted_service.insert_into_cache(&conn);
             }
         }
         

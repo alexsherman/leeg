@@ -3,12 +3,18 @@
  * @author dmcfalls
  * @author alexsherman
  */
+extern crate serde_json;
+extern crate serde;
 
 use champions::Champions;
 use matches::{GlobalMatch, GlobalMatchContainer};
 use scores::{Score, ScoreVector, GlobalScoreVectors};
 use champions::Champion;
 use utils::argmax::argmax_idx;
+use utils::redis_utils::*;
+use utils::redis_utils::redis::Commands;
+use self::serde::{Serialize, Deserialize};
+use self::serde_json::json;
 
 // Used for comparisons. The "empty product" is 1 instead of 0, but 1 is greater than any
 // score we'd encounter, so we filter out any value of 1.
@@ -20,12 +26,21 @@ const ZERO_F64: f64 = 0f64;
  */
  #[derive(Clone, Deserialize, Serialize)]
 pub struct GlobalReqService {
-    team_picks: Vec<String>,
-    opp_picks: Vec<String>,
+    pub team_picks: Vec<String>,
+    pub opp_picks: Vec<String>,
     score_vectors: GlobalScoreVectors,
 }
 
 impl GlobalReqService {
+
+	pub fn with_picks(team_picks: &Vec<String>, opp_picks: &Vec<String>) -> GlobalReqService {
+		GlobalReqService {
+			team_picks: team_picks.clone(),
+			opp_picks: opp_picks.clone(),
+			score_vectors: GlobalScoreVectors::with_dimensions(1)
+		}
+	}
+
    	pub fn req_banless(&self, champions: &Champions, num_reqs: usize)
 	       		 -> Vec<String> {
 	    
@@ -98,6 +113,41 @@ pub struct GlobalServiceWithWeight {
 	pub req_service: GlobalReqService,
 	pub weight: usize
 }
+
+impl GlobalServiceWithWeight {
+
+	pub fn with_picks(team_picks: &Vec<String>, opp_picks: &Vec<String>) -> GlobalServiceWithWeight {
+		GlobalServiceWithWeight {
+			req_service: GlobalReqService::with_picks(team_picks, opp_picks),
+			weight: 0
+		}
+	}
+
+	fn get_cache_key_name(&self) -> String {
+		let mut tp = self.req_service.team_picks.clone();
+	    let mut op = self.req_service.opp_picks.clone();
+	    tp.sort();
+	    op.sort();
+	    format!("globalreqs+{}-{}", tp.join(","), op.join(","))
+	}
+}
+
+
+impl Cacheable<'_> for GlobalServiceWithWeight {
+    type CacheItem = GlobalServiceWithWeight;
+
+    fn from_cache(self, conn: &RedisConnection) -> Result<Self::CacheItem, RedisError> {
+        let key = self.get_cache_key_name();
+        let result: String = conn.get(key)?;
+        Ok(serde_json::from_str(&(result)).unwrap())
+    }
+
+    fn insert_into_cache(&self, conn: &RedisConnection) -> Result<Vec<String>, RedisError> {
+        let key = self.get_cache_key_name();
+        conn.set_ex(key, json!(self).to_string(), REDIS_DEFAULT_EXPIRE_TIME)
+    }
+}
+
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct NamedGlobalService {

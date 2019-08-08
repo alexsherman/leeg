@@ -11,7 +11,7 @@ use super::summoner_utils::{Region, Masteries};
 use std::env;
 
 pub const REDIS_DEFAULT_EXPIRE_TIME: usize = 3600;
-pub const REDIS_DEFAULT_EXPIRE_TIME_SUMMONER_ID: usize = 86400;
+pub const REDIS_DEFAULT_EXPIRE_TIME_SUMMONER_ID: usize = 86400; 
 const REDIS_HOST_KEY: &str = "REDISHOST";
 const REDIS_PORT_KEY: &str = "REDISPORT";
 
@@ -31,16 +31,6 @@ pub fn get_connection() -> Result<Connection, RedisError> {
     let client = redis::Client::open(client_str)?;    
     client.get_connection()
 }
-/**
-*   E.g. team - Vec<Annie, Sivir> , opp - Vec<Vayne> -> globalreqs+Annie,Sivir-Vayne
-*/
-fn keyname_from_picks(team_picks: &Vec<String>, opp_picks: &Vec<String>) -> String {
-    let mut tp = team_picks.clone();
-    let mut op = opp_picks.clone();
-    tp.sort();
-    op.sort();
-    format!("globalreqs+{}-{}", tp.join(","), op.join(","))
-}
 
 /**
 *    E.g. sleepo mode - NA -> summonerid+sleepo mode-NA
@@ -49,30 +39,6 @@ fn keyname_from_name_and_region(name: &String, region: &Region) -> String {
     format!("summonerid+{}-{}", name, region.to_string())
 }
 
-/**
-* Get cached GlobalServiceWithWeight from Redis if one exists.
-*/
-pub fn get_cached_global_reqs(conn: &Connection, team_picks: &Vec<String>, opp_picks: &Vec<String>) 
-                                -> Result<GlobalServiceWithWeight, RedisError> {
-    let key = keyname_from_picks(team_picks, opp_picks);
-    println!("getting reqs for {}", key);
-    match get_key_from_cache(&conn, &key) {
-        Ok(res) => Ok(serde_json::from_str(&(res)).unwrap()),
-        Err(e) => Err(e)
-    }
-}
-
-/**
-* Inserts GlobalServiceWithWeight to Redis. If expire_time is None, the key will never expire on its own.
-*/
-pub fn insert_cached_global_reqs(conn: &Connection, team_picks: &Vec<String>, opp_picks: &Vec<String>, 
-                                 service: GlobalServiceWithWeight, expire_time: Option<usize>)
-                                 -> Result<Vec<String>, RedisError> {
-    let key = keyname_from_picks(team_picks, opp_picks);
-    println!("inserting reqs for {}", key);
-    let val = json!(service).to_string();
-    insert_key_value_to_cache(&conn, key, val, expire_time)
-}
 
 /**
 *   Gets cached summoner id from name and region, if one exists.
