@@ -1,7 +1,7 @@
 extern crate serde_json;
 
 use utils::postgres_utils::*;
-use utils::redis_utils::{RedisConnection, Cacheable, RedisError, REDIS_DEFAULT_EXPIRE_TIME, REDIS_DEFAULT_EXPIRE_TIME_SUMMONER_ID};
+use utils::redis_utils::{RedisConnection, Cacheable, RedisError, REDIS_DEFAULT_EXPIRE_TIME};
 use self::serde_json::json;
 use utils::redis_utils::redis::Commands;
 use std::collections::HashMap;

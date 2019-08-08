@@ -19,7 +19,7 @@ mod summoner;
 
 pub use utils::postgres_utils::{get_connection_string, FromDatabase};
 pub use champions::{Champions, load_champions_from_db};
-use matches::{load_global_matches_from_db, GlobalMatch, GlobalMatchContainer, GlobalMatchMatrices};
+use matches::{GlobalMatch, GlobalMatchContainer, GlobalMatchMatrices};
 use reqs::{GlobalReqService, GlobalServiceWithWeight, combine_req_services};
 use utils::redis_utils::{get_connection, RedisConnection, Cacheable};
 use itertools::Itertools;

@@ -1,14 +1,33 @@
+extern crate serde_json;
+extern crate serde;
+
 use utils::postgres_utils::*;
-use utils::redis_utils::{Cacheable, RedisConnection, get_cached_summoner_id, insert_cached_summoner_id};
+use utils::redis_utils::{Cacheable, RedisConnection, RedisError, REDIS_DEFAULT_EXPIRE_TIME_SUMMONER_ID};
+use utils::redis_utils::redis::Commands;
 use utils::riot_api_utils::*;
 use utils::summoner_utils::*;
 use std::error::Error;
+use self::serde_json::json;
 
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Summoner {
     info: SummonerInfo,
     masteries: Masteries
+}
+
+impl Summoner {
+
+    pub fn from_name_and_region(redis_conn: &RedisConnection, pool: ConnectionPool, 
+                                name: String, region: Region) 
+                                -> Result<Summoner, Box<Error>> {
+        let info = get_summoner_info(redis_conn, name, region)?;
+        let masteries = get_summoner_masteries(redis_conn, pool, &info.id)?;
+        Ok(Summoner {
+            info: info,
+            masteries: masteries
+        })
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -18,22 +37,35 @@ struct SummonerInfo {
     region: Region, 
 }
 
-impl Summoner {
-
-    pub fn from_name_and_region(redis_conn: &RedisConnection, pool: ConnectionPool, 
-                                name: String, region: Region) 
-                                -> Result<Summoner, Box<Error>> {
-        let id = get_summoner_id(redis_conn, &name, &region)?;
-        let masteries = get_summoner_masteries(redis_conn, pool, &id)?;
-        let summoner_info = SummonerInfo {
+impl SummonerInfo {
+    pub fn with_name_and_region(name: String, region: Region) -> SummonerInfo {
+        SummonerInfo {
             name: name,
-            id: id,
-            region: region
-        };
-        Ok(Summoner {
-            info: summoner_info,
-            masteries: masteries
-        })
+            region: region,
+            id: "".to_string()
+        }
+    }
+
+    fn get_cache_key_name(&self) -> String {
+        format!("summonerid+{}-{}", self.name, self.region.to_string())
+    }
+}
+
+impl Cacheable<'_> for SummonerInfo {
+    type CacheItem = SummonerInfo;
+
+    fn from_cache(self, conn: &RedisConnection) -> Result<Self::CacheItem, RedisError> {
+        let key = self.get_cache_key_name();
+        let result: String = conn.get(key)?;
+        let id = serde_json::from_str(&(result)).unwrap();
+        let mut info = SummonerInfo::with_name_and_region(self.name, self.region);
+        info.id = id;
+        Ok(info)
+    }
+
+    fn insert_into_cache(&self, conn: &RedisConnection) -> Result<Vec<String>, RedisError> {
+        let key = self.get_cache_key_name();
+        conn.set_ex(key, json!(self.id).to_string(), REDIS_DEFAULT_EXPIRE_TIME_SUMMONER_ID)
     }
 }
 
@@ -42,21 +74,23 @@ impl Summoner {
 *   Returns an error only if the id is not in the cache and the request to Riot API fails.
 *   TODO: region included for future use. currently, all requests to Riot are going to the NA endpoint.
 */
-fn get_summoner_id (conn: &RedisConnection, name: &String, region: &Region) -> Result<String, Box<Error>> {
-    match get_cached_summoner_id(conn, name, region) {
-        Ok(id) => {
-            return Ok(id);
+fn get_summoner_info (conn: &RedisConnection, name: String, region: Region) -> Result<SummonerInfo, Box<Error>> {
+    match SummonerInfo::with_name_and_region(name.clone(), region.clone()).from_cache(conn) {
+         Ok(info) => {
+            return Ok(info);
         },
         Err(_) => ()
-    };
-    let id = SummonerId::from_riot_api(name)?;
-    match insert_cached_summoner_id(conn, name, region, &id) {
+    }
+    let id = SummonerId::from_riot_api(&name.clone())?;
+    let mut info = SummonerInfo::with_name_and_region(name, region);
+    info.id = id;
+    match info.insert_into_cache(conn) {
         Ok(_) => (),
         Err(e) => { 
             println!("{:?}", e);
         }
-    };
-    Ok(id)
+    }
+    Ok(info)
 }
 
 /**
