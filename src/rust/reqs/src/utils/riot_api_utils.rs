@@ -26,7 +26,7 @@ pub trait FromRiotApi {
 impl FromRiotApi for SummonerId {
     type DeserializedResponse = SummonerId;
 
-    fn from_riot_api(identifier: &str) -> Result<SummonerId, Box<Error>> {
+    fn from_riot_api(identifier: &str) -> Result<Self::DeserializedResponse, Box<Error>> {
         let riot_api_key = env::var(RIOT_API_KEY_ENV_VAR)?;
         let query_url = format!("{}{}{}{}{}", RIOT_API_URL_ROOT, 
                                  RIOT_API_SUMMONER_PATH, identifier, 
@@ -40,7 +40,7 @@ impl FromRiotApi for SummonerId {
 impl FromRiotApi for Masteries {
     type DeserializedResponse = Masteries;
 
-    fn from_riot_api(identifier: &str) -> Result<Masteries, Box<Error>> {
+    fn from_riot_api(identifier: &str) -> Result<Self::DeserializedResponse , Box<Error>> {
         let riot_api_key = env::var(RIOT_API_KEY_ENV_VAR)?;
         let query_url = format!("{}{}{}{}{}", RIOT_API_URL_ROOT, 
                                  RIOT_API_MASTERIES_PATH, identifier, 

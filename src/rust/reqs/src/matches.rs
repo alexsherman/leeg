@@ -131,6 +131,36 @@ fn load_all_matches(champions: &Champions, pool: ConnectionPool) -> Result<Vec<G
     Ok(matches)
 }
 
+pub struct GlobalMatchContainer<'a> {
+    pub matches: Vec<GlobalMatch>,
+    pub champions: &'a Champions,
+    pub same_team: &'a Vec<String>,
+    pub opp_team: &'a Vec<String>
+}
+
+impl<'a> GlobalMatchContainer<'a> {
+    pub fn with_teams_and_champs(same_team: &'a Vec<String>, opp_team: &'a Vec<String>, 
+                                   champions: &'a Champions) -> GlobalMatchContainer<'a> {
+        GlobalMatchContainer {
+            matches: Vec::new(),
+            champions: champions,
+            same_team: same_team,
+            opp_team: opp_team
+        }
+    }
+}
+
+impl<'a> FromDatabase for GlobalMatchContainer<'a> {
+    type Data = GlobalMatchContainer<'a>; 
+
+    fn from_database(self, pool: ConnectionPool) -> Result<Self::Data, Error> {
+       let matches = load_global_matches_from_db(self.same_team, self.opp_team, self.champions, pool)?;
+       let mut container = GlobalMatchContainer::with_teams_and_champs(self.same_team, self.opp_team, self.champions);
+       container.matches = matches;
+       Ok(container)
+    }
+}
+
 pub struct GlobalMatchMatrices {
     pub same_derived_matrix: Vec<Vec<GlobalMatch>>,
     pub opp_derived_matrix: Vec<Vec<GlobalMatch>>

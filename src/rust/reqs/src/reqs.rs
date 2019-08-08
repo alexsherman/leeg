@@ -5,7 +5,7 @@
  */
 
 use champions::Champions;
-use matches::{GlobalMatch};
+use matches::{GlobalMatch, GlobalMatchContainer};
 use scores::{Score, ScoreVector, GlobalScoreVectors};
 use champions::Champion;
 use utils::argmax::argmax_idx;
@@ -43,6 +43,10 @@ impl GlobalReqService {
 			opp_picks: opp_picks.clone(),
 			score_vectors: GlobalScoreVectors::from_global_matches(matches, num_champions),
 		};
+	}
+
+	pub fn from_matches_container(match_container: &GlobalMatchContainer) -> GlobalReqService {
+		Self::from_matches(&match_container.matches, match_container.same_team, match_container.opp_team, match_container.champions.len())
 	}
 
 	/**

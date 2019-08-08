@@ -19,9 +19,9 @@ mod champions;
 mod reqs;
 mod summoner;
 
-pub use utils::postgres_utils::get_connection_string;
+pub use utils::postgres_utils::{get_connection_string, FromDatabase};
 pub use champions::{Champions, load_champions_from_db};
-use matches::{load_global_matches_from_db, GlobalMatch, GlobalMatchMatrices};
+use matches::{load_global_matches_from_db, GlobalMatch, GlobalMatchContainer, GlobalMatchMatrices};
 use reqs::{GlobalReqService, GlobalServiceWithWeight, combine_req_services};
 use utils::redis_utils::{get_connection, RedisConnection, get_cached_global_reqs, insert_cached_global_reqs, REDIS_DEFAULT_EXPIRE_TIME};
 use itertools::Itertools;
@@ -48,7 +48,7 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>,
                                                             &team_picks, 
                                                             &opp_picks, 
                                                             &champions, 
-                                                            true);
+                                                            true)?;
     service_vec.push(weighted_service);
     let mut team_n: usize = 3;
     let mut opp_n: usize = 3;
@@ -69,9 +69,8 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>,
                                                                              &tc2, 
                                                                              &opp_combination, 
                                                                              &champions, 
-                                                                             false);
+                                                                             false).unwrap();
                         w_service.weight *= (team_n * opp_n) + 1;
-                        println!("{}", w_service.weight);
                         s2.send(w_service).unwrap();      
                     });               
                 }
@@ -102,29 +101,24 @@ pub fn handle_global_req_req(team_picks: &Vec<String>, opp_picks: &Vec<String>,
 fn get_or_create_global_req_service(conn: &RedisConnection, pool: Pool<PostgresConnectionManager>, 
                                     team_picks: &Vec<String>, opp_picks: &Vec<String>, 
                                     champions: &Champions, derive: bool) 
-                                    -> GlobalServiceWithWeight {
-    let cached_entry = get_cached_global_reqs(&conn, &team_picks, &opp_picks);
-    if cached_entry.is_ok() {
-        return cached_entry.unwrap()
-    }
-    let matches = load_global_matches_from_db(&team_picks, &opp_picks, &champions, pool).unwrap();
-    let service = GlobalReqService::from_matches(&matches, &team_picks, &opp_picks, champions.len());
-    // Currently trying to weight each service by the number of matches they have, but this is
-    // very imperfect. But the idea is that if there are 2 matches for one combination and some
-    // champion won in both of those, there needs to be some weight which prevents that 100% from
-    // dominating the score
-    //todo - increase weight by specificity
-    // 10 games of exact comp worth more than 10 games of less specific comp
+                                    -> Result<GlobalServiceWithWeight, Box<Error>> {
+    match get_cached_global_reqs(&conn, &team_picks, &opp_picks) {
+        Ok(cache_entry) => return Ok(cache_entry),
+        Err(_) => ()
+    };
+    let match_container = GlobalMatchContainer::with_teams_and_champs(&team_picks, &opp_picks, &champions).from_database(pool)?;
+    let weight = match_container.matches.len();
+    let service = GlobalReqService::from_matches_container(&match_container);    
     let weighted_service = GlobalServiceWithWeight {
         req_service: service,
-        weight: matches.len()
+        weight: weight
     };
     insert_cached_global_reqs(&conn, &team_picks, &opp_picks,  weighted_service.clone(), Some(REDIS_DEFAULT_EXPIRE_TIME));
     if derive {
-        derive_and_cache_granular_services(&conn, &matches, &team_picks, &opp_picks, &champions);
+        derive_and_cache_granular_services(&conn, &match_container.matches, &team_picks, &opp_picks, &champions);
     }
     
-    weighted_service
+    Ok(weighted_service)
 }
 
 /**
